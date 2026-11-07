@@ -232,6 +232,10 @@
     align-items: stretch;
     gap: var(--space-21);
   }
+  /* 세로 배치에서는 flex-basis가 높이가 되므로 검색 칸이 늘어나지 않게 */
+  .search {
+    flex: 0 0 auto;
+  }
   .cta.cta {
     width: 100%;
   }
