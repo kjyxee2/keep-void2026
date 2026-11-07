@@ -12,16 +12,16 @@ const LABELS = {
   flows: '신고 건수 기준(톤수 아님). weight 합 = 신고 행 수',
 };
 
-const factories = (group: string | null) => fetchAll<P>((a, b) => {
-  let q = db().from('factories').select('id,name,dong,waste_groups,lat,lng,coord_verified').eq('coord_verified', true);
+const factories = (group: string | null) => fetchAll<P>((a, b, opts) => {
+  let q = db().from('factories').select('id,name,dong,waste_groups,lat,lng,coord_verified', opts).eq('coord_verified', true);
   if (group) q = q.contains('waste_groups', JSON.stringify([group]));  // jsonb는 JSON 문자열로
   return q.order('id').range(a, b);
 });
-const processors = () => fetchAll<P>((a, b) => db().from('processors')
-  .select('id,name,sido,sigungu,method,confirmed,lat,lng,coord_verified').order('id').range(a, b));
+const processors = () => fetchAll<P>((a, b, opts) => db().from('processors')
+  .select('id,name,sido,sigungu,method,confirmed,lat,lng,coord_verified', opts).order('id').range(a, b));
 type F = { factory_id: string | null; processor_id: string | null; method: string | null; weight: number };
-const flows = (group: string | null) => fetchAll<F>((a, b) => {
-  let q = db().from('flows').select('factory_id,processor_id,method,weight');
+const flows = (group: string | null) => fetchAll<F>((a, b, opts) => {
+  let q = db().from('flows').select('factory_id,processor_id,method,weight', opts);
   if (group) q = q.eq('waste_group', group);
   return q.order('link_id').range(a, b);
 });

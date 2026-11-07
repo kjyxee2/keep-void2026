@@ -14,8 +14,8 @@ export type Reference = {
 async function load(): Promise<Reference> {
   const [chips, wasteTypes, procs] = await Promise.all([
     db().from('waste_chips').select('id, label, waste_group').order('id').then(r => { if (r.error) throw r.error; return r.data as ChipRow[]; }),
-    fetchAll<WasteTypeRow>((from, to) => db().from('flows').select('waste_type, waste_group').order('link_id').range(from, to)),
-    fetchAll<ProcessorRow>((from, to) => db().from('processors').select('id, name, name_variants').order('id').range(from, to)),
+    fetchAll<WasteTypeRow>((from, to, opts) => db().from('flows').select('waste_type, waste_group', opts).order('link_id').range(from, to)),
+    fetchAll<ProcessorRow>((from, to, opts) => db().from('processors').select('id, name, name_variants', opts).order('id').range(from, to)),
   ]);
   return {
     chips: buildChipIndex(chips, wasteTypes),
