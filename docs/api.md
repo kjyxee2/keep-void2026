@@ -96,13 +96,13 @@ POST /api/requests/:id/cancel         요청 취소
     "total_reports": 1209,
     "by_method": [{ "method": "소각", "reports": 460.3, "pct": 38.1 },
                   { "method": "중간가공(R10)", "reports": 262.3, "pct": 21.7 },
-                  { "method": "물질재활용", "reports": 163.5, "pct": 13.5 }],
-    "by_region": [{ "region": "경기 기타", "reports": 430.5, "pct": 35.6 },
-                  { "region": "안산", "reports": 378.5, "pct": 31.3 },
-                  { "region": "경기 밖", "reports": 193.0, "pct": 16.0 }],
+                  { "method": "물질재활용", "reports": 162.5, "pct": 13.4 }],
+    "by_region": [{ "region": "경기 기타", "reports": 436.5, "pct": 36.1 },
+                  { "region": "안산", "reports": 380.5, "pct": 31.5 },
+                  { "region": "경기 밖", "reports": 194.0, "pct": 16.0 }],
     "basis": "신고 건수 집계(톤수 아님). 칩의 신고 원 표기 기준(홈 칩 통계와 같음). …"
   },
-  "neighbors": { "recycling": 125, "burning": 445, "burning_methods": ["소각", "에너지회수"], "basis": "…" },
+  "neighbors": { "recycling": 123, "burning": 445, "burning_methods": ["소각", "에너지회수"], "basis": "…" },
   "candidates": [
     { "candidate_id": 1, "rank": 1, "processor_id": "P0025", "name": "(주)거단산업", "sigungu": "평택시",
       "fit_score": 67.6, "neighbors": 28, "distance_km": null, "distance_quality": null,
@@ -128,7 +128,7 @@ POST /api/requests/:id/cancel         요청 취소
 (배열은 앞 3개만 보임)
 
 화면 규칙:
-- `current_route.total_reports`와 `neighbors`는 홈 칩 통계와 같은 숫자다(폐합성수지 1,209건, 소각 445곳, 재활용 125곳). `neighbors`는 **본인 공장을 포함**한 안산 공장 수(홈 칩 통계와 같은 기준). 칩의 신고가 있는 공장 수이므로 본인 공장이 그 방식으로 신고했다면 본인도 들어 있다
+- `current_route.total_reports`와 `neighbors`는 홈 칩 통계와 같은 숫자다(폐합성수지 1,209건, 소각 445곳, 재활용 123곳). `neighbors`는 **본인 공장을 포함**한 안산 공장 수(홈 칩 통계와 같은 기준). 칩의 신고가 있는 공장 수이므로 본인 공장이 그 방식으로 신고했다면 본인도 들어 있다
 - `candidates`는 최대 3개, 0개일 수 있음(의료폐기물, "그 밖의 폐기물", 근거 경로 없음). `neighbors`는 "이웃 공장 N곳이 이 업체에 재활용으로 보냄"(사회적 증거). `note` 문구 필수
 - 후보 업체의 처리 방식(`processors.method`)이 `에너지회수`, `소각`, `매립`, `복수 허가`, `미확인`이면 넣지 않는다(원료 재활용 업체만 추천)
 - `source`: `fit_candidates`(신고 공장을 골랐고 근거 목록이 있음) 또는 `computed`(같은 규칙으로 서버 계산)
@@ -194,10 +194,10 @@ status: `requested`, `contacted`, `sample`, `contracted`, `first_pickup`, `cance
 ```json
 {
   "chips": [
-    { "chip_id": "C01", "name": "폐합성수지", "reports": 1209, "burn_factories": 445, "recycle_factories": 125, "both_factories": 75,
-      "in_ansan_pct": 31.3, "outside_gyeonggi_pct": 16.0, "region_unknown_pct": 8.1, "recycle_pct": 13.5, "burn_pct": 49.3,
+    { "chip_id": "C01", "name": "폐합성수지", "reports": 1209, "burn_factories": 445, "recycle_factories": 123, "both_factories": 73,
+      "in_ansan_pct": 31.5, "outside_gyeonggi_pct": 16.0, "region_unknown_pct": 7.4, "recycle_pct": 13.4, "burn_pct": 49.3,
       "basis": "신고 건수 집계, 안산시 폐기물 배출자 신고현황 2026-07. …" },
-    { "chip_id": "C02", "name": "폐수처리오니", "reports": 511, "burn_factories": 20, "recycle_factories": 121, "both_factories": 3, "…": "…" },
+    { "chip_id": "C02", "name": "폐수처리오니", "reports": 511, "burn_factories": 20, "recycle_factories": 117, "both_factories": 3, "…": "…" },
     { "chip_id": "C03", "name": "폐활성탄", "reports": 301, "burn_factories": 2, "recycle_factories": 218, "both_factories": 2, "…": "…" },
     { "chip_id": "C04", "name": "폐유", "reports": 306, "burn_factories": 107, "recycle_factories": 10, "both_factories": 7, "…": "…" }
   ],
@@ -248,7 +248,7 @@ status: `requested`, `contacted`, `sample`, `contracted`, `first_pickup`, `cance
 
 ```json
 {
-  "summary": { "region_pct": { "안산": 16.8, "…": "…" }, "burn_vs_material": { "…": "…" }, "official_stats_2024_ansan_ton": { "…": "…" } },
+  "summary": { "region_pct": { "안산": 16.9, "…": "…" }, "burn_vs_material": { "…": "…" }, "official_stats_2024_ansan_ton": { "…": "…" } },
   "app": { "diagnoses_completed": 0, "requests_active": 0, "routes_switched_to_recycling": 0, "basis": "앱 실제 집계" },
   "labels": { "summary": "신고 건수 집계(톤수 아님) 또는 공식 통계 원값. 각 값의 basis 참고" }
 }
@@ -325,7 +325,7 @@ status: `requested`, `contacted`, `sample`, `contracted`, `first_pickup`, `cance
 
 ```
 npm run dev          # http://localhost:3000/api/chips
-npm run test:api     # 순위 규칙, 경로 집계, 단가 규칙, 검색 필터, 묶음, 지도 방식, 서류 자동 입력(검사, 환산, 이름 연결), 실제 데모 데이터 값(1,209/445/125 등, unzip 필요)
+npm run test:api     # 순위 규칙, 경로 집계, 단가 규칙, 검색 필터, 묶음, 지도 방식, 서류 자동 입력(검사, 환산, 이름 연결), 실제 데모 데이터 값(1,209/445/123 등, unzip 필요)
 npm run test:db      # 마이그레이션 + RLS, 시드 SQL 적용 확인 (PGlite, Docker 불필요, python3과 unzip 필요)
 ```
 `.env.local`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`(서버 전용, 커밋 금지), `ANTHROPIC_API_KEY`(서버 전용, 커밋 금지. 없으면 서류 자동 입력만 503).
