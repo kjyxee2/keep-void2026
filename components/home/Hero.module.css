@@ -80,15 +80,16 @@
 
 /* 글자 뒤 옅은 밝은 막: 왼쪽 벽 쪽만 흰 35%에서 투명으로 */
 .veil {
-  /* 사진 전체를 덮던 그라데이션 대신, 글자 블록 뒤에만 반투명 판(.inner)을 둔다 */
-  display: none;
+  /* 사진 전체를 덮는 옅은 흰색 막(Figma Veil (whole photo), 40%). 사진이 비치면서 글자 대비를 확보 */
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--color-bg-page) 40%, transparent);
 }
 
 /* 글자 블록 뒤 반투명 띠(Figma Veil (behind message)): 사진 전체 폭, 흰색 72% */
 .band {
   width: 100%;
   padding-block: var(--space-42);
-  background: color-mix(in srgb, var(--color-bg-page) 72%, transparent);
 }
 
 .inner {
