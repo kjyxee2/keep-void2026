@@ -48,10 +48,10 @@ const home: Record<string, { reports: number; burn_factories: number; recycle_fa
 const prices = demoCsv('unit_prices').map(r => ({ id: r.id, category: r.category, item: r.item, waste_group: r.waste_group || null, year: Number(r.year) }));
 const forChip = (id: string) => chipFlows(flows.filter(f => f.waste_group === chips[id].waste_group), chipTypes[id]);
 
-test('폐합성수지 칩: 원 표기 기준 총 신고 1,209, 소각 445, 재활용 125(본인 공장 포함)', () => {
+test('폐합성수지 칩: 원 표기 기준 총 신고 1,209, 소각 445, 재활용 123(본인 공장 포함, v3 이름 교정 후)', () => {
   const fs = forChip('C01');
   assert.equal(routeShare(fs).total_reports, 1209);
-  assert.deepEqual(neighborCounts(fs), { recycling: 125, burning: 445 });
+  assert.deepEqual(neighborCounts(fs), { recycling: 123, burning: 445 });
 });
 
 test('홈 칩 4개 통계와 결과 화면 집계가 같은 숫자', () => {

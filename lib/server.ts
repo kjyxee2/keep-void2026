@@ -3,7 +3,7 @@ import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 
 // ponytail: 데모 데이터를 교체할 때 함께 갱신(data/refit_demo_data.zip 커밋)
-export const DATA_VERSION = 'demo-4d8c270';
+export const DATA_VERSION = 'demo-ce08a33';
 
 export const LABELS = {
   route: '신고 건수 집계(톤수 아님). 칩의 신고 원 표기 기준(홈 칩 통계와 같음). 신고 계약 기준이며 실제 운반량이 아님',
