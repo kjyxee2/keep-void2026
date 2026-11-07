@@ -1,0 +1,12 @@
+body { margin: 0; background: #fff; font-family: "Apple SD Gothic Neo", sans-serif; color: #111; }
+.page { position: relative; width: 1000px; margin: 40px auto; padding: 40px; border: 2px solid #222; box-sizing: border-box; overflow: hidden; }
+h1 { text-align: center; font-size: 40px; letter-spacing: 12px; margin: 0 0 8px; }
+.sub { text-align: center; font-size: 18px; color: #444; margin-bottom: 28px; }
+table { width: 100%; border-collapse: collapse; font-size: 24px; }
+th, td { border: 1px solid #333; padding: 14px 16px; text-align: left; }
+th { width: 30%; background: #f2f2f2; font-weight: 600; }
+.big td { font-size: 32px; font-weight: 700; }
+.foot { margin-top: 24px; font-size: 18px; color: #333; }
+.wm { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; pointer-events: none; }
+.wm span { transform: rotate(-28deg); font-size: 150px; font-weight: 800; color: rgba(200, 0, 0, 0.16); white-space: nowrap; }
+.band { background: #c00; color: #fff; text-align: center; font-size: 22px; font-weight: 700; padding: 8px; margin: -40px -40px 28px; }
