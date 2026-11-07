@@ -31,6 +31,11 @@ try {
   ok(await one(`select count(*)::int from waste_chips where waste_types is null`) === 0, 'every chip has waste_types');
   ok(await one(`select round(sum(f.weight))::int from flows f join waste_chips c on f.waste_type = any(c.waste_types) and f.waste_group = c.waste_group where c.id = 'C01'`) === 1209,
     'C01 reports by waste_types = 1,209');
+  const hs = (await db.query(`select chip_id, name, reports, burn_factories, recycle_factories, both_factories, in_ansan_pct from home_waste_stats order by chip_id`)).rows;
+  const truth = JSON.parse(fs.readFileSync(path.join(root, 'data/home_waste_stats.json'), 'utf8'));
+  ok(hs.length === 4 && hs.map(r => r.chip_id).join() === 'C01,C02,C03,C04', 'home_waste_stats 4 chips');
+  ok(hs.every(r => ['reports', 'burn_factories', 'recycle_factories', 'both_factories', 'in_ansan_pct'].every(k => truth[r.name][k] === r[k])),
+    'home_waste_stats equals data/home_waste_stats.json');
 } finally {
   fs.rmSync(tmp, { recursive: true, force: true });
 }

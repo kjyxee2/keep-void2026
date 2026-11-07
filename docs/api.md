@@ -162,6 +162,25 @@ status: `requested`, `contacted`, `sample`, `contracted`, `first_pickup`, `cance
 운영자 계정 만들기: Supabase Auth에서 사용자 생성 후 SQL Editor에서
 `update profiles set role = 'operator' where id = '<user id>';`
 
+## 홈: GET /api/home-stats
+
+홈 폐기물 칩 4개 통계(결정 2). 시드 테이블 `home_waste_stats` 원값(`data/home_waste_stats.json`, 생성 `scripts/home_waste_stats.py`). 캐시 헤더 있음.
+```json
+{
+  "chips": [
+    { "chip_id": "C01", "name": "폐합성수지", "reports": 1209, "burn_factories": 445, "recycle_factories": 125, "both_factories": 75,
+      "in_ansan_pct": 31.3, "outside_gyeonggi_pct": 16.0, "region_unknown_pct": 8.1, "recycle_pct": 13.5, "burn_pct": 49.3,
+      "basis": "신고 건수 집계, 안산시 폐기물 배출자 신고현황 2026-07. …" },
+    { "chip_id": "C02", "name": "폐수처리오니", "reports": 511, "burn_factories": 20, "recycle_factories": 121, "both_factories": 3, "…": "…" },
+    { "chip_id": "C03", "name": "폐활성탄", "reports": 301, "burn_factories": 2, "recycle_factories": 218, "both_factories": 2, "…": "…" },
+    { "chip_id": "C04", "name": "폐유", "reports": 306, "burn_factories": 107, "recycle_factories": 10, "both_factories": 7, "…": "…" }
+  ],
+  "labels": { "stats": "…", "factories": "…" }
+}
+```
+- 집계 기준은 결과 화면과 같다(칩 신고 원 표기, 폐유는 묶음 전체). `reports`는 신고 수, `*_factories`는 그 방식 신고가 하나라도 있는 고유 공장 수, `*_pct`는 1/k 가중 합을 그 칩 전체 신고 수(지역 미확인 포함)로 나눈 값
+- `chip_id`로 진단 시작(`POST /api/diagnoses { chip_id }`)에 그대로 쓴다
+
 ## 지도: GET /api/map
 
 | 요청 | 응답 |

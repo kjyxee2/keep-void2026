@@ -35,6 +35,9 @@ ok((await as('anon',null,`select * from waste_chips`)).length===1, 'anon reads c
 await db.exec(`update waste_chips set waste_types = array['폐합성수지류(폐염화비닐수지류는 제외한다)'] where id='plastic'`);
 ok((await as('anon',null,`select waste_types from waste_chips`))[0].waste_types[0]==='폐합성수지류(폐염화비닐수지류는 제외한다)', 'chip waste_types is text[] and readable');
 ok((await as('anon',null,`select * from processors`)).length===2, 'anon reads reference tables');
+await db.exec(`insert into home_waste_stats (chip_id,name,reports,burn_factories,recycle_factories,both_factories) values ('plastic','폐합성수지',1209,445,125,75)`);
+ok((await as('anon',null,`select reports from home_waste_stats`))[0]?.reports===1209, 'anon reads home_waste_stats');
+ok(await fails('anon',null,`insert into home_waste_stats (chip_id,name) values ('x','x')`), 'anon cannot write home_waste_stats');
 ok((await as('anon',null,`update processors set name='x' returning id`)).length===0, 'anon cannot update reference tables');
 ok(await fails('authenticated',A,`insert into factories (id,name) values ('F9','x')`), 'user cannot insert reference rows');
 ok((await as('anon',null,`select * from diagnoses`)).length===0, 'anon sees no diagnoses');
