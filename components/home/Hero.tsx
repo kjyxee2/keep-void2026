@@ -33,7 +33,7 @@ export function Hero() {
         <div className={styles.bottom}>
           <p className={styles.sub}>서류 사진 한 장이면 맡기는 곳과 비교할 단가가 나와요.</p>
           <div id={HERO_ACTIONS_ID} className={styles.actions}>
-            <Button href={PHOTO_START_HREF} className={styles.cta}>
+            <Button href={PHOTO_START_HREF} variant="inverse" className={styles.cta}>
               <span className={styles.ctaLabel}>
                 <ScanIcon />
                 서류 사진으로 시작

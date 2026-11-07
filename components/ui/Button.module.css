@@ -47,6 +47,21 @@
   background: var(--primitive-ink-950);
 }
 
+/* Primary on dark(inverse): 어두운 사진, 초록 띠 위의 주 동작. 밝은 바탕 + 브랜드 글자 */
+.inverse {
+  background: var(--color-bg-page);
+  color: var(--color-text-brand);
+}
+.inverse:hover:not(:disabled) {
+  background: var(--color-bg-brand-soft);
+}
+.inverse:active:not(:disabled) {
+  background: var(--color-bg-accent-soft);
+}
+.inverse:focus-visible {
+  outline-color: var(--color-text-inverse-accent);
+}
+
 /* Secondary */
 .secondary {
   background: var(--color-bg-page);
@@ -61,6 +76,7 @@
 }
 
 .primary:disabled,
+.inverse:disabled,
 .secondary:disabled {
   background: var(--color-bg-tint-4);
   border-color: transparent;
@@ -100,6 +116,10 @@
 .primary.loading:disabled {
   background: var(--color-bg-brand);
   color: var(--color-text-inverse);
+}
+.inverse.loading:disabled {
+  background: var(--color-bg-page);
+  color: var(--color-text-brand);
 }
 .secondary.loading:disabled {
   background: var(--color-bg-page);

@@ -2,13 +2,14 @@
 import type { ReactNode } from 'react';
 import styles from './Footnote.module.css';
 
-export type FootnoteBasis = '신고 건수' | '공식 원값' | '직접 입력' | '고시 단가';
+export type FootnoteBasis = '신고 건수' | '공식 원값' | '직접 입력' | '고시 단가' | '법령, 지침 원문';
 
 const BASIS_LABEL: Record<FootnoteBasis, string> = {
   '신고 건수': '출처 (신고 건수 집계)',
   '공식 원값': '출처 (공식 통계 원값)',
   '직접 입력': '출처 (직접 입력)',
   '고시 단가': '출처 (고시 단가, 실제 계약가 아님)',
+  '법령, 지침 원문': '출처 (법령, 지침 원문)',
 };
 
 export function Footnote({

@@ -1,4 +1,4 @@
-// Figma Button(70:86): Style Primary/Secondary/Text x Size Mobile/PC x State
+// Figma Button(70:86): Style Primary/Primary on dark(inverse)/Secondary/Text x Size Mobile/PC x State
 // 상태: Default, Hover, Pressed(:active), Focus(:focus-visible), Disabled, Loading
 import Link from 'next/link';
 import type { ButtonHTMLAttributes, ReactNode } from 'react';
@@ -6,7 +6,8 @@ import { ArrowIcon } from '@/components/brand/Icon';
 import styles from './Button.module.css';
 
 type Common = {
-  variant?: 'primary' | 'secondary' | 'text';
+  /** inverse: 어두운 바탕(사진, 초록 띠) 위의 Primary */
+  variant?: 'primary' | 'inverse' | 'secondary' | 'text';
   /** mobile: 줄 전체 폭, pc: 내용 폭(최소 240) */
   size?: 'mobile' | 'pc';
   /** 오른쪽 화살표 아이콘(Text 스타일에는 없음) */

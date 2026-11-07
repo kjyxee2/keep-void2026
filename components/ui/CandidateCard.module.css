@@ -31,6 +31,11 @@
   flex: 1;
   min-width: 0;
 }
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-7);
+}
 .name {
   font-size: var(--font-size-h7);
   font-weight: var(--font-weight-bold);
@@ -70,6 +75,22 @@
 }
 .evidenceText {
   font-size: var(--font-size-p3);
+}
+.reasonLabel {
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-tertiary);
+}
+.reasonList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  padding-left: var(--space-21);
+  list-style: disc;
+}
+.noteText {
+  display: inline-flex;
+  min-width: 0;
 }
 .action {
   display: flex;

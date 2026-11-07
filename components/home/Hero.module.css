@@ -89,20 +89,10 @@
 }
 
 /* Figma 히어로 버튼: 어두운 사진 위 흰 Primary. 공용 Button의 색만 바꾼다(모양, 상태 구조는 그대로) */
+/* 색과 상태는 공용 Button variant="inverse". 여기서는 히어로 크기만 */
 .cta.cta {
   min-height: var(--control-input-h);
   min-width: calc(var(--space-84) * 3 + var(--space-14));
-  background: var(--color-bg-page);
-  color: var(--color-text-brand);
-}
-.cta.cta:hover {
-  background: var(--color-bg-brand-soft);
-}
-.cta.cta:active {
-  background: var(--color-bg-accent-soft);
-}
-.cta.cta:focus-visible {
-  outline-color: var(--color-text-inverse-accent);
 }
 .ctaLabel {
   display: inline-flex;
@@ -155,11 +145,3 @@
   }
 }
 
-/* 히어로 버튼 눌림(공용 Button의 scale)도 모션 줄이기에서는 멈춘다 */
-@media (prefers-reduced-motion: reduce) {
-  .cta.cta,
-  .cta.cta:active {
-    transition: none;
-    transform: none;
-  }
-}

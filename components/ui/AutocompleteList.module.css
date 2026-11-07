@@ -1,3 +1,5 @@
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · posture: restrained · surface: Search/Autocomplete list 119:74 · motion: none */
+/* Hallmark · pre-emit critique: one bordered panel, rows with name, address line and dong badge, no-result and error rows · weakest: long addresses wrap to two lines on 375 */
 .panel {
   display: flex;
   flex-direction: column;
