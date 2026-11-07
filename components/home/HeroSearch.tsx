@@ -1,5 +1,5 @@
 // 사업장 이름 검색(Figma Search Field 106:663, 열린 상태 120:512). ARIA combobox(1.2 패턴):
-// 초점은 입력창에 두고 aria-activedescendant로 옵션을 가리킨다. 2자 이상, 250ms 디바운스, 결과 없음과 오류 상태.
+// 초점은 입력창에 두고 aria-activedescendant로 옵션을 가리킨다. 2자 이상, 120ms 디바운스, 결과 없음과 오류 상태.
 // 고르면 /diagnose?factory=<id> 로 간다.
 'use client';
 import { useEffect, useId, useRef, useState, type KeyboardEvent } from 'react';
@@ -10,7 +10,7 @@ import { SearchIcon } from './icons';
 import styles from './HeroSearch.module.css';
 
 const MIN_CHARS = 2;
-const DEBOUNCE_MS = 250;
+const DEBOUNCE_MS = 120;
 
 type Status = 'idle' | 'loading' | 'ready' | 'empty' | 'error';
 

@@ -1,4 +1,4 @@
-/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · route: / · hero: full-viewport bright factory photo slides (4, crossfade every 2s, one pause control), dark type on the empty left wall, word-by-word rise then rule, sentence, two actions · motion: tokens only, transform and opacity, hidden state under html.js, slide crossfade with scale-in and scroll parallax · surface: absolute */
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · route: / · hero: full-viewport bright factory photo slides (4, crossfade every 2s, no pause control by user decision), dark type on the empty left wall, word-by-word rise then rule, sentence, two actions · motion: tokens only, transform and opacity, hidden state under html.js, slide crossfade with scale-in and scroll parallax · surface: absolute */
 /* 홈 히어로. Figma 75:150(PC), 75:24(모바일). 사진은 화면 전체(100svh에서 헤더만큼 뺀 높이), 초록 scrim 없음.
    글자 뒤에만 흰 35% 이하의 옅은 그라데이션(--color-bg-page)으로 대비를 지킨다. */
 .hero {
@@ -181,38 +181,11 @@
   flex: 1 1 0;
 }
 
-/* 사진 멈춤 버튼: 오른쪽 아래, 48px 터치. 스크립트가 있을 때만 */
-.pause {
-  position: absolute;
-  right: var(--layout-gutter);
-  bottom: var(--space-21);
-  z-index: 1;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  width: var(--touch-min);
-  height: var(--touch-min);
-  border-radius: var(--radius-full);
-  background: var(--color-bg-page);
-  color: var(--color-text-primary);
-  box-shadow: var(--shadow-card);
-}
-:global(.js) .pause {
-  display: inline-flex;
-}
-.pause:hover {
-  background: var(--color-bg-subtle);
-}
-.pause:active {
-  background: var(--color-bg-tint-4);
-}
-.pause:focus-visible {
-  outline: var(--focus-ring-width) solid var(--color-border-focus);
-  outline-offset: var(--focus-ring-offset);
-}
 
-/* 색과 상태는 공용 Button Primary. 여기서는 히어로 크기만 */
+/* 색과 상태는 공용 Button Primary. 여기서는 히어로 크기와 가운데 정렬(글자와 화살표를 붙여 가운데) */
 .cta.cta {
+  justify-content: center;
+  gap: var(--space-10);
   min-height: var(--control-input-h);
   min-width: calc(var(--space-84) * 3 + var(--space-14));
 }
@@ -266,9 +239,5 @@
   }
   .cta.cta {
     width: 100%;
-  }
-  /* 좁은 화면에서는 멈춤/재생 버튼을 두지 않는다(사용자 결정 2026-11-08). 줄임 모드에서는 첫 장 고정이라 전환이 없다 */
-  :global(.js) .pause {
-    display: none;
   }
 }

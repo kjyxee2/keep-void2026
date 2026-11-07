@@ -1,5 +1,5 @@
 import { factorySearchFilter } from '@/lib/search';
-import { db, dbFail, fail, json } from '@/lib/server';
+import { cached, db, dbFail, fail } from '@/lib/server';
 
 // 진단 3단계, 홈 "우리 공장 찾기": 공개 신고현황의 사업장명, 주소 검색. (주), 괄호, 점이 든 이름도 그대로 찾는다
 export async function GET(req: Request) {
@@ -10,5 +10,6 @@ export async function GET(req: Request) {
     .or(filter)
     .order('name').limit(10);
   if (error) return dbFail(error);
-  return json({ factories: data });
+  // 공개 신고 자료라 검색어별로 CDN에 캐시한다(같은 검색어는 두 번째부터 수십 ms)
+  return cached({ factories: data });
 }

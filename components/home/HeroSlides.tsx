@@ -7,7 +7,6 @@ import { useEffect, useId, useRef, useState } from 'react';
 import Image, { type StaticImageData } from 'next/image';
 import { useReducedMotion } from 'framer-motion';
 import { MOTION } from '@/components/motion';
-import { PauseIcon, PlayIcon } from './icons';
 import styles from './Hero.module.css';
 
 /** 한 장이 머무는 시간(ms). styles/motion.css --motion-dwell과 같은 값 */
@@ -21,10 +20,8 @@ export function HeroSlides({ photos }: { photos: StaticImageData[] }) {
   const [active, setActive] = useState(0);
   // 방금 물러난 장: 새 장이 다 나타날 때까지 아래에 그대로 둔다(겹치는 동안 바탕이 비치지 않게)
   const [leaving, setLeaving] = useState<number | null>(null);
-  const [paused, setPaused] = useState(false);
   const [hidden, setHidden] = useState(false);
-  const statusId = useId();
-  const running = !reduce && !paused && !hidden && photos.length > 1;
+  const running = !reduce && !hidden && photos.length > 1;
 
   useEffect(() => {
     const onVisibility = () => setHidden(document.visibilityState === 'hidden');
@@ -103,21 +100,6 @@ export function HeroSlides({ photos }: { photos: StaticImageData[] }) {
         </div>
         <div className={styles.veil} />
       </div>
-      {photos.length > 1 && !reduce && (
-        <button
-          type="button"
-          className={styles.pause}
-          aria-pressed={paused}
-          aria-describedby={statusId}
-          onClick={() => setPaused((p) => !p)}
-        >
-          {paused ? <PlayIcon /> : <PauseIcon />}
-          <span className="sr-only">{paused ? '사진 다시 재생' : '사진 멈춤'}</span>
-          <span id={statusId} className="sr-only">
-            배경 사진 {photos.length}장이 {DWELL_MS / 1000}초마다 바뀝니다
-          </span>
-        </button>
-      )}
     </>
   );
 }
