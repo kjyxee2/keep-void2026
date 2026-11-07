@@ -19,3 +19,7 @@ dist/
 # 기타
 .DS_Store
 *.log
+supabase/.branches/
+*.tsbuildinfo
+next-env.d.ts
+data/demo/
