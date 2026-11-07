@@ -77,7 +77,6 @@ export function Footer() {
               <img src="/brand/partners/void-wordmark.svg" alt="VOID 2026" width="1364" height="224" />
             </a>
           </p>
-          <p className={styles.note}>숫자 출처는 각 화면 아래에 표시</p>
         </div>
       </div>
     </footer>
