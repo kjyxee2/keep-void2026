@@ -5,6 +5,7 @@ import { PriceCheck } from '@/components/home/PriceCheck';
 import { ResultPreview } from '@/components/home/ResultPreview';
 import { StickyCta } from '@/components/home/StickyCta';
 import { WasteStats } from '@/components/home/WasteStats';
+import { Intro } from '@/components/intro/Intro';
 import { loadHomePrices, loadHomeStats } from '@/lib/home-data';
 import styles from '@/components/home/home.module.css';
 
@@ -14,6 +15,8 @@ export default async function Home() {
   const [chips, prices] = await Promise.all([loadHomeStats(), loadHomePrices()]);
   return (
     <main id="main" className={styles.main}>
+      {/* 첫 진입 인트로: 클라이언트에서만, 세션당 한 번. 서버 HTML에는 없다 */}
+      <Intro />
       <Hero />
       <WasteStats chips={chips} photoHref={PHOTO_START_HREF} />
       <PriceCheck rows={prices} />

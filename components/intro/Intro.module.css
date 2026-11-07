@@ -1,0 +1,135 @@
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · route: / (first entry only, once per session) · surface: fixed overlay on bg/brand, symbol wipe then wordmark and one line, then opacity out · motion: tokens only (--motion-intro-*), transform and opacity, client-only mount, none under reduced motion · surface: absolute */
+/* 홈 첫 진입 인트로. 장면 시간은 styles/motion.css --motion-intro-*.
+   (1) 심볼: 초록 가림막이 왼쪽에서 오른쪽으로 translateX로 걷히며 드러난다 (2) 워드마크: 오른쪽에서 translateX+opacity
+   (3) 한 줄: 아래에서 translateY+opacity (4) 오버레이 전체 opacity 1에서 0. 끝나면 Intro.tsx가 DOM에서 뗀다. */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-42);
+  padding: var(--layout-gutter);
+  background: var(--color-bg-brand);
+  color: var(--color-text-inverse);
+  opacity: 1;
+  animation: intro-out var(--motion-intro-exit) var(--motion-ease) var(--motion-intro-exit-delay) both;
+}
+.overlay[data-phase="skip"] {
+  animation: intro-out var(--motion-intro-skip) var(--motion-ease) both;
+}
+@keyframes intro-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* 심볼과 워드마크를 한 줄에. 비율은 refit_lockup.svg(심볼 176, 워드마크 154, 사이 55)를 따른다 */
+.lockup {
+  display: flex;
+  align-items: center;
+  gap: var(--space-42);
+}
+
+.symbol {
+  position: relative;
+  display: block;
+  height: calc(var(--space-84) * 2);
+  overflow: hidden;
+}
+.symbolImage {
+  width: auto;
+  height: 100%;
+  max-width: none;
+}
+/* 가림막: 바탕과 같은 초록. 오른쪽으로 끝까지 밀려나며 심볼이 왼쪽부터 드러난다 */
+.cover {
+  position: absolute;
+  inset: 0;
+  background: var(--color-bg-brand);
+  transform: translateX(0);
+  animation: intro-draw var(--motion-intro-draw) var(--motion-ease) both;
+}
+@keyframes intro-draw {
+  to {
+    transform: translateX(101%);
+  }
+}
+
+.wordmark {
+  width: auto;
+  height: calc(var(--space-84) * 1.75);
+  max-width: none;
+  opacity: 0;
+  transform: translateX(var(--motion-shift-hero));
+  animation: intro-word var(--motion-intro-word) var(--motion-ease) var(--motion-intro-word-delay) both;
+}
+@keyframes intro-word {
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.line {
+  margin: 0;
+  font-size: var(--font-size-p1);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.7;
+  text-align: center;
+  text-wrap: balance;
+  opacity: 0;
+  transform: translateY(var(--motion-shift-step));
+  animation: intro-line var(--motion-intro-line) var(--motion-ease) var(--motion-intro-line-delay) both;
+}
+@keyframes intro-line {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* 건너뛰기: 오버레이 밖(aria-hidden 밖)의 유일한 초점 요소. 오른쪽 아래 작게, 48px 터치 영역. 오버레이와 같이 사라진다 */
+.skip {
+  position: fixed;
+  right: var(--layout-gutter);
+  bottom: var(--layout-gutter);
+  z-index: 1001;
+  min-width: var(--touch-min);
+  min-height: var(--touch-min);
+  padding: var(--space-10) var(--space-14);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-inverse-muted);
+  animation: intro-out var(--motion-intro-exit) var(--motion-ease) var(--motion-intro-exit-delay) both;
+}
+.skip:hover,
+.skip:active {
+  color: var(--color-text-inverse);
+}
+.skip[data-phase="skip"] {
+  animation: intro-out var(--motion-intro-skip) var(--motion-ease) both;
+}
+.skip:focus-visible {
+  outline-color: var(--color-text-inverse-accent);
+}
+
+@media (max-width: 767px) {
+  .lockup {
+    flex-direction: column;
+    gap: var(--space-28);
+  }
+}
+
+/* 줄임 모드: 인트로 없음. Intro.tsx가 붙이지 않지만 재생 중 설정이 바뀌어도 바로 사라진다 */
+@media (prefers-reduced-motion: reduce) {
+  .overlay,
+  .skip {
+    display: none;
+    animation: none;
+  }
+}
