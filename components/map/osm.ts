@@ -3,7 +3,7 @@
 // _update를 부른다. 점은 canvas.ts의 DotLayer가 캔버스 하나에 그리고, 점마다 투명 버튼을 두어 Tab, Enter, 툴팁을 받는다.
 // Tooltip은 role=tooltip 컨테이너를 만든다.
 // 타일 정책(https://operations.osmfoundation.org/policies/tiles/): https 타일 주소 그대로, 출처 표기를 지도 위에 보이게,
-// 보이는 칸만 받고 미리 받기 금지(Leaflet 기본 동작, keepBuffer 기본값), no-cache 헤더를 붙이지 않음.
+// 보이는 칸만 받고 미리 받기 금지(keepBuffer 기본값, 확대 연출 중에는 받지 않음), no-cache 헤더를 붙이지 않음.
 import type * as Leaflet from 'leaflet';
 import type { Bounds, LngLat } from '@/lib/map-geo';
 import { defineDotLayer, readPaint, type DotLayer } from './canvas';
@@ -84,6 +84,7 @@ export const osmProvider: MapProvider = {
     const tiles = L.tileLayer(TILE_URL, {
       maxZoom: opts.maxZoom,
       attribution: ATTRIBUTION,
+      updateWhenZooming: false, // 확대 연출이 끝난 뒤 한 번만 새 칸을 받는다
     });
     const fail = () => {
       if (failed || loaded > 0) return;
