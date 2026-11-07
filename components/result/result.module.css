@@ -244,6 +244,13 @@
   font-weight: var(--font-weight-regular);
   color: var(--color-text-tertiary);
 }
+.cellNext {
+  display: block;
+  margin-top: var(--space-7);
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
 .mineRow th,
 .mineRow td {
   background: var(--color-bg-brand-soft);
@@ -275,6 +282,7 @@
 }
 .groupSvg {
   width: 100%;
+  max-width: calc(var(--space-84) * 4 + var(--space-42));
   height: auto;
   background: var(--color-bg-subtle);
   border-radius: var(--radius-sm);

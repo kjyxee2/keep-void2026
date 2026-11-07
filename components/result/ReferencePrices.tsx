@@ -1,11 +1,12 @@
-// 공개 단가 표: API reference_prices 행을 모두 원문 그대로(무게와 곱하지 않음). 고시 두 해는 year_label로 나눠 적는다.
+// 공개 단가 표: API reference_prices 행을 모두 원문 그대로(무게와 곱하지 않음).
+// 고시 2022 적용분과 2027 시행분은 item, method 원문이 같을 때만 한 줄로 묶고 2027 값은 아래 작은 줄에 적는다.
 // 사용자가 넣은 톤당 단가가 있으면 같은 단위(원/톤)로 옆에 한 줄 더 둔다(계산 없음).
 'use client';
 import { useEffect, useId, useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Footnote } from '@/components/ui/Footnote';
 import { Input } from '@/components/ui/Input';
-import { num } from '@/lib/result-copy';
+import { mergeNoticeYears, num } from '@/lib/result-copy';
 import type { ReferencePrice } from '@/lib/types';
 import styles from './result.module.css';
 
@@ -26,6 +27,8 @@ export function ReferencePrices({ rows, userPrice }: { rows: Row[]; userPrice: n
   }, [open, inputId]);
   const mine = typedOk ? typed : (userPrice ?? null);
 
+  // 같은 고시 항목(category, item, method 원문 일치)의 2022 적용분과 2027 시행분은 한 줄. 큰 숫자는 지금 적용되는 2022 값
+  const merged = mergeNoticeYears(rows);
   const sources = [...new Set(rows.map((r) => r.source).filter(Boolean))] as string[];
   const notes = [...new Set(rows.map((r) => r.note).filter(Boolean))] as string[];
 
@@ -48,13 +51,18 @@ export function ReferencePrices({ rows, userPrice }: { rows: Row[]; userPrice: n
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
+              {merged.map(({ main: r, next }) => (
                 <tr key={r.id}>
                   <th scope="row">
                     <span className={styles.cellMain}>{r.item}</span>
                     <span className={styles.cellSub}>
                       {r.method}, {r.category}
                     </span>
+                    {next && (
+                      <span className={`${styles.cellNext} count`}>
+                        2027년부터 {num(next.price_won)}원(2027 시행 고시)
+                      </span>
+                    )}
                   </th>
                   <td className="count">
                     {num(r.price_won)}
@@ -80,7 +88,7 @@ export function ReferencePrices({ rows, userPrice }: { rows: Row[]; userPrice: n
           </table>
         </div>
       )}
-      {rows.some((r) => r.year_label === '2027 시행') && <p className={styles.small}>2027 시행 값은 아직 시행 전이에요.</p>}
+      {merged.some(({ main }) => main.year_label === '2027 시행') && <p className={styles.small}>2027 시행 값은 아직 시행 전이에요.</p>}
       {notes.length > 0 && (
         <ul role="list" className={styles.noteList}>
           {notes.map((n) => (

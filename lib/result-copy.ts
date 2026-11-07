@@ -113,3 +113,55 @@ export function toLocalKm([lng, lat]: [number, number], [clng, clat]: [number, n
   const y = (lat - clat) * 110.574;
   return [x, y];
 }
+
+// ---------- 공개 단가 표: 고시 2022 적용분과 2027 시행분 한 줄로 ----------
+
+export type PriceRowIn = {
+  id: string;
+  category: string;
+  item: string;
+  method: string;
+  price_won: number;
+  unit: string;
+  year: number;
+  year_label?: string;
+};
+export type PriceRowOut<R extends PriceRowIn> = {
+  /** 큰 숫자로 보여 줄 행: 2022 적용분, 없으면 2027 시행분, 고시가 아니면 그 행 */
+  main: R;
+  /** 같은 고시 항목의 2027 시행분(main이 2022일 때만) */
+  next: R | null;
+};
+
+const NOW_LABEL = '2022 적용';
+const NEXT_LABEL = '2027 시행';
+
+/**
+ * 같은 고시 항목(category, item, method 원문이 모두 같고 year_label이 2022 적용 또는 2027 시행)을 한 줄로 묶는다.
+ * 원문 문자열이 완전히 같을 때만 묶고, 그 밖의 행은 그대로 한 줄씩. 순서는 처음 나온 순서. 값은 바꾸지 않는다.
+ */
+export function mergeNoticeYears<R extends PriceRowIn>(rows: R[]): PriceRowOut<R>[] {
+  const out: PriceRowOut<R>[] = [];
+  const byKey = new Map<string, PriceRowOut<R>>();
+  for (const r of rows) {
+    const label = r.year_label;
+    if (label !== NOW_LABEL && label !== NEXT_LABEL) {
+      out.push({ main: r, next: null });
+      continue;
+    }
+    const key = JSON.stringify([r.category, r.item, r.method]);
+    const found = byKey.get(key);
+    if (!found) {
+      const entry: PriceRowOut<R> = { main: r, next: null };
+      byKey.set(key, entry);
+      out.push(entry);
+      continue;
+    }
+    if (label === NEXT_LABEL && found.main.year_label === NOW_LABEL && !found.next) found.next = r;
+    else if (label === NOW_LABEL && found.main.year_label === NEXT_LABEL) {
+      found.next = found.main;
+      found.main = r;
+    } else out.push({ main: r, next: null });
+  }
+  return out;
+}
