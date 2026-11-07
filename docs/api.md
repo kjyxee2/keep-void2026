@@ -210,10 +210,12 @@ status: `requested`, `contacted`, `sample`, `contracted`, `first_pickup`, `cance
 
 | 요청 | 응답 |
 |---|---|
-| `?layer=factories` | 확인 좌표 공장 1,123곳 GeoJSON Point. properties: id, name, dong, waste_groups |
+| `?layer=factories` | 확인 좌표 공장 1,123곳 GeoJSON Point. properties: id, name, dong, waste_groups, `method` |
 | `?layer=processors` | 확인 좌표 처리업체 32곳 Point + `unlocated`: 좌표 없는 771곳을 `{ sido, sigungu, count, processors: [...] }` 목록으로(많은 순) |
 | `?layer=flows` | 공장→처리업체 LineString(양쪽 좌표 확인된 신고만). properties: factory_id, processor_id, method, reports. `coverage`: `{ total_reports: 4575, drawn_reports: 652, drawn_pct: 14.3 }` |
 | `&group=폐유` | 세 레이어 모두 폐기물군으로 거르기 |
+
+`method`(공장 점 모양, Figma 지도 설명 규칙): 그 공장의 신고 중 weight 합이 가장 많은 방식 묶음. `물질재활용` → `재활용`, `소각`과 `에너지회수` → `소각`, `매립` → `매립`, 나머지(중간가공, 복수 허가, 미확인 등) → `미확인`. 동률이면 재활용, 소각, 매립, 미확인 순. `&group=`이 있으면 그 폐기물군 신고로만 정하고, 없으면 모든 폐기물군 신고로 정한다(칩을 바꾸면 `group`을 바꿔 다시 받는다). 화면은 원 재활용, 사각 소각, 삼각 매립, 빈 원 미확인.
 
 좌표는 `[lng, lat]`(GeoJSON 순서). 좌표 없는 곳은 지어서 그리지 않는다. `coverage.drawn_pct`를 지도에 함께 표시("신고 경로 중 14.3%만 위치 확인").
 
