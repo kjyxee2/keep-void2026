@@ -154,8 +154,8 @@ export function MapExplorer() {
     <>
       <p className={styles.intro}>
         점 하나는 위치가 확인된 배출 공장 한 곳이에요.
-        {/* 숫자가 오기 전에도 같은 문장 길이를 두어 아래 내용이 밀리지 않게 */} 위치가 확인된 {view ? num(view.total) : '…'}곳 중 반월시화
-        일대 {view ? num(view.inside) : '…'}곳이 지도 안에 있고, 폐기물 종류를 고르면 그 폐기물을 내는 공장만 보여요.
+        {/* 숫자가 오기 전에도 같은 문장 길이를 두어 아래 내용이 밀리지 않게 */} {view ? num(view.total) : '…'}곳 중 반월시화 일대{' '}
+        {view ? num(view.inside) : '…'}곳이 지도 안에 있고, 종류를 고르면 그 폐기물을 내는 공장만 보여요.
       </p>
 
       <div className={styles.layout}>
