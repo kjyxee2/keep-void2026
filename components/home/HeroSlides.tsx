@@ -5,8 +5,7 @@
 'use client';
 import { useEffect, useId, useRef, useState } from 'react';
 import Image, { type StaticImageData } from 'next/image';
-import { useReducedMotion } from 'framer-motion';
-import { MOTION } from '@/components/motion';
+import { MOTION, useReducedMotion } from '@/components/motion';
 import styles from './Hero.module.css';
 
 /** 한 장이 머무는 시간(ms). styles/motion.css --motion-dwell과 같은 값 */

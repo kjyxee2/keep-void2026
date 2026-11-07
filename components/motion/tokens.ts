@@ -1,4 +1,4 @@
-// Framer Motion용 모션 값. styles/motion.css, Figma RE:FIT v3 Motion과 같은 값(초 단위)
+// 스크립트 쪽(숫자 세기, 단계 전환 타이머, 히어로 슬라이드) 모션 값. styles/motion.css, Figma RE:FIT v3 Motion과 같은 값(초 단위)
 export const MOTION = {
   short: 0.15,
   base: 0.25,

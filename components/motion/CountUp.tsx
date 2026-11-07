@@ -3,8 +3,9 @@
 // fromZero: 화면에 들어올 때 0에서 최종 값까지 한 번 센다(800ms). 그 뒤의 변경은 이전 값에서 이어 센다.
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { animate, inView, useReducedMotion } from 'framer-motion';
+import { animateValue } from './animate';
 import { MOTION } from './tokens';
+import { useReducedMotion } from './useReducedMotion';
 
 export function CountUp({
   to,
@@ -29,11 +30,20 @@ export function CountUp({
   useEffect(() => {
     if (!fromZero) return;
     const el = ref.current;
-    if (!el) {
+    if (!el || typeof IntersectionObserver === 'undefined') {
       setSeen(true);
       return;
     }
-    return inView(el, () => setSeen(true), { amount: 0.5 });
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        setSeen(true);
+      },
+      { threshold: 0.5 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
   }, [fromZero]);
 
   useEffect(() => {
@@ -52,12 +62,7 @@ export function CountUp({
       setValue(to);
       return;
     }
-    const controls = animate(from, to, {
-      duration,
-      ease: MOTION.ease,
-      onUpdate: (x) => setValue(x),
-    });
-    return () => controls.stop();
+    return animateValue({ from, to, duration, onUpdate: setValue });
   }, [to, reduce, seen, fromZero]);
 
   const text = value.toLocaleString('ko-KR', { minimumFractionDigits: decimals, maximumFractionDigits: decimals });

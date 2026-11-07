@@ -22,7 +22,7 @@ export function db() {
 }
 
 export const json = (data: unknown, status = 200) => Response.json(data, { status });
-// 공개 참고 데이터 GET(지도, 칩, 홈 통계, 대시보드): CDN 1시간, 만료 뒤 하루 동안은 옛 값 주며 갱신. 오류 응답에는 붙이지 않는다
+// 공개 참고 데이터 GET(지도, 칩, 홈 통계, 대시보드, 공장 한 곳과 검색): CDN 1시간, 만료 뒤 하루 동안은 옛 값 주며 갱신. 오류 응답에는 붙이지 않는다
 export const CACHE_PUBLIC = 'public, s-maxage=3600, stale-while-revalidate=86400';
 export const cached = (data: unknown) => Response.json(data, { headers: { 'Cache-Control': CACHE_PUBLIC } });
 export const fail = (status: number, error: string) => json({ error }, status);
@@ -71,15 +71,31 @@ export async function isOperator(req: Request) {
   return data?.role === 'operator';
 }
 
-// PostgREST max_rows(1000)를 넘는 조회를 나눠 받는다. build는 같은 정렬을 보장해야 함
-export async function fetchAll<T>(
-  build: (from: number, to: number) => PromiseLike<{ data: T[] | null; error: { message: string } | null }>,
-) {
-  const out: T[] = [];
-  for (let from = 0; ; from += 1000) {
-    const { data, error } = await build(from, from + 999);
+// PostgREST max_rows(1000)를 넘는 조회를 나눠 받는다. build는 같은 정렬을 보장하고 opts를 select의 두 번째 인자로 넘겨야 함.
+// 첫 쪽에서 전체 행 수(count: 'exact')를 받아 나머지 쪽은 한꺼번에 요청한다(쪽마다 차례로 기다리지 않음)
+export const PAGE_ROWS = 1000;
+export type PageOpts = { count: 'exact' } | undefined;
+export type PageResult<T> = PromiseLike<{ data: T[] | null; error: { message: string } | null; count?: number | null }>;
+export async function fetchAll<T>(build: (from: number, to: number, opts?: PageOpts) => PageResult<T>) {
+  const first = await build(0, PAGE_ROWS - 1, { count: 'exact' });
+  if (first.error) throw first.error;
+  const out: T[] = [...(first.data ?? [])];
+  const total = first.count ?? null;
+  if (total === null) {
+    // 행 수를 못 받았으면 예전처럼 차례로
+    for (let from = PAGE_ROWS; out.length % PAGE_ROWS === 0 && out.length > 0; from += PAGE_ROWS) {
+      const { data, error } = await build(from, from + PAGE_ROWS - 1);
+      if (error) throw error;
+      out.push(...(data ?? []));
+      if (!data || data.length < PAGE_ROWS) break;
+    }
+    return out;
+  }
+  const rest: PageResult<T>[] = [];
+  for (let from = PAGE_ROWS; from < total; from += PAGE_ROWS) rest.push(build(from, from + PAGE_ROWS - 1));
+  for (const { data, error } of await Promise.all(rest)) {
     if (error) throw error;
     out.push(...(data ?? []));
-    if (!data || data.length < 1000) return out;
   }
+  return out;
 }

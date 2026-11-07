@@ -9,6 +9,7 @@
 /* Hallmark · dismissed F19 · Figma RE:FIT v3 text styles use Regular, Medium, SemiBold and Bold · four weights are the design system's own type ramp */
 
 @import "../styles/tokens.css";
+@import "../styles/fonts.css";
 @import "../styles/motion.css";
 
 *,

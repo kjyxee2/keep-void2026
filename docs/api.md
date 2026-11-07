@@ -12,7 +12,7 @@ Next.js Route Handler(`app/api/`). 모든 응답은 JSON. 데이터 기준: 데�
 | 로그인 사용자 | `Authorization: Bearer <Supabase access_token>` (선택. 운영자 API는 필수) |
 | 오류 | `{ "error": "메시지" }`. 400 입력 오류, 403 권한 없음, 404 없음, 409 상태 충돌, 422 완료에 필요한 입력 없음, 500 DB 오류 |
 | 거리 | 공장과 처리업체 좌표가 **모두 건물 위치로 확인된 경우만** 숫자. 아니면 `null` → 화면은 "거리 정보 없음" |
-| 캐시 | `GET /api/map`, `/api/chips`, `/api/home-stats`, `/api/dashboard`의 성공 응답은 `Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400`(Vercel CDN 1시간, 그 뒤 하루는 옛 값을 주며 갱신). 대시보드 `app` 집계도 최대 1시간 늦을 수 있다. 오류 응답과 진단, 요청 API는 캐시하지 않는다 |
+| 캐시 | `GET /api/map`, `/api/chips`, `/api/home-stats`, `/api/dashboard`, `/api/factories/search`, `/api/factories/{id}`의 성공 응답은 `Cache-Control: public, s-maxage=3600, stale-while-revalidate=86400`(Vercel CDN 1시간, 그 뒤 하루는 옛 값을 주며 갱신). 대시보드 `app` 집계도 최대 1시간 늦을 수 있다. 오류 응답과 진단, 요청 API는 캐시하지 않는다 |
 | 비율 | 신고 건수 집계(톤수 아님). `reports`는 신고 행 수(한 신고에 업체가 k곳이면 1/k씩) |
 | 칩 집계 기준 | 결과의 `current_route`, `neighbors`는 칩의 **신고 원 표기**(`waste_chips.waste_types`)로 센다. 홈 칩 통계(`GET /api/home-stats`)와 같은 숫자. C01 폐합성수지 `폐합성수지류(폐염화비닐수지류는 제외한다)`, C02 `폐수처리오니`, C03 `폐활성탄`, 나머지 칩은 그 폐기물군의 원 표기 전부(폐유 = 폐유 묶음 전체). 추천 후보(`candidates`)는 README fit_score 규칙대로 **폐기물군** 신고 경로로 계산(`fit_candidates`와 같은 기준) |
 

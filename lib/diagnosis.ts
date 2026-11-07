@@ -22,8 +22,8 @@ export async function loadDiagnosis(id: string) {
 }
 
 export function groupFlows(group: string) {
-  return fetchAll<Flow>((from, to) => db().from('flows')
-    .select('factory_id,processor_id,method,method_by_other_group_permit,region,waste_type,transporter,weight')
+  return fetchAll<Flow>((from, to, opts) => db().from('flows')
+    .select('factory_id,processor_id,method,method_by_other_group_permit,region,waste_type,transporter,weight', opts)
     .eq('waste_group', group).order('link_id').range(from, to));
 }
 
@@ -113,16 +113,16 @@ async function reasonsFor(
   const [{ data: me, error }, transportRows] = await Promise.all([
     db().from('factories').select('dong').eq('id', factoryId).maybeSingle(),
     mine.size
-      ? fetchAll<{ processor_id: string; transporter: string | null }>((from, to) => db().from('flows')
-        .select('processor_id,transporter').in('processor_id', ids).not('transporter', 'is', null)
+      ? fetchAll<{ processor_id: string; transporter: string | null }>((from, to, opts) => db().from('flows')
+        .select('processor_id,transporter', opts).in('processor_id', ids).not('transporter', 'is', null)
         .order('link_id').range(from, to))
       : Promise.resolve([]),
   ]);
   if (error) throw error;
   const dong = (me?.dong as string | null) ?? null;
   const neighbors = dong
-    ? await fetchAll<{ id: string; dong: string | null }>((from, to) => db().from('factories')
-      .select('id,dong').eq('dong', dong).order('id').range(from, to))
+    ? await fetchAll<{ id: string; dong: string | null }>((from, to, opts) => db().from('factories')
+      .select('id,dong', opts).eq('dong', dong).order('id').range(from, to))
     : [];
   return candidateReasons(cards, {
     flows: groupFlows, self: { factory_id: factoryId, dong }, transportRows,
