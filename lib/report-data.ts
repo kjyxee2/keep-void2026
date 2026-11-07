@@ -100,6 +100,8 @@ export function trendSentence(trend: TrendRow[]): { title: string; body: string 
 
 /** lib/api-client.ts tokenStore가 쓰는 키 접두사(refit:anon_token:<진단 id>) */
 export const TOKEN_PREFIX = 'refit:anon_token:';
+/** 진단을 마칠 때(components/diagnose/DiagnoseFlow.tsx) 적어 두는 마지막 완료 진단 id */
+export const LAST_COMPLETED_KEY = 'refit:last_completed_diagnosis';
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 /** 한 번에 확인하는 진단 수(요청 수 제한) */
 export const MAX_CHECK = 20;

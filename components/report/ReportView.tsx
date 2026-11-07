@@ -1,10 +1,9 @@
 // 우리 공장 보고서 화면(Figma 151:3000, 82:2758). 탭 두 개: 우리 공장, 안산시 지표.
-// 탭은 ARIA tablist(좌우 화살표, Home, End)이고 선택은 주소 ?tab=factory|city 에 남긴다.
-// 공용 Tabs(components/ui/Tabs)는 선택 상태를 밖에서 정할 수 없어서 같은 스타일로 여기서 제어한다.
+// 탭은 공용 Tabs(components/ui/Tabs)의 제어 모드(value, onChange)로 쓰고 선택은 주소 ?tab=factory|city 에 남긴다.
 'use client';
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import tabStyles from '@/components/ui/Tabs.module.css';
+import { Tabs } from '@/components/ui/Tabs';
 import { getDashboard } from '@/lib/api-client';
 import { parseCitySummary } from '@/lib/report-data';
 import { num } from '@/lib/result-copy';
@@ -24,7 +23,6 @@ export function ReportView({ initialTab, initialDashboard }: { initialTab: Repor
   const [tab, setTab] = useState<ReportTab>(initialTab);
   const [dashboard, setDashboard] = useState(initialDashboard);
   const [dashState, setDashState] = useState<'idle' | 'loading' | 'error'>('idle');
-  const refs = useRef<(HTMLButtonElement | null)[]>([]);
 
   // 서버에서 못 받았으면 브라우저에서 한 번 더
   const loadDashboard = useCallback(async () => {
@@ -40,29 +38,15 @@ export function ReportView({ initialTab, initialDashboard }: { initialTab: Repor
     if (!initialDashboard) void loadDashboard();
   }, [initialDashboard, loadDashboard]);
 
-  const select = (next: ReportTab, focus = false) => {
+  const select = (id: string) => {
+    const next: ReportTab = id === 'city' ? 'city' : 'factory';
     setTab(next);
-    if (focus) refs.current[TABS.findIndex((t) => t.id === next)]?.focus();
     try {
       const url = new URL(window.location.href);
       url.searchParams.set('tab', next);
       window.history.replaceState(window.history.state, '', url);
     } catch {
       /* 주소를 못 바꿔도 화면은 바뀐다 */
-    }
-  };
-
-  const onKey = (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
-    const n = TABS.length;
-    const to: Record<string, number> = {
-      ArrowRight: (i + 1) % n,
-      ArrowLeft: (i - 1 + n) % n,
-      Home: 0,
-      End: n - 1,
-    };
-    if (e.key in to) {
-      e.preventDefault();
-      select(TABS[to[e.key]].id, true);
     }
   };
 
@@ -91,48 +75,26 @@ export function ReportView({ initialTab, initialDashboard }: { initialTab: Repor
         </header>
 
         <div className={styles.tabs}>
-          <div role="tablist" aria-label="보고서 보기" className={tabStyles.list} data-report-noprint>
-            {TABS.map((t, i) => (
-              <button
-                key={t.id}
-                ref={(el) => {
-                  refs.current[i] = el;
-                }}
-                type="button"
-                role="tab"
-                id={`report-tab-${t.id}`}
-                aria-selected={t.id === tab}
-                aria-controls={`report-panel-${t.id}`}
-                tabIndex={t.id === tab ? 0 : -1}
-                className={tabStyles.tab}
-                onClick={() => select(t.id)}
-                onKeyDown={(e) => onKey(e, i)}
-              >
-                {t.label}
-              </button>
-            ))}
-          </div>
-
-          <div
-            role="tabpanel"
-            id="report-panel-factory"
-            aria-labelledby="report-tab-factory"
-            hidden={tab !== 'factory'}
-            tabIndex={0}
-            className={`${styles.panel} tab-fade-in`}
-          >
-            <FactoryTab active={tab === 'factory'} switched={dashboard?.app.routes_switched_to_recycling ?? null} />
-          </div>
-          <div
-            role="tabpanel"
-            id="report-panel-city"
-            aria-labelledby="report-tab-city"
-            hidden={tab !== 'city'}
-            tabIndex={0}
-            className={`${styles.panel} tab-fade-in`}
-          >
-            <CityTab city={city} app={dashboard?.app ?? null} state={dashState} onRetry={loadDashboard} />
-          </div>
+          <Tabs
+            label="보고서 보기"
+            idBase="report"
+            value={tab}
+            onChange={select}
+            listProps={{ 'data-report-noprint': '' }}
+            panelClassName={styles.panel}
+            items={[
+              {
+                id: 'factory',
+                label: TABS[0].label,
+                content: <FactoryTab active={tab === 'factory'} switched={dashboard?.app.routes_switched_to_recycling ?? null} />,
+              },
+              {
+                id: 'city',
+                label: TABS[1].label,
+                content: <CityTab city={city} app={dashboard?.app ?? null} state={dashState} onRetry={loadDashboard} />,
+              },
+            ]}
+          />
         </div>
       </div>
     </main>

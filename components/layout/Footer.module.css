@@ -1,3 +1,5 @@
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · posture: restrained · surface: footer (logo, slogan, one source line, team) · motion: none */
+/* Hallmark · waive 26b · no :active or :disabled rules here · the footer's only control is the home logo link, which has no disabled state; its hover and active come from Logo.module.css */
 .footer {
   margin-top: auto;
   background: var(--color-bg-subtle);
@@ -17,14 +19,23 @@
   align-items: flex-start;
   gap: var(--space-10);
 }
+.logo {
+  display: inline-flex;
+  border-radius: var(--radius-xs);
+}
+.logo:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
 .slogan {
   font-size: var(--font-size-p3);
   color: var(--color-text-secondary);
 }
 .sources {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
-  gap: var(--space-21);
+  align-self: end;
+  font-size: var(--font-size-p4);
+  line-height: 1.6;
+  color: var(--color-text-tertiary);
 }
 .team {
   grid-column: 1 / -1;

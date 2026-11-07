@@ -172,7 +172,7 @@ export function CityTab({
               </li>
             ))}
           </ul>
-          <p className={styles.source}>출처: {SOURCES.app}</p>
+          <Footnote basis="앱 집계">{SOURCES.app}</Footnote>
         </section>
       )}
     </div>

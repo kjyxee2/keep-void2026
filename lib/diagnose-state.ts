@@ -71,16 +71,8 @@ export function formatWeightInput(raw: string): string {
 
 export const fmtKg = (n: number) => `${n.toLocaleString('ko-KR')}kg`;
 
-// ---------- 서류 판독 확인 정도(docs/api.md 화면 안내) ----------
-
-export type ConfidenceLevel = { level: 3 | 2 | 1; text: string };
-
-export function confidenceLevel(value: number | null | undefined): ConfidenceLevel | null {
-  if (typeof value !== 'number' || Number.isNaN(value)) return null;
-  if (value >= 0.85) return { level: 3, text: '또렷하게 읽음' };
-  if (value >= 0.6) return { level: 2, text: '한 번 더 확인' };
-  return { level: 1, text: '흐릿함, 꼭 확인' };
-}
+// ---------- 서류 판독 ----------
+// 칸별 확인 표시(확인됨 / 확인 필요)는 서버 응답 check를 그대로 보인다(components/diagnose/DocumentScan.tsx). 모델 신뢰도는 쓰지 않는다.
 
 /** 서류 종류가 무게 출처 선택지와 바로 같을 때만 고른다. 그 밖에는 사용자가 고른다 */
 export function weightSourceFromDocument(documentType: string | null | undefined): WeightSource | null {

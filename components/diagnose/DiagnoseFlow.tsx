@@ -13,6 +13,7 @@ import { Tag } from '@/components/ui/Tag';
 import { MethodIcon, WasteIcon, type MethodType, type WasteType } from '@/components/brand/Icon';
 import { SlideStep } from '@/components/motion';
 import { ApiError, completeDiagnosis, createDiagnosis, getChips, getFactory, patchDiagnosis, tokenStore } from '@/lib/api-client';
+import { rememberLastCompleted } from '@/lib/report-latest';
 import type { Chip, DiagnosisPatch, Method, WeightSource } from '@/lib/types';
 import {
   draftStore,
@@ -301,10 +302,13 @@ export function DiagnoseFlow({ chips: initialChips, initialFactoryId, initialSte
       if (factory) await patchDiagnosis(diagnosisId, { factory_id: factory.id, location_source: '신고공장' });
       await completeDiagnosis(diagnosisId);
       draftStore.remove(diagnosisId);
+      rememberLastCompleted(diagnosisId);
       router.push(`/result/${encodeURIComponent(diagnosisId)}`);
     } catch (e) {
       if (e instanceof ApiError && e.status === 409) {
+        // 이미 마친 진단
         draftStore.remove(diagnosisId);
+        rememberLastCompleted(diagnosisId);
         router.push(`/result/${encodeURIComponent(diagnosisId)}`);
         return;
       }

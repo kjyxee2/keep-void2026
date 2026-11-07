@@ -169,7 +169,7 @@ export default async function ImpactPage() {
       <section className={styles.band} aria-labelledby="impact-factory">
         <div className={`container ${styles.split}`}>
           <div className={styles.splitIntro}>
-            <h2 id="impact-factory" className={styles.h2}>
+            <h2 id="impact-factory" tabIndex={-1} className={styles.h2}>
               우리 공장 처리비는 직접 넣은 값으로만 계산합니다.
             </h2>
             <p className={styles.sub}>

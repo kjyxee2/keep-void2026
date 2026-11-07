@@ -124,7 +124,7 @@ test('묶음: F0036은 G0158(성곡동 10곳), 좌표 없는 F0001은 성곡동 
   assert.ok(f1[0].group.dongs.includes('성곡동'));
 });
 
-test('추천 이유 F0001 폐합성수지: 이웃 28/14/10, 같은 동(성곡동) 6/4/4, (주)동우 운반 연결 없음, 안산 업체 2곳', () => {
+test('추천 이유 F0001 폐합성수지: 이웃 28/15/10(v3 이름 교정 후), 같은 동(성곡동) 6/4/4, (주)동우 운반 연결 없음, 안산 업체 2곳', () => {
   const group = flows.filter(f => f.waste_group === '폐합성수지류');
   const procRows = Object.fromEntries(demoCsv('processors').map(r => [r.id, r]));
   const factoryDong = new Map(demoCsv('factories').map(r => [r.id, r.dong || null]));
@@ -136,7 +136,7 @@ test('추천 이유 F0001 폐합성수지: 이웃 28/14/10, 같은 동(성곡동
   const ctx = { flows: group, self: { factory_id: 'F0001', dong: factoryDong.get('F0001') ?? null }, factoryDong, transportRows };
   const r = candidateReasons(top, ctx);
   const pick = (i: number, t: string) => r[i].find(x => x.type === t);
-  assert.deepEqual(top.map((_, i) => pick(i, 'neighbors_same_group')?.count), [28, 14, 10]);
+  assert.deepEqual(top.map((_, i) => pick(i, 'neighbors_same_group')?.count), [28, 15, 10]);
   assert.deepEqual(top.map((_, i) => pick(i, 'same_dong')?.count), [6, 4, 4]);
   assert.equal(pick(0, 'same_dong')?.text, '같은 동(성곡동) 공장 6곳이 이 업체에 보내요');
   assert.deepEqual(top.map((_, i) => !!pick(i, 'transporter_link')), [false, false, false]);   // (주)동우는 세 업체로 운반 신고 없음
@@ -173,7 +173,7 @@ test('안산 안 후보 F0001 폐합성수지: 상위 3곳에 이미 안산 업�
   assert.equal(r.ansan?.processor_id, 'P0065');
   assert.equal(r.ansan?.rank, 2);
   assert.equal(r.ansan?.already_in_top, true);
-  assert.equal(r.ansan?.evidence_rows, 14);
+  assert.equal(r.ansan?.evidence_rows, 15);   // v3 처리업체 이름 교정으로 P0065 근거 14 → 15
 });
 
 test('안산 안 후보 폐흡착제(폐활성탄): 상위 3곳(화성, 양산, 화성) 밖의 P0093 한국수자원공사 환경에너지센터, 근거 11곳', () => {

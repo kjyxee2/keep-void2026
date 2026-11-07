@@ -41,9 +41,14 @@ export function ResultPreview({ startHref }: { startHref: string }) {
             }
           />
         </div>
-        <Button href={exampleHref} variant="text" className={styles.more}>
-          전체 결과 예시 보기
-        </Button>
+        <div className={styles.links}>
+          <Button href={exampleHref} variant="text" className={styles.more}>
+            전체 결과 예시 보기
+          </Button>
+          <Button href="/how" variant="text" className={styles.more}>
+            어떻게 찾나요
+          </Button>
+        </div>
       </div>
     </section>
   );

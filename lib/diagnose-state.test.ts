@@ -1,7 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-  confidenceLevel,
   formatWeightInput,
   parseDraft,
   parseWeight,
@@ -30,14 +29,6 @@ test('입력 중 천 단위 쉼표', () => {
   assert.equal(formatWeightInput('00120'), '120');
   assert.equal(formatWeightInput('1a2b3'), '123');
   assert.equal(formatWeightInput(''), '');
-});
-
-test('확인 정도: docs/api.md 기준 0.85, 0.6', () => {
-  assert.deepEqual(confidenceLevel(0.97), { level: 3, text: '또렷하게 읽음' });
-  assert.deepEqual(confidenceLevel(0.85), { level: 3, text: '또렷하게 읽음' });
-  assert.deepEqual(confidenceLevel(0.6), { level: 2, text: '한 번 더 확인' });
-  assert.deepEqual(confidenceLevel(0.3), { level: 1, text: '흐릿함, 꼭 확인' });
-  assert.equal(confidenceLevel(undefined), null);
 });
 
 test('무게 출처는 서류 종류가 바로 같을 때만', () => {

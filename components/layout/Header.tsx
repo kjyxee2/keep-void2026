@@ -1,4 +1,4 @@
-// 헤더: 로고와 메뉴 3개. 모바일은 로고와 메뉴 버튼(시트)
+// 헤더: 로고와 메뉴 5개(components/layout/nav.ts). 모바일은 로고와 메뉴 버튼(시트)
 import Link from 'next/link';
 import { LogoLockup } from '@/components/brand/Logo';
 import { MobileMenu } from './MobileMenu';

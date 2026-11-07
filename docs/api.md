@@ -296,7 +296,7 @@ status: `requested`, `contacted`, `sample`, `contracted`, `first_pickup`, `cance
 
 ## 서류 사진 자동 입력: POST /api/ocr/document
 
-계량표(계근표, 계량증명서)나 올바로 전자인계서, 폐기물 인계서 사진에서 **인쇄된 값만** 읽어 돌려준다. 진단을 저장하지 않는다. 화면은 값과 근거 글자를 보여 주고 사용자가 확인한 뒤 `PATCH /api/diagnoses/:id`로 저장한다(컴포넌트 `components/diagnose/DocumentScan.tsx`, `onApply({ weight_kg, chip_id, processor_id })`).
+계량표(계근표, 계량증명서)나 올바로 전자인계서, 폐기물 인계서 사진에서 **인쇄된 값만** 읽어 돌려준다. 진단을 저장하지 않는다. 화면은 값과 근거 글자, 칸별 확인 표시(`check`)를 보여 주고 사용자가 확인한 뒤 `PATCH /api/diagnoses/:id`로 저장한다(컴포넌트 `components/diagnose/DocumentScan.tsx`, `onApply({ weight_kg, chip_id, processor_id })`).
 
 요청: `multipart/form-data`
 
@@ -309,27 +309,36 @@ status: `requested`, `contacted`, `sample`, `contracted`, `first_pickup`, `cance
 ```json
 {
   "document_type": "인계서",
-  "weight_kg": 2480, "weight_unit_raw": "톤",
-  "waste_type_raw": "폐유", "processor_name_raw": "견본리사이클(주)", "transporter_name_raw": "견본운수(주)",
+  "weight_kg": 2480, "weight_unit_raw": "톤", "weight_unit_source": "숫자 옆",
+  "waste_type_raw": "폐유", "waste_category_raw": "사업장일반폐기물",
+  "processor_name_raw": "견본리사이클(주)", "transporter_name_raw": "견본운수(주)",
   "date_raw": "2026년 10월 15일",
-  "confidence": { "weight_kg": 0.97, "waste_type_raw": 0.97, "processor_name_raw": 0.96 },
-  "evidence": { "weight_kg": "인계량 2.48 톤", "waste_type_raw": "폐유", "processor_name_raw": "견본리사이클(주)",
-                "transporter_name_raw": "견본운수(주)", "date_raw": "2026년 10월 15일" },
+  "check": { "weight_kg": "확인됨", "waste_type_raw": "확인됨", "processor_name_raw": "확인 필요",
+             "transporter_name_raw": "확인됨", "date_raw": "확인됨" },
+  "flags": [],
+  "needs_review": false,
+  "evidence": { "weight_kg": "인계량: 2.48 톤", "weight_unit": "톤", "waste_type_raw": "폐기물 종류: 폐유",
+                "processor_name_raw": "처리자: 견본리사이클(주)", "transporter_name_raw": "운반자: 견본운수(주)",
+                "date_raw": "인계일자: 2026년 10월 15일" },
   "mapped": { "chip_id": "C04", "chip_label": "폐유", "processor_id": null, "processor_name": null },
   "diagnosis_id": null,
   "provider": { "name": "anthropic", "model": "claude-haiku-5-5" },
-  "labels": { "values": "…", "weight": "…", "mapping": "…", "privacy": "사진은 저장하지 않음" }
+  "labels": { "values": "…", "weight": "…", "mapping": "…", "check": "…", "privacy": "사진은 저장하지 않음" }
 }
 ```
-(시험용 견본 `tests/fixtures/sample-handover.png`의 실제 결과)
+(시험용 견본 `tests/fixtures/sample-handover.png` 기준 모양. v2부터 `confidence`는 없다)
 
 규칙:
 - 서류에 없는 값, 흐린 값은 `null`. 추정, 계산 없음(총중량에서 공차중량을 빼지 않음). 금액은 읽지 않음
-- `weight_kg`: 서류에 `kg`이면 그대로, `톤`/`t`/`ton`이면 1000을 곱함(단위 환산만). 단위가 없거나 다른 단위(㎥, 마대 등)면 `null`이고 `weight_unit_raw`에 원문을 남김. `evidence.weight_kg`에 그 숫자가 보이지 않으면 `null`
+- `weight_kg`: 서류에 `kg`이면 그대로, `톤`/`t`/`ton`이면 1000을 곱함(단위 환산만). 단위가 없거나 다른 단위(㎥, 마대 등)면 `null`이고 `weight_unit_raw`에 원문을 남김. `evidence.weight_kg`에 그 숫자가 보이지 않으면 `null`. 총중량, 공차중량 칸의 값이면 `null`(`weight_not_net`). 단위가 근거 글자에 보이지 않으면 `null`(`weight_unit_unshown`). `weight_unit_source`는 단위를 읽은 곳(`숫자 옆`, `단위 칸`, `표 머리글`)
 - **서류 한 장의 무게**다. 진단의 `weight_kg_per_month`(한 달 무게)와 다를 수 있어 화면에서 확인받는다
+- `waste_type_raw`는 종류(품명, 품목) 칸 값만. `구분` 칸 값(사업장일반폐기물, 지정폐기물 등)은 `waste_category_raw`로 보내고 종류로 쓰지 않는다(`waste_category_only`)
+- `processor_name_raw`(처리자, 처리처, 인수자, 반입처)와 `transporter_name_raw`(운반자, 운송사)는 근거의 칸 이름으로 역할을 확인한다. 칸이 서로 바뀌어 있으면 바꿔 넣고 `role_swapped`, 가려낼 수 없으면 둘 다 `null`과 `role_conflict`
 - `mapped.chip_id`: `waste_type_raw`가 칩 `label`, 칩 `waste_group`, 신고 자료(`flows.waste_type`) 원 표기 중 하나와 정규화 후 정확히 같을 때만. 정규화는 NFKC, 소문자, 공백과 문장부호 제거
 - `mapped.processor_id`: `processors.name` 또는 `name_variants`와 정규화 후 정확히 같을 때만(법인 표기 (주), 주식회사 등은 무시). 부분 일치, 유사도 매칭 없음. 같은 키가 두 곳 이상이면 `null`. 못 찾아도 `*_raw`는 그대로
-- `confidence`는 모델이 매긴 0~1 값(참고용). 화면 안내: 0.85 이상 "또렷하게 읽음", 0.6 이상 "한 번 더 확인", 그 아래 "흐릿함, 꼭 확인"
+- `check`(칸별 `확인됨` | `확인 필요`): 서버 규칙(`lib/ocr/checks.ts`)으로 매긴다. `확인됨`은 근거의 칸 이름과 값 모양이 맞고, 종류와 처리업체는 목록에도 연결된 경우. 그 밖(빈칸 포함)은 `확인 필요`. 철자까지 보장하지는 않는다. **모델이 매긴 신뢰도(confidence)는 틀린 값에도 높게 나와 응답에서 뺐다**(research/ai/ocr_eval/README.md)
+- `flags`: `role_swapped`, `role_conflict`, `same_company`, `waste_category_only`, `waste_label_mismatch`, `weight_not_net`, `weight_unit_unshown`, `date_future`, `date_too_old`. `needs_review`는 `flags`가 하나라도 있으면 `true`. 화면(`DocumentScan.tsx`)은 칸마다 `check`를 "확인됨 / 확인 필요"로, `flags`는 한국어 안내로 보인다
+- 브라우저 사전 검사(`lib/image-quality.ts`): 보내기 전에 긴 변 1024px 이하 캔버스에서 선명도(라플라시안 분산)를 재고, 흐리거나(350 미만) 너무 작으면(긴 변 400px 미만) "다시 찍기"를 권한다. 막지는 않는다("그래도 보내기")
 
 오류(`{ "error": "한국어 안내" }`):
 

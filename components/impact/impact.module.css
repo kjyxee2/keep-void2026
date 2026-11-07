@@ -24,6 +24,11 @@
   color: var(--color-text-secondary);
 }
 
+/* 첫 화면의 "우리 공장 계산" 이동 링크(#impact-factory)가 닿는 제목. 초점 고리는 공용 값 */
+.h2:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
 .band {
   padding-block: var(--space-70);
   background: var(--color-bg-page);

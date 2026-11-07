@@ -196,7 +196,7 @@ export function FactoryTab({ active, switched }: { active: boolean; switched: nu
             </h2>
             <p className={`${styles.switchedValue} count`}>{num(switched)}건</p>
             <p className={styles.switchedLabel}>RE:FIT으로 소각과 매립에서 재활용으로 바꾼 신고</p>
-            <p className={styles.source}>출처: RE:FIT 서비스 기록(앱 실제 집계)</p>
+            <Footnote basis="앱 집계">RE:FIT 서비스 기록</Footnote>
           </section>
         )}
       </div>

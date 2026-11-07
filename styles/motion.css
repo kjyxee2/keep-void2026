@@ -1,3 +1,4 @@
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · surface: motion tokens and state classes (reveal-once, bar scale, tab fade) · motion: tokens only, every value from tokens.css */
 /*
  * RE:FIT 모션 토큰과 상태 클래스. 원본 docs/REFIT_motion_tokens.css
  * 값은 tokens.css의 Figma Motion 변수(--duration-*, --stagger-base, --ease-standard)에 연결한다.
@@ -112,4 +113,9 @@
   from {
     opacity: 0;
   }
+}
+
+/* 초점 고리는 즉시 보인다(전환 없음). 모션 토큰이 초점 표시에 끼어들지 않는다 */
+:focus-visible {
+  transition-property: none;
 }

@@ -3,7 +3,7 @@
 // 시험용 견본(tests/fixtures/sample-*.png)만 보낸다. 실제 서류를 넣지 말 것. 키 값은 출력하지 않는다.
 import { readFileSync, existsSync } from 'node:fs';
 import { anthropicProvider } from '../lib/ocr/anthropic.ts';
-import { normalizeExtraction } from '../lib/ocr/normalize.ts';
+import { normalizeExtraction, publicFields } from '../lib/ocr/normalize.ts';
 import { selectProvider } from '../lib/ocr/provider.ts';
 import { checkImage } from '../lib/ocr/validate.ts';
 
@@ -39,13 +39,15 @@ for (const c of cases) {
   const t0 = performance.now();
   const { raw, usage } = await provider.extract({ bytes, mime: check.mime, signal: AbortSignal.timeout(20_000) });
   const ms = Math.round(performance.now() - t0);
-  const r = normalizeExtraction(raw);
+  // 화면이 받는 모양(check, flags, needs_review 포함, 모델 confidence 제외)으로 본다
+  const r = publicFields(normalizeExtraction(raw));
   const price = PRICE[model];
   const usd = price && usage ? (usage.input_tokens * price[0] + usage.output_tokens * price[1]) / 1e6 : null;
   const mismatches = Object.entries(c.expect).filter(([k, v]) => r[k] !== v);
   failed += mismatches.length ? 1 : 0;
   console.log(JSON.stringify({
     file: c.file, ok: mismatches.length === 0, mismatches: mismatches.map(([k, v]) => ({ field: k, expected: v, got: r[k] })),
+    check: r.check, flags: r.flags, needs_review: r.needs_review,
     ms, usage, usd: usd && Number(usd.toFixed(6)), krw: usd && Number((usd * KRW_PER_USD).toFixed(2)), result: r,
   }, null, 2));
 }
