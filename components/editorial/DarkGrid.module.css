@@ -1,0 +1,66 @@
+/* Hallmark · component: dark grid · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma Editorial/Dark Grid 265:5658 (bg/brand band, label + headline in text/inverse, two-column capture grid gap 24, button) · states: none · motion: none */
+.band {
+  width: 100%;
+  padding-block: var(--editorial-section-gap);
+  background: var(--color-bg-brand);
+  color: var(--color-text-inverse);
+}
+.inner {
+  display: flex;
+  flex-direction: column;
+  gap: var(--block-title-content);
+}
+.head {
+  width: 100%;
+}
+.headline {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+  color: var(--color-text-inverse);
+  overflow-wrap: break-word;
+  min-width: 0;
+  text-wrap: balance;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--editorial-gap-24);
+  width: 100%;
+}
+.cell {
+  position: relative;
+  aspect-ratio: var(--editorial-ratio-tile);
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  background: var(--color-bg-tile-on-dark);
+}
+.image {
+  object-fit: cover;
+}
+.top {
+  object-position: top;
+}
+.center {
+  object-position: center;
+}
+.action {
+  display: flex;
+}
+
+@media (max-width: 767px) {
+  .inner {
+    gap: var(--block-content);
+  }
+  .headline {
+    font-size: var(--font-size-h5);
+    line-height: 1.4;
+  }
+  .grid {
+    gap: var(--space-14);
+  }
+  .action {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

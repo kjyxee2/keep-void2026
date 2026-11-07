@@ -1,0 +1,43 @@
+/* Hallmark · component: editorial row · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma Editorial/Section Head 265:5502 label column + text column · states: none · motion: none */
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--editorial-gap-12) var(--editorial-gap-24);
+  width: 100%;
+  min-width: 0;
+}
+.withLabel {
+  grid-template-columns: var(--editorial-label-col) minmax(0, 1fr);
+}
+.labelCol {
+  min-width: 0;
+}
+/* 라벨: 본문보다 한 단계 작은 P3 Medium, sentence case, 추적 없음 */
+.label {
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.7;
+  color: var(--color-text-tertiary);
+}
+.dark .label {
+  color: var(--color-text-inverse);
+}
+.textCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--editorial-gap-16);
+  min-width: 0;
+}
+
+@media (max-width: 767px) {
+  .withLabel {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* 라벨 없이 자리만 비운 열은 모바일에서 사라진다 */
+  .labelCol:empty {
+    display: none;
+  }
+  .label {
+    font-size: var(--font-size-p4);
+  }
+}

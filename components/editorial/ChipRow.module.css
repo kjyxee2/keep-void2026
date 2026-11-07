@@ -1,0 +1,26 @@
+/* Hallmark · component: chip row · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma Editorial/Chip Row 265:5756 (five equal Option columns, gap 12; mobile one column per 홈 v2 279:4090) · states: inherited from Option · motion: none */
+.row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--editorial-gap-12);
+  width: 100%;
+  min-width: 0;
+  border: 0;
+  padding: 0;
+}
+.row > * {
+  min-width: 0;
+}
+
+@media (max-width: 1100px) {
+  .row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 767px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-10);
+  }
+}

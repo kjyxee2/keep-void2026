@@ -1,0 +1,81 @@
+/* Hallmark · component: editorial stat · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma Editorial/Stat 265:5308 (L Editorial/Number 96, M Display 42) + Pages v2 verification number H1 54 and home Numeral 70 · states: none · motion: CountUp may sit in value (tabular numerals) */
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  min-width: 0;
+}
+.value {
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.size-l .value {
+  font-size: var(--font-size-editorial-number);
+  line-height: 1;
+}
+.size-m .value {
+  font-size: var(--font-size-display);
+}
+.size-h1 .value {
+  font-size: var(--font-size-h1);
+}
+.size-numeral .value {
+  font-size: var(--font-size-numeral);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+}
+.tone-accent .value {
+  color: var(--color-text-accent);
+}
+.tone-brand .value {
+  color: var(--color-text-brand);
+}
+.tone-primary .value {
+  color: var(--color-text-primary);
+}
+.divider {
+  width: 100%;
+  border: 0;
+  border-top: var(--border-width-1) solid var(--color-border-default);
+}
+.rule-top {
+  gap: var(--space-14);
+  padding-top: var(--space-21);
+  border-top: var(--border-width-1) solid var(--color-border-default);
+}
+.caption {
+  font-size: var(--font-size-p2);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+.size-h1 .caption {
+  color: var(--color-text-primary);
+}
+.note {
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.7;
+  color: var(--color-text-tertiary);
+}
+
+@media (max-width: 767px) {
+  .size-h1 .value {
+    font-size: var(--font-size-h3);
+  }
+  .size-numeral .value {
+    font-size: var(--font-size-display);
+    font-weight: var(--font-weight-bold);
+    line-height: 1.5;
+  }
+  .rule-top {
+    gap: var(--radius-sm);
+    padding-top: var(--space-14);
+  }
+  .caption {
+    font-size: var(--font-size-p3);
+  }
+}

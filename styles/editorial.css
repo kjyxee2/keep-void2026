@@ -1,0 +1,64 @@
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) 00 Editorial System 265:5298 · theme: RE:FIT v3 (by request) · genre: modern-minimal · surface: editorial layout tokens (container 1200/343, label column 200, section gap 140/96, opener 560/420, band ratios, Editorial/Headline 56/32, Editorial/Number 96/56) · motion: none */
+/*
+ * 편집형(Editorial) 레이아웃 토큰. Figma 00 Editorial System의 변수(editorial/container, editorial/label-col, section/gap-pc, section/gap-mobile,
+ * Editorial/Headline, Editorial/Number)와 05 Pages v2의 띠, 오프너 치수를 옮긴 것. 색은 전부 tokens.css 변수를 쓴다.
+ * 값은 components/editorial/*의 CSS 모듈과 홈, /how, /impact 화면에서만 쓴다.
+ */
+
+:root {
+  /* 컨테이너(editorial/container 1200)와 양옆 여백. 1440에서 120씩 남는다 */
+  --editorial-container: 1200px;
+  --editorial-gutter: 20px;
+  /* 섹션 머리 왼쪽 라벨 열(editorial/label-col) */
+  --editorial-label-col: 200px;
+  /* 섹션 사이 여백(section/gap-pc) */
+  --editorial-section-gap: 140px;
+  /* 사진 오프너 높이와 아래 여백, 그라데이션 높이 */
+  --editorial-opener-h: 560px;
+  --editorial-opener-pad: 56px;
+  --editorial-shade-h: 320px;
+  /* 격자와 작은 간격(space/12, space/16, space/24) */
+  --editorial-gap-12: 12px;
+  --editorial-gap-16: 16px;
+  --editorial-gap-24: 24px;
+  /* 띠 비율: 가로 띠 1200x400, 머리 띠 1200x420, 단계 이미지 588x368, 격자 칸 588x360 */
+  --editorial-ratio-wide: 3;
+  --editorial-ratio-intro: 2.857;
+  --editorial-ratio-tall: 1.6;
+  --editorial-ratio-tile: 1.63;
+  /* 처리비 표: 이름 열 260, 막대 240 */
+  --editorial-price-label: 260px;
+  --editorial-track-w: 240px;
+  /* 처리비 점검 입력 칸 폭 466 */
+  --editorial-input-w: 466px;
+  /* 글자 크기(Editorial/Headline 56, Editorial/Number 96) */
+  --font-size-editorial-headline: 56px;
+  --font-size-editorial-number: 96px;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --editorial-section-gap: 96px;
+    --editorial-opener-h: 420px;
+    --editorial-opener-pad: 24px;
+    --editorial-shade-h: 240px;
+    --editorial-gap-12: 12px;
+    --editorial-gap-16: 16px;
+    --editorial-gap-24: 16px;
+    --editorial-ratio-wide: 1.56;
+    --editorial-ratio-intro: 1.6;
+    --editorial-ratio-tall: 1.6;
+    --editorial-ratio-tile: 1.33;
+    --editorial-track-w: 150px;
+    --font-size-editorial-headline: 32px;
+    --font-size-editorial-number: 56px;
+  }
+}
+
+/* 편집형 컨테이너: 1200 + 양옆 여백, 가운데 정렬 */
+.editorial-container {
+  width: 100%;
+  max-width: calc(var(--editorial-container) + var(--editorial-gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--editorial-gutter);
+}
