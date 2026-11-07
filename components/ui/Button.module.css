@@ -87,6 +87,7 @@
   color: var(--color-text-secondary);
 }
 .text.mobile {
+  align-self: flex-start;
   width: auto;
   display: inline-flex;
 }

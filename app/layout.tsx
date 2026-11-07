@@ -1,5 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import localFont from 'next/font/local';
+import { Footer } from '@/components/layout/Footer';
+import { Header } from '@/components/layout/Header';
 import './globals.css';
 
 const pretendard = localFont({
@@ -27,7 +29,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <noscript>
           <style>{'[data-motion-bar]{transform:scaleX(var(--ratio))!important}[data-motion-reveal]{opacity:1!important;transform:none!important}'}</style>
         </noscript>
+        <a href="#main" className="skip-link">
+          본문으로 건너뛰기
+        </a>
+        <Header />
         {children}
+        <Footer />
       </body>
     </html>
   );

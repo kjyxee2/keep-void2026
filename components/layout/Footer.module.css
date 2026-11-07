@@ -1,0 +1,40 @@
+.footer {
+  margin-top: auto;
+  background: var(--color-bg-subtle);
+  border-top: var(--border-width-1) solid var(--color-border-subtle);
+}
+.inner {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: var(--space-28) var(--space-56);
+  max-width: calc(var(--container-full) + var(--layout-gutter) * 2);
+  margin-inline: auto;
+  padding: var(--space-56) var(--layout-gutter);
+}
+.brand {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-10);
+}
+.slogan {
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+.sources {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--space-21);
+}
+.team {
+  grid-column: 1 / -1;
+  padding-top: var(--space-21);
+  border-top: var(--border-width-1) solid var(--color-border-default);
+  font-size: var(--font-size-p4);
+  color: var(--color-text-tertiary);
+}
+@media (max-width: 767px) {
+  .inner {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
