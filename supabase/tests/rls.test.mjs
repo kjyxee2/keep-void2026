@@ -18,7 +18,7 @@ alter default privileges in schema public grant all on sequences to anon, authen
 const dir = new URL('../migrations/', import.meta.url);
 for (const f of fs.readdirSync(dir).filter(f => f.endsWith('.sql')).sort())
   await db.exec(fs.readFileSync(new URL(f, dir), 'utf8').replace(/^create extension if not exists pgcrypto;$/m, ''));
-await db.exec(`insert into factories (id,name) values ('F0001','f'); insert into processors (id,name) values ('P0001','p1'),('P0002','p2');`);
+await db.exec(`insert into factories (id,name) values ('F0001','f'); insert into processors (id,name) values ('P0001','p1'),('P0002','p2'); insert into group_fit (group_id) values ('G0001');`);
 const A='00000000-0000-0000-0000-00000000000a', B='00000000-0000-0000-0000-00000000000b', P='00000000-0000-0000-0000-00000000000c';
 await db.exec(`
 insert into auth.users values ('${A}','{"name":"A"}'),('${B}','{}'),('${P}','{}');
@@ -46,6 +46,12 @@ ok((await as('authenticated',P,`update connection_requests set status='contacted
 ok(await fails('authenticated',P,`update connection_requests set contact_phone='x'`), 'processor cannot edit other columns');
 ok((await as('authenticated',A,`update connection_requests set status='contracted' returning id`)).length===0, 'user cannot change own request status');
 ok(await fails('authenticated',A,`insert into events (user_id,name) values ('${B}','x')`), 'cannot log events as other user');
+ok((await as('authenticated',A,`update diagnoses set current_method='소각', lat=37.3 where id='10000000-0000-0000-0000-000000000001' returning id`)).length===1, 'A edits own diagnosis inputs');
+for (const col of ["tons_per_year=999", "status='completed'", "anon_token='x'", "user_id='${B}'", "waste_group='x'"])
+  ok(await fails('authenticated',A,`update diagnoses set ${col} where id='10000000-0000-0000-0000-000000000001'`), `A cannot set diagnoses.${col.split('=')[0]}`);
+ok((await as('authenticated',A,`insert into group_memberships (group_id,diagnosis_id,user_id) values ('G0001','10000000-0000-0000-0000-000000000001','${A}') returning id`)).length===1, 'A joins group with own diagnosis');
+ok(await fails('authenticated',A,`insert into group_memberships (group_id,diagnosis_id,user_id) values ('G0001','10000000-0000-0000-0000-000000000002','${A}')`), 'A cannot join with B diagnosis');
+ok(await fails('authenticated',A,`update group_memberships set diagnosis_id='10000000-0000-0000-0000-000000000002' where user_id='${A}'`), 'A cannot repoint membership to B diagnosis');
 await db.exec(`update profiles set role='operator' where id='${B}'`);
 ok((await as('authenticated',B,`select * from diagnoses`)).length===2, 'operator sees all diagnoses');
 ok(Math.abs((await db.query(`select haversine_km(37.3234,126.7875,37.3108,126.8308) d`)).rows[0].d - 4.07) < 0.1, 'haversine ~4km');
