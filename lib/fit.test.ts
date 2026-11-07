@@ -1,7 +1,7 @@
 // 실행: npm run test:api (Node 22 타입 제거로 바로 실행)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { addBusinessDays, chipFlows, neighborCounts, referencePriceIds, priceYearLabel, pickStored, rankComputed, resolveCurrentMethod, routeShare, type Flow, type Proc } from './fit.ts';
+import { addBusinessDays, candidateReasons, chipFlows, splitTransporters, neighborCounts, referencePriceIds, priceYearLabel, pickStored, rankComputed, resolveCurrentMethod, routeShare, type Flow, type Proc } from './fit.ts';
 
 const f = (factory_id: string, processor_id: string | null, method: string, weight = 1, other = false): Flow =>
   ({ factory_id, processor_id, method, method_by_other_group_permit: other, region: '안산', weight });
@@ -102,4 +102,59 @@ test('candidates drop processors whose method is 에너지회수, 소각, 매립
   assert.deepEqual(pickStored(['E1', 'B1', 'L1', 'R1', 'M1'].map(row), ps).map(x => x.processor_id), ['R1', 'M1']);
   const fs = ['E1', 'B1', 'L1', 'R1'].map((id, i) => f(`F${i + 10}`, id, '물질재활용'));
   assert.deepEqual(rankComputed({ flows: fs, procs: ps, currentMethod: '소각', origin: null, selfFactoryId: null }).map(x => x.processor_id), ['R1']);
+});
+
+// 추천 이유: 순위, fit_score는 바꾸지 않고 화면 설명만 붙인다(research/ai/recommender v2 권고)
+const rf = (factory_id: string, processor_id: string, method: string, transporter: string | null = null, other = false): Flow =>
+  ({ ...f(factory_id, processor_id, method, 1, other), transporter });
+const reasonFlows = [
+  rf('F1', 'P1', '소각', '(주)동우'),                                  // 본인 공장, 지금 운반업체 (주)동우
+  rf('F2', 'R1', '물질재활용'), rf('F3', 'R1', '물질재활용'), rf('F4', 'R1', '물질재활용'),
+  rf('F5', 'R1', '물질재활용', null, true),                           // 다른 폐기물군 허가는 같은 동 수에 넣지 않음
+  rf('F3', 'R2', '중간가공(R10)'),                                     // 재활용이 아니면 같은 동 수에 넣지 않음
+];
+const dongs = new Map([['F1', '성곡동'], ['F2', '성곡동'], ['F3', '성곡동'], ['F4', '원시동'], ['F5', '성곡동']]);
+const transportRows = [
+  { processor_id: 'R1', transporter: '(주)지엔티_ (주)동우' },          // 운반자 여러 곳은 '_'로 이어 적힘
+  { processor_id: 'R2', transporter: '자가' },
+];
+const cands = [
+  { processor_id: 'R1', neighbors: 3, sigungu: '안산시' },
+  { processor_id: 'R2', neighbors: 1, sigungu: '평택시' },
+];
+
+test('splitTransporters splits on underscore, trims, drops 자가 and blanks', () => {
+  assert.deepEqual(splitTransporters('(주)지엔티_ (주)동우'), ['(주)지엔티', '(주)동우']);
+  assert.deepEqual(splitTransporters('자가_대일개발(주)'), ['대일개발(주)']);
+  assert.deepEqual(splitTransporters(null), []);
+});
+
+test('reasons with factory: neighbors, same dong, transporter link, in Ansan', () => {
+  const r = candidateReasons(cands, {
+    flows: reasonFlows, self: { factory_id: 'F1', dong: '성곡동' }, factoryDong: dongs, transportRows,
+  });
+  const basis = '신고 건수 집계 2026-07';
+  assert.deepEqual(r[0], [
+    { type: 'neighbors_same_group', count: 3, text: '같은 폐기물군을 이 업체에 재활용으로 보내는 안산 공장 3곳', basis },
+    { type: 'same_dong', count: 2, text: '같은 동(성곡동) 공장 2곳이 이 업체에 보내요', basis },
+    { type: 'transporter_link', text: '지금 운반업체 (주)동우가 이 업체로도 운반해요', basis },
+    { type: 'in_ansan', text: '안산 안의 업체예요', basis },
+  ]);
+  // R2: 같은 동 재활용 0곳, 운반 연결 없음, 안산 밖 → 이웃 수만
+  assert.deepEqual(r[1].map(x => x.type), ['neighbors_same_group']);
+});
+
+test('transporter josa follows the last syllable (받침 있으면 이)', () => {
+  const r = candidateReasons([cands[0]], {
+    flows: [rf('F1', 'P1', '소각', '(주)한성')], self: { factory_id: 'F1', dong: null }, factoryDong: dongs,
+    transportRows: [{ processor_id: 'R1', transporter: '(주)한성' }],
+  });
+  assert.equal(r[0].find(x => x.type === 'transporter_link')?.text, '지금 운반업체 (주)한성이 이 업체로도 운반해요');
+  assert.equal(r[0].some(x => x.type === 'same_dong'), false);        // 동을 모르면 같은 동 이유 없음
+});
+
+test('reasons without factory: only neighbors and in Ansan', () => {
+  const r = candidateReasons(cands, { flows: reasonFlows, self: null, factoryDong: dongs, transportRows });
+  assert.deepEqual(r[0].map(x => x.type), ['neighbors_same_group', 'in_ansan']);
+  assert.deepEqual(r[1].map(x => x.type), ['neighbors_same_group']);
 });

@@ -77,6 +77,17 @@ export type DiagnosisRow = {
 
 export type RouteShare<K extends string> = { reports: number; pct: number } & Record<K, string>;
 
+/** 추천 이유(화면 설명 전용, 순위에 쓰지 않음). 실제 신고 집계로 서버가 만든 문구 */
+export type CandidateReason = {
+  type: 'neighbors_same_group' | 'same_dong' | 'transporter_link' | 'in_ansan';
+  /** neighbors_same_group, same_dong만 */
+  count?: number;
+  /** 화면에 그대로 보여 줄 문구 */
+  text: string;
+  /** "신고 건수 집계 2026-07" */
+  basis: string;
+};
+
 export type Candidate = {
   candidate_id: number;
   rank: number;
@@ -92,6 +103,8 @@ export type Candidate = {
   source: 'fit_candidates' | 'computed';
   /** 화면에 반드시 보여 줄 문구 */
   note: string;
+  /** 추천 이유. 백엔드 reasons 브랜치에서 추가 */
+  reasons?: CandidateReason[];
 };
 
 /** unit_prices 원문 열 전부 */

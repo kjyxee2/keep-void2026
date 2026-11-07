@@ -107,7 +107,11 @@ POST /api/requests/:id/cancel         요청 취소
     { "candidate_id": 1, "rank": 1, "processor_id": "P0025", "name": "(주)거단산업", "sigungu": "평택시",
       "fit_score": 67.6, "neighbors": 28, "distance_km": null, "distance_quality": null,
       "confirmed": true, "confirm_status": "확인(2023 전국 처리업체 현황)",
-      "source": "fit_candidates", "note": "업체 확인 필요" }
+      "source": "fit_candidates", "note": "업체 확인 필요",
+      "reasons": [
+        { "type": "neighbors_same_group", "count": 28, "text": "같은 폐기물군을 이 업체에 재활용으로 보내는 안산 공장 28곳", "basis": "신고 건수 집계 2026-07" },
+        { "type": "same_dong", "count": 6, "text": "같은 동(성곡동) 공장 6곳이 이 업체에 보내요", "basis": "신고 건수 집계 2026-07" }
+      ] }
   ],
   "ranking": { "current_method_used": "소각", "inferred_from_reports": false, "rule": "data/demo/README.md fit_score" },
   "reference_prices": [
@@ -130,6 +134,15 @@ POST /api/requests/:id/cancel         요청 취소
 화면 규칙:
 - `current_route.total_reports`와 `neighbors`는 홈 칩 통계와 같은 숫자다(폐합성수지 1,209건, 소각 445곳, 재활용 125곳). `neighbors`는 **본인 공장을 포함**한 안산 공장 수(홈 칩 통계와 같은 기준). 칩의 신고가 있는 공장 수이므로 본인 공장이 그 방식으로 신고했다면 본인도 들어 있다
 - `candidates`는 최대 3개, 0개일 수 있음(의료폐기물, "그 밖의 폐기물", 근거 경로 없음). `neighbors`는 "이웃 공장 N곳이 이 업체에 재활용으로 보냄"(사회적 증거). `note` 문구 필수
+- `reasons`: 후보마다 추천 이유 배열(`lib/fit.ts` `candidateReasons`). **화면 설명 전용이고 순위와 `fit_score`에 쓰지 않는다**(research/ai/recommender v2 권고). 모두 2026-07 신고 집계에서 서버가 만들고 `text`를 그대로 보여 준다. 순서는 아래 표 순서, 조건이 안 맞는 이유는 빠진다
+  | type | count | text | 조건 |
+  |---|---|---|---|
+  | `neighbors_same_group` | 이웃 수(`neighbors`와 같음) | 같은 폐기물군을 이 업체에 재활용으로 보내는 안산 공장 N곳 | 항상 |
+  | `same_dong` | 같은 동 공장 수 | 같은 동(성곡동) 공장 N곳이 이 업체에 보내요 | 진단 공장(`factory_id`)의 동을 알 때. 그 동의 다른 공장 중 같은 폐기물군을 이 업체에 물질재활용(다른 폐기물군 허가 제외)으로 신고한 곳. 0이면 뺌 |
+  | `transporter_link` | 없음 | 지금 운반업체 (주)동우가 이 업체로도 운반해요 | 진단 공장의 이 폐기물군 신고 운반자(`flows.transporter`, '_'로 나눔, 자가 제외)가 이 업체로 가는 신고(폐기물군 무관)에도 운반자로 적혀 있을 때. 없으면 뺌 |
+  | `in_ansan` | 없음 | 안산 안의 업체예요 | 업체 `sigungu`가 안산시 |
+  - `factory_id`가 없는 진단과 공유 보기(본인 아님)는 공장 정보(동, 운반업체)를 쓰지 않아 `neighbors_same_group`, `in_ansan`만 나온다
+  - 예: F0001 폐합성수지 상위 3곳(P0025, P0065, P0040)은 같은 동(성곡동) 6, 4, 4곳. 지금 운반업체 (주)동우는 세 업체 어디로도 운반 신고가 없어 `transporter_link`가 없다
 - 후보 업체의 처리 방식(`processors.method`)이 `에너지회수`, `소각`, `매립`, `복수 허가`, `미확인`이면 넣지 않는다(원료 재활용 업체만 추천)
 - `source`: `fit_candidates`(신고 공장을 골랐고 근거 목록이 있음) 또는 `computed`(같은 규칙으로 서버 계산)
 - `ranking.inferred_from_reports = true`면 사용자가 "모름"을 골라서 신고 경로에서 가장 많은 방식으로 순위를 매긴 것

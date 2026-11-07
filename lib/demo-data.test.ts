@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { findGroups, type GroupRow } from './groups.ts';
-import { chipFlows, neighborCounts, pickStored, referencePriceIds, routeShare, NOTICE_ITEMS, type Flow, type Proc } from './fit.ts';
+import { candidateReasons, chipFlows, neighborCounts, pickStored, referencePriceIds, routeShare, NOTICE_ITEMS, type Flow, type Proc } from './fit.ts';
 
 const root = new URL('../', import.meta.url);
 const zip = new URL('data/refit_demo_data.zip', root).pathname;
@@ -40,6 +40,7 @@ const flows: Flow[] = demoCsv('flows').map(r => ({
   factory_id: r.factory_id || null, processor_id: r.processor_id || null, method: r.method || null,
   method_by_other_group_permit: r.method_by_other_group_permit === 'True', region: r.region || null,
   waste_type: r.waste_type || null, waste_group: r.waste_group || null, weight: Number(r.weight),
+  transporter: r.transporter || null,
 }));
 const chips: Record<string, { id: string; waste_group: string }> = Object.fromEntries(demoCsv('waste_chips').map(c => [c.id, { id: c.id, waste_group: c.waste_group }]));
 const chipTypes: Record<string, string[]> = dataJson('chip_waste_types.json');
@@ -121,4 +122,26 @@ test('묶음: F0036은 G0158(성곡동 10곳), 좌표 없는 F0001은 성곡동 
   assert.equal(f1.length, 1);
   assert.equal(f1[0].match, 'dong');
   assert.ok(f1[0].group.dongs.includes('성곡동'));
+});
+
+test('추천 이유 F0001 폐합성수지: 이웃 28/14/10, 같은 동(성곡동) 6/4/4, (주)동우 운반 연결 없음, 안산 업체 2곳', () => {
+  const group = flows.filter(f => f.waste_group === '폐합성수지류');
+  const procRows = Object.fromEntries(demoCsv('processors').map(r => [r.id, r]));
+  const factoryDong = new Map(demoCsv('factories').map(r => [r.id, r.dong || null]));
+  const top = demoCsv('fit_candidates').filter(r => r.factory_id === 'F0001' && r.waste_group === '폐합성수지류')
+    .map(r => ({ processor_id: r.candidate_processor_id, neighbors: Number(r.evidence_rows), sigungu: procRows[r.candidate_processor_id].sigungu || null }));
+  assert.deepEqual(top.map(c => c.processor_id), ['P0025', 'P0065', 'P0040']);
+  const ids = new Set([...top.map(c => c.processor_id), 'P0101']);
+  const transportRows = flows.filter(f => ids.has(f.processor_id ?? '')).map(f => ({ processor_id: f.processor_id!, transporter: f.transporter ?? null }));
+  const ctx = { flows: group, self: { factory_id: 'F0001', dong: factoryDong.get('F0001') ?? null }, factoryDong, transportRows };
+  const r = candidateReasons(top, ctx);
+  const pick = (i: number, t: string) => r[i].find(x => x.type === t);
+  assert.deepEqual(top.map((_, i) => pick(i, 'neighbors_same_group')?.count), [28, 14, 10]);
+  assert.deepEqual(top.map((_, i) => pick(i, 'same_dong')?.count), [6, 4, 4]);
+  assert.equal(pick(0, 'same_dong')?.text, '같은 동(성곡동) 공장 6곳이 이 업체에 보내요');
+  assert.deepEqual(top.map((_, i) => !!pick(i, 'transporter_link')), [false, false, false]);   // (주)동우는 세 업체로 운반 신고 없음
+  assert.deepEqual(top.map((_, i) => !!pick(i, 'in_ansan')), [false, true, true]);             // 평택시, 안산시, 안산시
+  // (주)동우가 운반하는 재활용 업체(P0101)라면 연결 이유가 붙는다(실제 신고 기준)
+  const p101 = candidateReasons([{ processor_id: 'P0101', neighbors: 1, sigungu: procRows.P0101.sigungu || null }], ctx)[0];
+  assert.equal(p101.find(x => x.type === 'transporter_link')?.text, '지금 운반업체 (주)동우가 이 업체로도 운반해요');
 });
