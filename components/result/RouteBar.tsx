@@ -1,8 +1,8 @@
 // 안산 공장들이 이 폐기물을 보내는 길: 처리 방식별 신고 비율 막대(API pct 그대로, 합치거나 다시 계산하지 않음).
 // 결과 화면의 유일한 자동 연출: 구간마다 scaleX 채움(공용 ScaleXBar, 800ms, 80ms 간격, 화면 진입은 구간 칸으로 잼). 비율은 글자로 범례에 같이 적는다.
+// 출처는 Main 끝의 페이지 각주(Figma v2 277:3887)에 한 번만 적는다.
 import { ScaleXBar } from '@/components/motion';
-import { Footnote } from '@/components/ui/Footnote';
-import { SOURCE_REPORTS, num, objectParticle, routeKind } from '@/lib/result-copy';
+import { num, objectParticle, routeKind } from '@/lib/result-copy';
 import type { RouteShare } from '@/lib/types';
 import styles from './RouteBar.module.css';
 
@@ -66,7 +66,6 @@ export function RouteBar({
           </li>
         ))}
       </ul>
-      <Footnote basis="신고 건수">{SOURCE_REPORTS}, 신고 건수 기준(톤수 아님)</Footnote>
     </section>
   );
 }

@@ -1,15 +1,15 @@
 // 공개 단가 표: API reference_prices 행을 모두 원문 그대로(무게와 곱하지 않음).
 // 고시 2022 적용분과 2027 시행분은 item, method 원문이 같을 때만 한 줄로 묶고 2027 값은 아래 작은 줄에 적는다.
 // 사용자가 넣은 톤당 단가가 있으면 같은 단위(원/톤)로 옆에 한 줄 더 둔다(계산 없음).
+// 주의 문장과 행별 출처는 "자세히 보기" 접힘 안(Figma v2 76:290). 고시 출처는 페이지 각주에도 있다.
 'use client';
 import { useEffect, useId, useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Footnote } from '@/components/ui/Footnote';
 import { Input } from '@/components/ui/Input';
 import { mergeNoticeYears, num } from '@/lib/result-copy';
 import type { ReferencePrice } from '@/lib/types';
+import { Disclosure } from './Disclosure';
 import styles from './result.module.css';
-
 
 const MAX_PRICE = 1_000_000_000;
 
@@ -88,24 +88,26 @@ export function ReferencePrices({ rows, userPrice }: { rows: ReferencePrice[]; u
           </table>
         </div>
       )}
-      {merged.some(({ main }) => main.year_label === '2027 시행') && <p className={styles.small}>2027 시행 값은 아직 시행 전이에요.</p>}
-      {notes.length > 0 && (
-        <ul role="list" className={styles.noteList}>
-          {notes.map((n) => (
-            <li key={n}>{n}</li>
-          ))}
-        </ul>
-      )}
-      <Footnote basis="고시 단가">
-        {sources.map((s) => (
-          <span key={s} className={styles.block}>
-            {s}
-          </span>
-        ))}
-      </Footnote>
-      <p className={styles.panelBody}>
-        실제 계약 단가는 업체마다 다릅니다. RE:FIT은 예상 절감액을 계산하지 않고, 연결 후 업체 견적으로 확인합니다.
-      </p>
+      <Disclosure>
+        <p className={styles.panelBody}>
+          실제 계약 단가는 업체마다 다릅니다. RE:FIT은 예상 절감액을 계산하지 않고, 연결 후 업체 견적으로 확인합니다.
+        </p>
+        {merged.some(({ main }) => main.year_label === '2027 시행') && <p className={styles.small}>2027 시행 값은 아직 시행 전이에요.</p>}
+        {notes.length > 0 && (
+          <ul role="list" className={styles.noteList}>
+            {notes.map((n) => (
+              <li key={n}>{n}</li>
+            ))}
+          </ul>
+        )}
+        {sources.length > 0 && (
+          <ul role="list" className={styles.noteList} aria-label="출처">
+            {sources.map((s) => (
+              <li key={s}>{s}</li>
+            ))}
+          </ul>
+        )}
+      </Disclosure>
       {open ? (
         <div className={`${styles.priceInput} expand-content`}>
           <Input

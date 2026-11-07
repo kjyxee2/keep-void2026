@@ -96,6 +96,10 @@
   gap: var(--space-28);
   min-width: 0;
 }
+/* Main 끝 페이지 각주(Figma v2 277:3887). 한 단에서는 맨 아래 */
+.areaFoot {
+  min-width: 0;
+}
 
 /* ---------- 이웃 수 ---------- */
 .stats {
@@ -183,9 +187,6 @@
 .small {
   font-size: var(--font-size-p4);
   color: var(--color-text-secondary);
-}
-.block {
-  display: block;
 }
 .linkRow {
   display: flex;
@@ -367,6 +368,9 @@
   }
   .areaSide {
     order: 4;
+  }
+  .areaFoot {
+    order: 5;
   }
 }
 
