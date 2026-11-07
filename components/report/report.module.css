@@ -1,0 +1,408 @@
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · posture: restrained · surface: report 151:3000, 151:4960, 82:2758, 82:2548 · motion: city indicators CountUp only, trend bars static */
+/* Hallmark · pre-emit critique: one column of ruled sections as Figma, numbers set big with source under each · weakest: factory tab has no factory name because the API does not return it */
+/* Hallmark · waive 26b · this file styles no controls · the tab buttons use components/ui/Tabs.module.css and the actions use components/ui/Button, which carry hover, active, focus and disabled states */
+
+.page {
+  flex: 1;
+  background: var(--color-bg-subtle);
+  padding-block: var(--space-56) var(--section-md);
+}
+.wrap {
+  max-width: var(--container-narrow);
+}
+
+/* ---------- 머리 ---------- */
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+  margin-bottom: var(--space-42);
+}
+.introTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-7) var(--space-21);
+}
+.title {
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.35;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+.meta {
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+
+.tabs {
+  min-width: 0;
+}
+.panel {
+  padding-top: var(--space-42);
+}
+.panel:focus-visible {
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* ---------- 공통 ---------- */
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-70);
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+  min-width: 0;
+}
+.ruled {
+  padding-top: var(--space-21);
+  border-top: var(--border-width-3) solid var(--color-text-primary);
+}
+.h2 {
+  font-size: var(--font-size-h6);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.4;
+  overflow-wrap: break-word;
+}
+.h3 {
+  font-size: var(--font-size-h7);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.4;
+}
+.lead {
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+.small {
+  font-size: var(--font-size-p4);
+  color: var(--color-text-secondary);
+}
+.source {
+  font-size: var(--font-size-p4);
+  color: var(--color-text-tertiary);
+}
+.block {
+  display: block;
+}
+.notes {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  padding: 0;
+  list-style: none;
+  font-size: var(--font-size-p4);
+  color: var(--color-text-secondary);
+}
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+  padding: var(--space-28);
+  border: var(--border-width-1) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-page);
+  min-width: 0;
+}
+
+/* ---------- 지표 4개 ---------- */
+.statGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-35);
+}
+.stat {
+  background: transparent;
+  padding-inline: 0;
+}
+
+/* ---------- 추이와 공식 통계 ---------- */
+.cityGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: var(--space-70);
+  align-items: start;
+}
+.chart {
+  margin-top: var(--space-14);
+}
+.bars {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  gap: var(--space-35);
+}
+.barCol {
+  display: grid;
+  grid-template-rows: auto calc(var(--space-84) * 2) auto;
+  gap: var(--space-7);
+  justify-items: center;
+  min-width: 0;
+}
+.barValue {
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+.barValueLast {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+.barTrack {
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  height: 100%;
+  border-bottom: var(--border-width-1) solid var(--color-border-strong);
+}
+/* 높이는 정지(움직이지 않음). --h는 가장 큰 값 대비 비율, 바닥은 0 */
+.bar {
+  display: block;
+  width: 100%;
+  height: calc(var(--h) * 100%);
+  background: var(--color-chart-unknown);
+}
+.barLast {
+  background: var(--color-chart-factory);
+}
+.barLabel {
+  font-size: var(--font-size-p4);
+  color: var(--color-text-secondary);
+}
+.barLabelLast {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+
+.tableWrap {
+  overflow-x: auto;
+  margin-top: var(--space-42);
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-p3);
+}
+.table th,
+.table td {
+  padding: var(--space-14) var(--space-7);
+  border-bottom: var(--border-width-1) solid var(--color-border-subtle);
+  text-align: left;
+  font-weight: var(--font-weight-regular);
+  white-space: nowrap;
+}
+.table thead th {
+  font-size: var(--font-size-p4);
+  color: var(--color-text-tertiary);
+  border-bottom-color: var(--color-border-strong);
+}
+.table th:first-child,
+.table td:first-child {
+  padding-left: 0;
+}
+.rowStrong th,
+.rowStrong td {
+  font-weight: var(--font-weight-bold);
+}
+
+.bigTon {
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.2;
+}
+.offTable {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-p3);
+  margin-top: var(--space-14);
+}
+.offTable th,
+.offTable td {
+  padding: var(--space-14) 0;
+  border-bottom: var(--border-width-1) solid var(--color-border-subtle);
+}
+.offLabel {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-10);
+}
+.offTable th {
+  font-weight: var(--font-weight-regular);
+  text-align: left;
+}
+.offTable td {
+  text-align: right;
+  font-size: var(--font-size-p1);
+  font-weight: var(--font-weight-bold);
+  white-space: nowrap;
+}
+.markBlank {
+  width: var(--space-14);
+  height: var(--space-14);
+  flex: none;
+  border: var(--border-width-1) solid var(--color-text-secondary);
+  border-radius: var(--radius-xs);
+}
+.callout {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  padding: var(--space-14) var(--space-21);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-tint-4);
+}
+.calloutTitle {
+  font-size: var(--font-size-p1);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-warning);
+}
+
+/* ---------- 앱 실제 집계 ---------- */
+.appGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-35);
+  list-style: none;
+  padding: 0;
+  margin-top: var(--space-14);
+}
+.appStat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  padding-top: var(--space-14);
+  border-top: var(--border-width-3) solid var(--color-text-primary);
+  min-width: 0;
+}
+.appValue {
+  font-size: var(--font-size-numeral);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+}
+.appLabel {
+  font-size: var(--font-size-p2);
+}
+
+/* ---------- 우리 공장 ---------- */
+.dl {
+  display: flex;
+  flex-direction: column;
+}
+.dlRow {
+  display: grid;
+  grid-template-columns: minmax(0, 14rem) minmax(0, 1fr);
+  gap: var(--space-7) var(--space-28);
+  padding: var(--space-14) 0;
+  border-bottom: var(--border-width-1) solid var(--color-border-subtle);
+  font-size: var(--font-size-p3);
+}
+.dlRow dt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  color: var(--color-text-secondary);
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+.dlRow dd {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  font-weight: var(--font-weight-semibold);
+  min-width: 0;
+}
+.dtSub,
+.ddSub {
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-tertiary);
+}
+.ddMuted {
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-secondary);
+}
+.dlRow .ddMethod {
+  flex-direction: row;
+  align-items: center;
+  gap: var(--space-10);
+}
+.priceBig {
+  font-size: var(--font-size-h7);
+  font-weight: var(--font-weight-bold);
+}
+.factoryGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: var(--space-35);
+  align-items: start;
+}
+.switched {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  padding-top: var(--space-14);
+  border-top: var(--border-width-3) solid var(--color-text-primary);
+}
+.switchedValue {
+  font-size: var(--font-size-numeral);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+}
+.switchedLabel {
+  font-size: var(--font-size-p2);
+}
+
+/* ---------- 폭 ---------- */
+@media (max-width: 1023px) {
+  .statGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .cityGrid,
+  .factoryGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+@media (max-width: 767px) {
+  .page {
+    padding-block: var(--space-35) var(--space-70);
+  }
+  .stack {
+    gap: var(--space-56);
+  }
+  .statGrid,
+  .appGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-28);
+  }
+  .bars {
+    gap: var(--space-10);
+  }
+  .card {
+    padding: var(--space-21);
+  }
+  .dlRow {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .table th,
+  .table td {
+    padding-inline: var(--space-7) 0;
+    white-space: normal;
+  }
+}
+
+/* 인쇄: 화면 폭과 관계없이 두 단을 한 단으로 */
+@media print {
+  .page {
+    padding-block: 0;
+  }
+  .cityGrid,
+  .factoryGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .statGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
