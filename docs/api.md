@@ -155,12 +155,12 @@ status: `requested`, `contacted`, `sample`, `contracted`, `first_pickup`, `cance
 
 | 요청 | 응답 |
 |---|---|
-| `?layer=factories` | 확인 좌표 공장 1,138곳 GeoJSON Point. properties: id, name, dong, waste_groups |
+| `?layer=factories` | 확인 좌표 공장 1,123곳 GeoJSON Point. properties: id, name, dong, waste_groups |
 | `?layer=processors` | 확인 좌표 처리업체 32곳 Point + `unlocated`: 좌표 없는 771곳을 `{ sido, sigungu, count, processors: [...] }` 목록으로(많은 순) |
-| `?layer=flows` | 공장→처리업체 LineString(양쪽 좌표 확인된 신고만). properties: factory_id, processor_id, method, reports. `coverage`: `{ total_reports: 4575, drawn_reports: 657, drawn_pct: 14.4 }` |
+| `?layer=flows` | 공장→처리업체 LineString(양쪽 좌표 확인된 신고만). properties: factory_id, processor_id, method, reports. `coverage`: `{ total_reports: 4575, drawn_reports: 652, drawn_pct: 14.3 }` |
 | `&group=폐유` | 세 레이어 모두 폐기물군으로 거르기 |
 
-좌표는 `[lng, lat]`(GeoJSON 순서). 좌표 없는 곳은 지어서 그리지 않는다. `coverage.drawn_pct`를 지도에 함께 표시("신고 경로 중 14.4%만 위치 확인").
+좌표는 `[lng, lat]`(GeoJSON 순서). 좌표 없는 곳은 지어서 그리지 않는다. `coverage.drawn_pct`를 지도에 함께 표시("신고 경로 중 14.3%만 위치 확인").
 
 ## 시 대시보드: GET /api/dashboard
 
