@@ -8,7 +8,8 @@
   align-items: flex-end;
   height: calc(100svh - var(--layout-header-h));
   min-height: calc(var(--space-84) * 7);
-  padding-block: var(--space-70);
+  /* Figma v2 PC(279:3918): 검색 칸 아래에서 사진 끝까지 70(띠 42 + 28) */
+  padding-block: var(--space-70) var(--space-28);
   background: var(--color-bg-subtle);
   color: var(--color-text-primary);
   /* 검색 목록이 다음 구역 위로 펼쳐지도록 잘라내지 않고 위에 둔다 */
@@ -138,7 +139,8 @@
 }
 
 .rule {
-  max-width: calc(var(--space-84) * 6);
+  /* Figma v2: 선은 컨테이너 폭 전체 */
+  max-width: none;
   border: 0;
   border-top: var(--border-width-2) solid var(--color-border-strong);
   margin: 0;
@@ -175,8 +177,8 @@
   min-width: 0;
 }
 .search {
-  /* 자리 표시 문구가 잘리지 않게 넉넉한 기본 폭(504), 좁으면 줄어듦 */
-  flex: 1 1 calc(var(--space-84) * 6);
+  /* Figma v2 PC 검색 칸 폭 340(84 x 4): 늘어나지 않고, 좁으면 줄어듦. 자리 표시 문구는 이 폭에 든다 */
+  flex: 0 1 calc(var(--space-84) * 4);
   min-width: 0;
 }
 

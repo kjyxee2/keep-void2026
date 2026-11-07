@@ -1,6 +1,7 @@
 /* Hallmark · component: result preview · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma 홈 v2 Section / 결과 미리보기 279:4039 PC, 279:4171 mobile (Dark Grid: label, two-line headline, 2x2 live captures, inverse button) · states: static · motion: none (band is taller than a phone screen, so no reveal gate) */
+/* Figma v2(PC, 모바일 모두): 처리비 점검의 자세한 기준 보기 선 바로 아래에 띠가 붙는다(사이 여백 없음) */
 .section {
-  margin-top: var(--editorial-section-gap);
+  margin-top: 0;
   background: var(--color-bg-brand);
 }
 .cta {

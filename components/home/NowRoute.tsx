@@ -55,9 +55,9 @@ export function NowRoute({ chips, photoHref }: { chips: HomeChipView[]; photoHre
         <Reveal index={1}>
           <MediaBand
             src={mapStrip}
-            alt="이웃 공장 지도 화면. 안산 반월시화 일대 배출 공장 1,123곳이 처리 방식별 모양과 색으로 찍혀 있고, 오른쪽에 폐기물 종류 선택과 처리업체가 있는 지역 비율이 있다."
+            alt="이웃 공장 지도 화면의 지도 부분. 안산 반월시화 일대 배출 공장 1,123곳이 처리 방식별 모양과 색으로 찍혀 있고, 가까운 공장은 숫자 원으로 묶여 있다."
             ratio="wide"
-            // 페이지 캡처(1200x683)의 가운데 띠가 지도와 종류 선택 칸이다
+            // 지도 영역만 1200x400으로 잘라 둔 캡처(strips/map.jpg)라 띠 비율과 같다. 가운데 기준으로 두면 폭이 달라져도 지도 중심이 남는다
             position="center"
           />
         </Reveal>

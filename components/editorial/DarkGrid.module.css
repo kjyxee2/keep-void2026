@@ -44,6 +44,10 @@
 .center {
   object-position: center;
 }
+/* 페이지 캡처: 왼쪽 여백부터 보여 글자 첫 획이 잘리지 않는다(칸 비율이 캡처보다 좁아 오른쪽만 잘림) */
+.start {
+  object-position: left top;
+}
 .action {
   display: flex;
 }

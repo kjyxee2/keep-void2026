@@ -5,7 +5,8 @@ import type { ReactNode } from 'react';
 import { Row } from './Row';
 import styles from './DarkGrid.module.css';
 
-export type DarkGridImage = { src: StaticImageData | string; alt: string; position?: 'top' | 'center' };
+/** position: top은 캡처 위쪽 가운데, center는 사진 가운데, start는 페이지 캡처의 왼쪽 위(왼쪽 여백부터) */
+export type DarkGridImage = { src: StaticImageData | string; alt: string; position?: 'top' | 'center' | 'start' };
 
 export function DarkGrid({
   label,

@@ -7,8 +7,8 @@
   padding-block: var(--space-56) var(--section-md);
 }
 
-/* Figma 76:168: 1440에서 본문 1200(양쪽 120) */
-.wrap {
+/* Figma 76:168: 1440에서 본문 1200(양쪽 120). 공용 .container(globals.css)가 뒤에 실려 한 단계 높은 선택자로 적는다 */
+.page .wrap {
   max-width: var(--container-narrow);
 }
 
@@ -375,7 +375,7 @@
 }
 
 @media (max-width: 767px) {
-  .wrap {
+  .page .wrap {
     max-width: none;
   }
   .page {
@@ -384,8 +384,9 @@
   .intro {
     margin-bottom: var(--space-35);
   }
+  /* Figma 76:11 모바일 헤드라인 28(h2 모바일 값) */
   .headline {
-    font-size: var(--font-size-h4);
+    font-size: var(--font-size-h2);
   }
   .sectionTitle {
     font-size: var(--font-size-h5);
