@@ -1,7 +1,7 @@
 // 실행: npm run test:api (Node 22 타입 제거로 바로 실행)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { addBusinessDays, neighborCounts, pickStored, rankComputed, resolveCurrentMethod, routeShare, type Flow, type Proc } from './fit.ts';
+import { addBusinessDays, chipFlows, neighborCounts, pickStored, rankComputed, resolveCurrentMethod, routeShare, type Flow, type Proc } from './fit.ts';
 
 const f = (factory_id: string, processor_id: string | null, method: string, weight = 1, other = false): Flow =>
   ({ factory_id, processor_id, method, method_by_other_group_permit: other, region: '안산', weight });
@@ -26,8 +26,15 @@ test('route share sums weights as report counts', () => {
   assert.equal(r.by_method[0].reports, 6);
 });
 
-test('neighbors exclude own factory', () => {
-  assert.deepEqual(neighborCounts(flows, 'F1'), { recycling: 5, burning: 1 });
+test('neighbors count every Ansan factory including own (home stats basis)', () => {
+  // F2~F6 재활용 5곳, F1(사용자 공장)과 F7 소각 2곳
+  assert.deepEqual(neighborCounts(flows), { recycling: 5, burning: 2 });
+});
+
+test('chipFlows keeps only the chip waste types, null keeps the whole group', () => {
+  const typed = [{ ...f('F1', 'P1', '소각'), waste_type: 'A' }, { ...f('F2', 'R1', '물질재활용'), waste_type: 'B' }];
+  assert.deepEqual(chipFlows(typed, ['A']).map(x => x.factory_id), ['F1']);
+  assert.equal(chipFlows(typed, null).length, 2);
 });
 
 test('모름 resolves to dominant reported method', () => {

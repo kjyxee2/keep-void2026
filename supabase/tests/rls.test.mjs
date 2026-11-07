@@ -32,6 +32,8 @@ ok((await db.query(`select count(*)::int n from profiles`)).rows[0].n===3, 'sign
 const as = async (role, uid, sql) => { await db.exec(`reset role; select set_config('request.jwt.claim.sub','${uid??''}',false); set role ${role};`); try { return (await db.query(sql)).rows; } finally { await db.exec('reset role'); } };
 const fails = async (role, uid, sql) => { try { await as(role, uid, sql); return false; } catch { return true; } };
 ok((await as('anon',null,`select * from waste_chips`)).length===1, 'anon reads chips');
+await db.exec(`update waste_chips set waste_types = array['폐합성수지류(폐염화비닐수지류는 제외한다)'] where id='plastic'`);
+ok((await as('anon',null,`select waste_types from waste_chips`))[0].waste_types[0]==='폐합성수지류(폐염화비닐수지류는 제외한다)', 'chip waste_types is text[] and readable');
 ok((await as('anon',null,`select * from processors`)).length===2, 'anon reads reference tables');
 ok((await as('anon',null,`update processors set name='x' returning id`)).length===0, 'anon cannot update reference tables');
 ok(await fails('authenticated',A,`insert into factories (id,name) values ('F9','x')`), 'user cannot insert reference rows');

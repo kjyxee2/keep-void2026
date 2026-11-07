@@ -6,8 +6,8 @@ import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 export const DATA_VERSION = 'demo-4d8c270';
 
 export const LABELS = {
-  route: '신고 건수 집계(톤수 아님). 신고 계약 기준이며 실제 운반량이 아님',
-  neighbors: '같은 폐기물군을 신고한 안산 공장 수(신고 건수 기준)',
+  route: '신고 건수 집계(톤수 아님). 칩의 신고 원 표기 기준(홈 칩 통계와 같음). 신고 계약 기준이며 실제 운반량이 아님',
+  neighbors: '같은 칩(신고 원 표기)을 신고한 안산 공장 수. 본인 공장 포함(홈 칩 통계와 같은 기준), 신고 건수 기준',
   candidates: '신고 경로 근거 추천, 실제 처리 가능 여부는 업체 확인 필요',
   distance: '양쪽 좌표가 건물 위치로 확인된 경우만 직선거리, 아니면 null',
   reference_prices: '원문 단가 그대로. 실제 계약가 아님, 무게와 곱하지 않음. 부가세와 운반비 별도',

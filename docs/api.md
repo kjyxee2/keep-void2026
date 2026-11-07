@@ -13,6 +13,7 @@ Next.js Route Handler(`app/api/`). 모든 응답은 JSON. 데이터 기준: 데�
 | 오류 | `{ "error": "메시지" }`. 400 입력 오류, 403 권한 없음, 404 없음, 409 상태 충돌, 422 완료에 필요한 입력 없음, 500 DB 오류 |
 | 거리 | 공장과 처리업체 좌표가 **모두 건물 위치로 확인된 경우만** 숫자. 아니면 `null` → 화면은 "거리 정보 없음" |
 | 비율 | 신고 건수 집계(톤수 아님). `reports`는 신고 행 수(한 신고에 업체가 k곳이면 1/k씩) |
+| 칩 집계 기준 | 결과의 `current_route`, `neighbors`는 칩의 **신고 원 표기**(`waste_chips.waste_types`)로 센다. 홈 칩 통계(`GET /api/home-stats`)와 같은 숫자. C01 폐합성수지 `폐합성수지류(폐염화비닐수지류는 제외한다)`, C02 `폐수처리오니`, C03 `폐활성탄`, 나머지 칩은 그 폐기물군의 원 표기 전부(폐유 = 폐유 묶음 전체). 추천 후보(`candidates`)는 README fit_score 규칙대로 **폐기물군** 신고 경로로 계산(`fit_candidates`와 같은 기준) |
 
 ## 진단 흐름
 
@@ -32,6 +33,7 @@ POST /api/requests/:id/cancel         요청 취소
 ```json
 {
   "chips": [{ "id": "C01", "label": "폐합성수지", "waste_group": "폐합성수지류",
+              "waste_types": ["폐합성수지류(폐염화비닐수지류는 제외한다)"],
               "container": "PP 마대(KS 규격 없음)", "unit_kg": null, "basis": "공식 환산 근거 없음",
               "display_text": "PP 마대 개수로는 무게를 계산하지 않아요. …", "source": "…", "source_url": "…" }],
   "volume_options": [{ "id": "V1", "label": "1개", "min_count": 1, "max_count": 1, "representative_count": 1, "note": "…" }],
@@ -86,16 +88,16 @@ POST /api/requests/:id/cancel         요청 취소
     "current_cost_won_per_month": 550000, "factory_id": "F0001", "lat": null, "lng": null, "location_source": "신고공장"
   },
   "current_route": {
-    "total_reports": 1326,
-    "by_method": [{ "method": "소각", "reports": 518.2, "pct": 39.1 },
-                  { "method": "중간가공(R10)", "reports": 272.7, "pct": 20.6 },
-                  { "method": "물질재활용", "reports": 178.5, "pct": 13.5 }],
-    "by_region": [{ "region": "경기 기타", "reports": 454.5, "pct": 34.3 },
-                  { "region": "안산", "reports": 421.5, "pct": 31.8 },
-                  { "region": "경기 밖", "reports": 210.5, "pct": 15.9 }],
-    "basis": "신고 건수 집계(톤수 아님). …"
+    "total_reports": 1209,
+    "by_method": [{ "method": "소각", "reports": 460.3, "pct": 38.1 },
+                  { "method": "중간가공(R10)", "reports": 262.3, "pct": 21.7 },
+                  { "method": "물질재활용", "reports": 163.5, "pct": 13.5 }],
+    "by_region": [{ "region": "경기 기타", "reports": 430.5, "pct": 35.6 },
+                  { "region": "안산", "reports": 378.5, "pct": 31.3 },
+                  { "region": "경기 밖", "reports": 193.0, "pct": 16.0 }],
+    "basis": "신고 건수 집계(톤수 아님). 칩의 신고 원 표기 기준(홈 칩 통계와 같음). …"
   },
-  "neighbors": { "recycling": 139, "burning": 486, "burning_methods": ["소각", "에너지회수"], "basis": "…" },
+  "neighbors": { "recycling": 125, "burning": 445, "burning_methods": ["소각", "에너지회수"], "basis": "…" },
   "candidates": [
     { "candidate_id": 1, "rank": 1, "processor_id": "P0025", "name": "(주)거단산업", "sigungu": "평택시",
       "fit_score": 67.6, "neighbors": 28, "distance_km": null, "distance_quality": null,
@@ -120,6 +122,7 @@ POST /api/requests/:id/cancel         요청 취소
 (배열은 앞 3개만 보임)
 
 화면 규칙:
+- `current_route.total_reports`와 `neighbors`는 홈 칩 통계와 같은 숫자다(폐합성수지 1,209건, 소각 445곳, 재활용 125곳). `neighbors`는 **본인 공장을 포함**한 안산 공장 수(홈 칩 통계와 같은 기준). 칩의 신고가 있는 공장 수이므로 본인 공장이 그 방식으로 신고했다면 본인도 들어 있다
 - `candidates`는 최대 3개, 0개일 수 있음(의료폐기물, "그 밖의 폐기물", 근거 경로 없음). `neighbors`는 "이웃 공장 N곳이 이 업체에 재활용으로 보냄"(사회적 증거). `note` 문구 필수
 - `source`: `fit_candidates`(신고 공장을 골랐고 근거 목록이 있음) 또는 `computed`(같은 규칙으로 서버 계산)
 - `ranking.inferred_from_reports = true`면 사용자가 "모름"을 골라서 신고 경로에서 가장 많은 방식으로 순위를 매긴 것

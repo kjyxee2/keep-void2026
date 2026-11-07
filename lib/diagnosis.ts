@@ -1,7 +1,7 @@
 // 진단 결과 조립(complete, GET 공용). 금액 계산 없음.
 import { db, fetchAll, LABELS } from './server';
 import {
-  BURN_METHODS, EXCLUDED_GROUPS, pickStored, rankComputed, resolveCurrentMethod, routeShare,
+  BURN_METHODS, EXCLUDED_GROUPS, chipFlows, pickStored, rankComputed, resolveCurrentMethod, routeShare,
   type Flow, type Proc, type Ranked,
 } from './fit';
 
@@ -21,8 +21,19 @@ export async function loadDiagnosis(id: string) {
 
 export function groupFlows(group: string) {
   return fetchAll<Flow>((from, to) => db().from('flows')
-    .select('factory_id,processor_id,method,method_by_other_group_permit,region,weight')
+    .select('factory_id,processor_id,method,method_by_other_group_permit,region,waste_type,weight')
     .eq('waste_group', group).order('link_id').range(from, to));
+}
+
+// 진단의 신고 경로 두 가지: group(폐기물군 전체, 추천 순위 규칙용)과 chip(칩 원 표기, 경로 분포와 이웃 수)
+export type DiagFlows = { group: Flow[]; chip: Flow[] };
+export async function diagnosisFlows(diag: Diagnosis): Promise<DiagFlows> {
+  const [group, { data: chip, error }] = await Promise.all([
+    groupFlows(diag.waste_group!),
+    db().from('waste_chips').select('waste_types').eq('id', diag.chip_id ?? '').maybeSingle(),
+  ]);
+  if (error) throw error;
+  return { group, chip: chipFlows(group, chip?.waste_types as string[] | null) };
 }
 
 export async function referencePrices(group: string) {
@@ -38,7 +49,8 @@ async function origin(diag: Diagnosis) {
   return data?.coord_verified ? { lat: data.lat, lng: data.lng } : null;
 }
 
-export async function computeCandidates(diag: Diagnosis, flows: Flow[]): Promise<Ranked[]> {
+// 추천은 README fit_score 규칙대로 폐기물군 신고 경로(fit_candidates와 같은 기준)로 계산
+export async function computeCandidates(diag: Diagnosis, flows: Flow[], currentMethod: string): Promise<Ranked[]> {
   const group = diag.waste_group!;
   if (EXCLUDED_GROUPS.includes(group)) return [];
 
@@ -61,8 +73,7 @@ export async function computeCandidates(diag: Diagnosis, flows: Flow[]): Promise
   const picked = pickStored(stored, procs);
   if (picked.length) return picked;
   return rankComputed({
-    flows, procs, origin: await origin(diag), selfFactoryId: diag.factory_id,
-    currentMethod: resolveCurrentMethod(diag.current_method ?? '모름', flows).method,
+    flows, procs, origin: await origin(diag), selfFactoryId: diag.factory_id, currentMethod,
   });
 }
 
@@ -82,9 +93,9 @@ async function candidateCards(diagnosisId: string) {
 }
 
 // full=false: 공유 링크용. 공장, 위치, 처리비, 연락처는 넣지 않는다
-export async function buildResult(diag: Diagnosis, full: boolean, flows?: Flow[]) {
+export async function buildResult(diag: Diagnosis, full: boolean, flows?: DiagFlows) {
   const group = diag.waste_group!;
-  flows ??= await groupFlows(group);
+  flows ??= await diagnosisFlows(diag);
   const [{ data: result }, cards, prices, { data: chip }, { data: volume }] = await Promise.all([
     db().from('diagnosis_results').select('*').eq('diagnosis_id', diag.id).maybeSingle(),
     candidateCards(diag.id),
@@ -92,7 +103,7 @@ export async function buildResult(diag: Diagnosis, full: boolean, flows?: Flow[]
     db().from('waste_chips').select('id,label,display_text').eq('id', diag.chip_id ?? '').maybeSingle(),
     db().from('volume_options').select('id,label').eq('id', diag.volume_option_id ?? '').maybeSingle(),
   ]);
-  const method = resolveCurrentMethod(diag.current_method ?? '모름', flows);
+  const method = resolveCurrentMethod(diag.current_method ?? '모름', flows.chip);
 
   return {
     diagnosis_id: diag.id,
@@ -109,7 +120,7 @@ export async function buildResult(diag: Diagnosis, full: boolean, flows?: Flow[]
         factory_id: diag.factory_id, lat: diag.lat, lng: diag.lng, location_source: diag.location_source,
       }),
     },
-    current_route: { ...routeShare(flows), basis: LABELS.route },
+    current_route: { ...routeShare(flows.chip), basis: LABELS.route },
     neighbors: {
       recycling: result?.neighbors_recycling ?? null, burning: result?.neighbors_burning ?? null,
       burning_methods: BURN_METHODS, basis: LABELS.neighbors,

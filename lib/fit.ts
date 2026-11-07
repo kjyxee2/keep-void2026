@@ -6,6 +6,8 @@ export type Flow = {
   method: string | null;
   method_by_other_group_permit: boolean | null;
   region: string | null;
+  waste_type?: string | null;
+  waste_group?: string | null;
   weight: number;
 };
 
@@ -60,10 +62,17 @@ export function routeShare(flows: Flow[]) {
   };
 }
 
-// 같은 폐기물군을 재활용으로, 태워서 보내는 안산 공장 수(본인 공장 제외)
-export function neighborCounts(flows: Flow[], selfFactoryId: string | null) {
+// 칩 집계 기준: 신고 원 표기(waste_chips.waste_types)만 남김. null이면 폐기물군 전체(시드 전 호환)
+export function chipFlows(flows: Flow[], wasteTypes: string[] | null | undefined) {
+  if (!wasteTypes) return flows;
+  const allowed = new Set(wasteTypes);
+  return flows.filter(f => allowed.has(f.waste_type ?? ''));
+}
+
+// 같은 칩을 재활용으로, 태워서 보내는 안산 공장 수. 본인 공장도 포함(홈 칩 통계와 같은 기준)
+export function neighborCounts(flows: Flow[]) {
   const count = (pred: (f: Flow) => boolean) =>
-    new Set(flows.filter(f => f.factory_id && f.factory_id !== selfFactoryId && pred(f)).map(f => f.factory_id)).size;
+    new Set(flows.filter(f => f.factory_id && pred(f)).map(f => f.factory_id)).size;
   return {
     recycling: count(f => f.method === RECYCLE),
     burning: count(f => BURN_METHODS.includes(f.method ?? '')),
