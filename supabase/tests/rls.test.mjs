@@ -32,7 +32,12 @@ ok((await db.query(`select count(*)::int n from profiles`)).rows[0].n===3, 'sign
 const as = async (role, uid, sql) => { await db.exec(`reset role; select set_config('request.jwt.claim.sub','${uid??''}',false); set role ${role};`); try { return (await db.query(sql)).rows; } finally { await db.exec('reset role'); } };
 const fails = async (role, uid, sql) => { try { await as(role, uid, sql); return false; } catch { return true; } };
 ok((await as('anon',null,`select * from waste_chips`)).length===1, 'anon reads chips');
+await db.exec(`update waste_chips set waste_types = array['폐합성수지류(폐염화비닐수지류는 제외한다)'] where id='plastic'`);
+ok((await as('anon',null,`select waste_types from waste_chips`))[0].waste_types[0]==='폐합성수지류(폐염화비닐수지류는 제외한다)', 'chip waste_types is text[] and readable');
 ok((await as('anon',null,`select * from processors`)).length===2, 'anon reads reference tables');
+await db.exec(`insert into home_waste_stats (chip_id,name,reports,burn_factories,recycle_factories,both_factories) values ('plastic','폐합성수지',1209,445,125,75)`);
+ok((await as('anon',null,`select reports from home_waste_stats`))[0]?.reports===1209, 'anon reads home_waste_stats');
+ok(await fails('anon',null,`insert into home_waste_stats (chip_id,name) values ('x','x')`), 'anon cannot write home_waste_stats');
 ok((await as('anon',null,`update processors set name='x' returning id`)).length===0, 'anon cannot update reference tables');
 ok(await fails('authenticated',A,`insert into factories (id,name) values ('F9','x')`), 'user cannot insert reference rows');
 ok((await as('anon',null,`select * from diagnoses`)).length===0, 'anon sees no diagnoses');
@@ -49,9 +54,25 @@ ok(await fails('authenticated',A,`insert into events (user_id,name) values ('${B
 ok((await as('authenticated',A,`update diagnoses set current_method='소각', lat=37.3, weight_kg_per_month=2000, weight_source='계량표' where id='10000000-0000-0000-0000-000000000001' returning id`)).length===1, 'A edits own diagnosis inputs');
 for (const col of ["completed_at=now()", "status='completed'", "anon_token='x'", "user_id='${B}'", "waste_group='x'"])
   ok(await fails('authenticated',A,`update diagnoses set ${col} where id='10000000-0000-0000-0000-000000000001'`), `A cannot set diagnoses.${col.split('=')[0]}`);
+ok((await as('authenticated',A,`update diagnoses set current_price_won_per_ton=260000 where id='10000000-0000-0000-0000-000000000001' returning id`)).length===1, 'A sets current_price_won_per_ton on draft');
+ok(await fails('authenticated',A,`update diagnoses set current_price_won_per_ton=-1 where id='10000000-0000-0000-0000-000000000001'`), 'current_price_won_per_ton must be >= 0');
+await db.exec(`update diagnoses set status='completed', completed_at=now() where id='10000000-0000-0000-0000-000000000001'`);
+ok((await as('authenticated',A,`update diagnoses set current_method='매립' where id='10000000-0000-0000-0000-000000000001' returning id`)).length===0, 'A cannot edit own completed diagnosis');
+ok((await as('authenticated',A,`select id from diagnoses where id='10000000-0000-0000-0000-000000000001'`)).length===1, 'A still reads own completed diagnosis');
+await db.exec(`update diagnoses set status='draft', completed_at=null where id='10000000-0000-0000-0000-000000000001'`);
 ok((await as('authenticated',A,`insert into group_memberships (group_id,diagnosis_id,user_id) values ('G0001','10000000-0000-0000-0000-000000000001','${A}') returning id`)).length===1, 'A joins group with own diagnosis');
 ok(await fails('authenticated',A,`insert into group_memberships (group_id,diagnosis_id,user_id) values ('G0001','10000000-0000-0000-0000-000000000002','${A}')`), 'A cannot join with B diagnosis');
 ok(await fails('authenticated',A,`update group_memberships set diagnosis_id='10000000-0000-0000-0000-000000000002' where user_id='${A}'`), 'A cannot repoint membership to B diagnosis');
+await db.exec(`insert into diagnosis_candidates (diagnosis_id,rank,processor_id,fit_score) values ('10000000-0000-0000-0000-000000000002',1,'P0002',50)`);
+const cand = (await db.query(`select id from diagnosis_candidates limit 1`)).rows[0].id;
+const req = st => `insert into connection_requests (diagnosis_id,candidate_id,processor_id,status) values ('10000000-0000-0000-0000-000000000002',${cand},'P0002','${st}')`;
+await db.exec(req('requested'));
+ok(await (async () => { try { await db.exec(req('contacted')); return false; } catch (e) { return e.code === '23505'; } })(), 'second active request for same candidate is 23505');
+await db.exec(req('cancelled')); await db.exec(req('rejected'));
+ok(true, 'cancelled, rejected requests do not block');
+ok(await fails('anon',null,`select my_role()`), 'anon cannot execute my_role()');
+ok(await fails('anon',null,`select my_processor_id()`), 'anon cannot execute my_processor_id()');
+ok((await as('authenticated',P,`select my_processor_id() p`))[0].p==='P0001', 'authenticated still executes my_processor_id() (RLS policies)');
 await db.exec(`update profiles set role='operator' where id='${B}'`);
 ok((await as('authenticated',B,`select * from diagnoses`)).length===2, 'operator sees all diagnoses');
 ok(Math.abs((await db.query(`select haversine_km(37.3234,126.7875,37.3108,126.8308) d`)).rows[0].d - 4.07) < 0.1, 'haversine ~4km');

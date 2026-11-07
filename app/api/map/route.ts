@@ -1,4 +1,5 @@
-import { db, dbFail, fail, fetchAll, json } from '@/lib/server';
+import { factoryMethods } from '@/lib/map';
+import { cached, db, dbFail, fail, fetchAll } from '@/lib/server';
 
 type P = { id: string; name: string; lat: number | null; lng: number | null; coord_verified: boolean | null; [k: string]: unknown };
 const point = ({ lat, lng, ...props }: P) =>
@@ -7,6 +8,7 @@ const fc = (features: unknown[]) => ({ type: 'FeatureCollection', features });
 
 const LABELS = {
   coords: '건물 위치로 확인된 좌표만 표시. 좌표 없는 곳은 지도에 그리지 않음',
+  method: '공장별로 신고가 가장 많은 처리 방식(물질재활용=재활용, 소각과 에너지회수=소각, 매립, 나머지=미확인). 동률이면 재활용, 소각, 매립 순. group이 없으면 모든 폐기물군',
   flows: '신고 건수 기준(톤수 아님). weight 합 = 신고 행 수',
 };
 
@@ -31,8 +33,9 @@ export async function GET(req: Request) {
   const group = sp.get('group') || null;
   try {
     if (layer === 'factories') {
-      const rows = await factories(group);
-      return json({ ...fc(rows.map(point)), labels: LABELS });
+      const [rows, fs] = await Promise.all([factories(group), flows(group)]);
+      const method = factoryMethods(fs);
+      return cached({ ...fc(rows.map(r => point({ ...r, method: method.get(r.id) ?? '미확인' }))), labels: LABELS });
     }
 
     if (layer === 'processors') {
@@ -49,7 +52,7 @@ export async function GET(req: Request) {
         g.processors.push(p);
         bySigungu.set(key, g);
       }
-      return json({
+      return cached({
         ...fc(rows.filter(p => p.coord_verified).map(point)),
         unlocated: [...bySigungu.values()].map(g => ({ ...g, count: g.processors.length }))
           .sort((a, b) => b.count - a.count),
@@ -74,7 +77,7 @@ export async function GET(req: Request) {
         lines.set(k, l);
       }
       const r1 = (n: number) => Math.round(n * 10) / 10;
-      return json({
+      return cached({
         ...fc([...lines.values()].map(l => ({
           type: 'Feature',
           geometry: { type: 'LineString', coordinates: [[l.f.lng, l.f.lat], [l.p.lng, l.p.lat]] },

@@ -1,5 +1,5 @@
-import { buildResult, computeCandidates, groupFlows, loadDiagnosis, referencePrices } from '@/lib/diagnosis';
-import { neighborCounts } from '@/lib/fit';
+import { buildResult, computeCandidates, diagnosisFlows, loadDiagnosis, referencePrices } from '@/lib/diagnosis';
+import { neighborCounts, resolveCurrentMethod } from '@/lib/fit';
 import { DATA_VERSION, db, dbFail, fail, isOwner, isUuid, json } from '@/lib/server';
 
 // 진단 완료: 신고 경로 분포, 이웃 공장 수, 추천 3곳, 원문 단가를 모아 저장하고 반환. 금액은 만들지 않는다
@@ -15,14 +15,17 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     if (diag.weight_kg_per_month == null) return fail(422, 'weight_kg_per_month 필요');
     if (!diag.current_method) return fail(422, 'current_method 필요');
 
-    const flows = await groupFlows(diag.waste_group);
-    const [ranked, prices] = await Promise.all([computeCandidates(diag, flows), referencePrices(diag.waste_group)]);
-    const n = neighborCounts(flows, diag.factory_id);
+    const flows = await diagnosisFlows(diag);
+    const method = resolveCurrentMethod(diag.current_method, flows.chip).method;
+    const [ranked, prices] = await Promise.all([computeCandidates(diag, flows.group, method), referencePrices(diag)]);
+    const n = neighborCounts(flows.chip);   // 칩 원 표기 기준, 본인 공장 포함(홈 칩 통계와 같은 기준)
 
-    // 다시 시도해도 같은 결과가 되도록 upsert(중간 실패 대비)
+    // 다시 시도해도 같은 결과가 되도록 이전 시도의 후보를 지우고 넣는다(후보 수가 줄어도 옛 행이 남지 않음).
+    // draft 진단이라 연결 요청(후보 FK)은 아직 없다
+    const del = await db().from('diagnosis_candidates').delete().eq('diagnosis_id', id);
+    if (del.error) return dbFail(del.error);
     if (ranked.length) {
-      const c = await db().from('diagnosis_candidates').upsert(
-        ranked.map(r => ({ diagnosis_id: id, ...r })), { onConflict: 'diagnosis_id,rank' });
+      const c = await db().from('diagnosis_candidates').insert(ranked.map(r => ({ diagnosis_id: id, ...r })));
       if (c.error) return dbFail(c.error);
     }
     const r = await db().from('diagnosis_results').upsert({

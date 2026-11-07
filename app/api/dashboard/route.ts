@@ -1,4 +1,4 @@
-import { db, dbFail, json } from '@/lib/server';
+import { cached, db, dbFail } from '@/lib/server';
 
 // 시 대시보드: summary.json(신고 건수 집계, 공식 통계 원값) + 앱 실제 집계
 export async function GET() {
@@ -11,7 +11,7 @@ export async function GET() {
   ]);
   const err = summary.error ?? diagnoses.error ?? requests.error ?? switched.error;
   if (err) return dbFail(err);
-  return json({
+  return cached({
     summary: summary.data?.data ?? null,
     app: {
       diagnoses_completed: diagnoses.count ?? 0,
