@@ -1,0 +1,440 @@
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · route: /impact · hero: Figma 184:3536 text-only head + one sentence · signature: 2024 공식 톤수 네 개와 고시 단가 차이 · motion: one auto reveal (scale CountUp on first view), everything else still · surface: absolute */
+/* Hallmark · pre-emit critique: every number is an app_summary, home_waste_stats or unit_prices raw value; money is multiplied only from the viewer's own inputs or the labelled assumption calculator · weakest: scenario percentages are fixed values from the research run */
+/* Hallmark · waive 26b · no :active or :disabled rules here · every control on /impact is the shared Button or Input, whose modules carry all eight states */
+
+.main {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.intro {
+  padding-block: var(--space-84) var(--space-56);
+}
+.h1 {
+  max-width: var(--container-text);
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.45;
+}
+.lead {
+  margin-top: var(--space-21);
+  margin-bottom: var(--space-28);
+  font-size: var(--font-size-p2);
+  color: var(--color-text-secondary);
+}
+
+.band {
+  padding-block: var(--space-70);
+  background: var(--color-bg-page);
+}
+.tint {
+  background: var(--color-bg-subtle);
+}
+.h2 {
+  scroll-margin-top: calc(var(--layout-header-h) + var(--space-21));
+  font-size: var(--font-size-h6);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+}
+.sub {
+  margin-top: var(--space-10);
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+.foot {
+  margin-top: var(--space-21);
+}
+
+/* 규모: 2열 x 2행 */
+.scaleGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-42) var(--space-35);
+  margin-top: var(--space-42);
+}
+.scaleGrid > .scaleStat,
+.pathGrid > .pathStat {
+  background: transparent;
+  padding-inline: 0;
+  align-content: start;
+}
+.scaleStat :global(.count) span,
+.pathStat :global(.count) {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
+/* 바꿀 수 있는 길: 3열 */
+.pathGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-35);
+  margin-top: var(--space-42);
+}
+
+/* 왼쪽 설명, 오른쪽 내용 */
+.split {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--space-56);
+  align-items: start;
+}
+.splitIntro {
+  min-width: 0;
+}
+.splitIntro .h2 {
+  font-size: var(--font-size-h6);
+}
+
+/* 고시 단가 */
+.priceTable {
+  min-width: 0;
+  border-top: var(--border-width-2) solid var(--color-border-brand);
+}
+.priceRow {
+  display: grid;
+  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  gap: var(--space-21);
+  align-items: center;
+  padding-block: var(--space-21);
+  border-bottom: var(--border-width-1) solid var(--color-border-subtle);
+}
+.priceRow dt {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  min-width: 0;
+}
+.priceName {
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-semibold);
+}
+.priceDetail {
+  font-size: var(--font-size-p4);
+  color: var(--color-text-tertiary);
+}
+.priceValue {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-14);
+  align-items: center;
+  min-width: 0;
+}
+.priceTrack {
+  display: block;
+  min-width: 0;
+}
+/* 정지된 막대: 길이는 단가 비율(애니메이션 없음) */
+.priceBar {
+  display: block;
+  height: var(--space-10);
+  border-radius: var(--radius-xs);
+  transform: scaleX(var(--ratio));
+  transform-origin: left center;
+}
+.burn {
+  background: var(--color-chart-burn);
+}
+.recycle {
+  background: var(--color-chart-recycle);
+}
+.priceAmount {
+  font-size: var(--font-size-h7);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.priceDiff {
+  font-size: var(--font-size-h6);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-brand);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 우리 공장 계산 */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-21);
+  min-width: 0;
+  padding: var(--space-28);
+  border: var(--border-width-1) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-page);
+}
+.pair {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-14);
+}
+.outRow {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-10) var(--space-21);
+  padding-block: var(--space-14);
+  border-top: var(--border-width-1) solid var(--color-border-subtle);
+  border-bottom: var(--border-width-1) solid var(--color-border-subtle);
+}
+.outLabel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  min-width: 0;
+}
+.outName {
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-semibold);
+}
+.outFormula {
+  font-size: var(--font-size-p4);
+  color: var(--color-text-tertiary);
+}
+.outEmpty {
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+.outValue {
+  font-size: var(--font-size-h6);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+/* 성과 지표 표 */
+.measure {
+  width: 100%;
+  margin-top: var(--space-35);
+  border-collapse: collapse;
+  border-top: var(--border-width-2) solid var(--color-text-primary);
+  text-align: left;
+}
+.measure th,
+.measure td {
+  padding: var(--space-21) var(--space-14) var(--space-21) 0;
+  border-bottom: var(--border-width-1) solid var(--color-border-default);
+  vertical-align: middle;
+}
+.measure thead th {
+  padding-block: var(--space-14);
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+.measure tbody th {
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-semibold);
+}
+.measureValue {
+  font-size: var(--font-size-h6);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.measureDir {
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-brand);
+  white-space: nowrap;
+}
+.measureHow {
+  font-size: var(--font-size-p4);
+  color: var(--color-text-secondary);
+}
+
+/* 가정 계산(안산 안 후보 시나리오 바로 아래 계산기). 작은 한 칸 폭, 위아래로 붙인다 */
+.assumeWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-35);
+}
+.assumeCol {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+  width: 100%;
+}
+@media (min-width: 768px) {
+  .assumeCol {
+    max-width: calc(var(--container-text) / 2 + var(--space-84));
+  }
+}
+.sources {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  padding-top: var(--space-21);
+  border-top: var(--border-width-1) solid var(--color-border-subtle);
+}
+
+.ansan,
+.calc {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+  min-width: 0;
+  padding: var(--space-21);
+  border: var(--border-width-1) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-page);
+}
+.ansanTitle,
+.calcTitle {
+  font-size: var(--font-size-p2);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+}
+.ansanLead,
+.ansanNote,
+.calcLead {
+  font-size: var(--font-size-p4);
+  color: var(--color-text-secondary);
+}
+.assumeTag {
+  align-self: flex-start;
+  padding: var(--space-7) var(--space-10);
+  border: var(--border-width-1) solid var(--color-text-warning);
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-warning);
+}
+.ansanTable {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+.ansanTable th,
+.ansanTable td {
+  padding: var(--space-10) 0;
+  border-bottom: var(--border-width-1) solid var(--color-border-subtle);
+  font-size: var(--font-size-p4);
+}
+.ansanTable thead th {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-tertiary);
+}
+.ansanTable tbody th {
+  font-weight: var(--font-weight-regular);
+  padding-right: var(--space-14);
+}
+.ansanTable td {
+  text-align: right;
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ansanTable thead th:last-child {
+  text-align: right;
+}
+
+.formula {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  padding: var(--space-14);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+}
+.formulaHead,
+.formulaNote {
+  font-size: var(--font-size-p4);
+  color: var(--color-text-secondary);
+}
+.formulaBody {
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+.warning {
+  padding-left: var(--space-10);
+  border-left: var(--border-width-3) solid var(--color-text-warning);
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-warning);
+}
+.result {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-7) var(--space-14);
+}
+.resultLabel {
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-semibold);
+}
+.resultEmpty {
+  font-size: var(--font-size-p4);
+  color: var(--color-text-secondary);
+}
+.resultValue {
+  font-size: var(--font-size-p2);
+  font-weight: var(--font-weight-bold);
+  font-variant-numeric: tabular-nums;
+}
+
+@media (max-width: 1023px) {
+  .split {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-35);
+  }
+  .pathGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-28);
+  }
+  /* 두 열일 때 큰 숫자가 칸을 넘지 않게 한 단계 작게 */
+  .scaleGrid :global(.count) {
+    font-size: var(--font-size-h1);
+  }
+}
+
+@media (max-width: 767px) {
+  .intro {
+    padding-block: var(--space-42) var(--space-35);
+  }
+  .band {
+    padding-block: var(--space-42);
+  }
+  .scaleGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-28);
+  }
+  .priceRow {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-10);
+  }
+  .panel {
+    padding: var(--space-21) var(--space-14);
+  }
+  .pair {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  /* 표는 행마다 블록으로 쌓는다. 머리 행은 스크린리더용으로만 */
+  .measure thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+  }
+  .measure tr {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-7) var(--space-14);
+    padding-block: var(--space-21);
+    border-bottom: var(--border-width-1) solid var(--color-border-default);
+  }
+  .measure th,
+  .measure td {
+    padding: 0;
+    border: 0;
+  }
+  .measure tbody th {
+    grid-column: 1 / -1;
+  }
+  .measureHow {
+    grid-column: 1 / -1;
+  }
+}
