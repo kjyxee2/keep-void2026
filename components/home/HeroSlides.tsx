@@ -3,7 +3,7 @@
 // 줄임 모드는 첫 장 고정. 탭이 숨겨지면 멈추고 돌아오면 다시 돈다. 스크립트가 없으면 첫 장만 보인다(나머지는 html.js 아래에서만 겹침).
 // 사진 틀(.media)은 스크롤에 따라 translateY로 천천히 따라 내려온다(패럴랙스, 위쪽 12% 여유). rAF 하나, passive scroll, transform만.
 'use client';
-import { useEffect, useId, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image, { type StaticImageData } from 'next/image';
 import { MOTION, useReducedMotion } from '@/components/motion';
 import styles from './Hero.module.css';
