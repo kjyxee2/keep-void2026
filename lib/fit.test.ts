@@ -77,3 +77,12 @@ test('reference prices: C01 fixed four, other chips own 고시 + 공제조합 ro
   assert.deepEqual(referencePriceIds({ id: 'C04', waste_group: '폐유' }, prices), ['U018', 'U148', 'U176']);
   assert.deepEqual(referencePriceIds({ id: 'C08', waste_group: '폐목재' }, prices), ['U052']);   // 공제조합 소각 행 없음 → U176 없음
 });
+
+test('candidates drop processors whose method is 에너지회수, 소각, 매립', () => {
+  const ps = new Map([p('E1', '에너지회수'), p('B1', '소각'), p('L1', '매립'), p('R1', '물질재활용'), p('M1', '중간가공(R10)')].map(x => [x.id, x]));
+  const row = (processor_id: string) =>
+    ({ processor_id, fit_score: 90, evidence_rows: 1, distance_km: null, distance_quality: null, candidate_confirmed: true });
+  assert.deepEqual(pickStored(['E1', 'B1', 'L1', 'R1', 'M1'].map(row), ps).map(x => x.processor_id), ['R1', 'M1']);
+  const fs = ['E1', 'B1', 'L1', 'R1'].map((id, i) => f(`F${i + 10}`, id, '물질재활용'));
+  assert.deepEqual(rankComputed({ flows: fs, procs: ps, currentMethod: '소각', origin: null, selfFactoryId: null }).map(x => x.processor_id), ['R1']);
+});

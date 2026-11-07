@@ -32,7 +32,8 @@ export type Ranked = {
 };
 
 export const EXCLUDED_GROUPS = ['의료폐기물', '그 밖의 폐기물'];   // 추천하지 않음(명세 2-4)
-export const EXCLUDED_METHODS = ['복수 허가', '미확인'];          // 후보에서 제외
+// 후보에서 제외: 방식 불명확(복수 허가, 미확인)과 원료 재활용이 아닌 업체(에너지회수, 소각, 매립)
+export const EXCLUDED_METHODS = ['복수 허가', '미확인', '에너지회수', '소각', '매립'];
 export const BURN_METHODS = ['소각', '에너지회수'];
 const SWITCH: Record<string, number> = { 매립: 1, 소각: 0.8, 에너지회수: 0.6 };
 const RECYCLE = '물질재활용';

@@ -124,6 +124,7 @@ POST /api/requests/:id/cancel         요청 취소
 화면 규칙:
 - `current_route.total_reports`와 `neighbors`는 홈 칩 통계와 같은 숫자다(폐합성수지 1,209건, 소각 445곳, 재활용 125곳). `neighbors`는 **본인 공장을 포함**한 안산 공장 수(홈 칩 통계와 같은 기준). 칩의 신고가 있는 공장 수이므로 본인 공장이 그 방식으로 신고했다면 본인도 들어 있다
 - `candidates`는 최대 3개, 0개일 수 있음(의료폐기물, "그 밖의 폐기물", 근거 경로 없음). `neighbors`는 "이웃 공장 N곳이 이 업체에 재활용으로 보냄"(사회적 증거). `note` 문구 필수
+- 후보 업체의 처리 방식(`processors.method`)이 `에너지회수`, `소각`, `매립`, `복수 허가`, `미확인`이면 넣지 않는다(원료 재활용 업체만 추천)
 - `source`: `fit_candidates`(신고 공장을 골랐고 근거 목록이 있음) 또는 `computed`(같은 규칙으로 서버 계산)
 - `ranking.inferred_from_reports = true`면 사용자가 "모름"을 골라서 신고 경로에서 가장 많은 방식으로 순위를 매긴 것
 - `reference_prices`는 표로 원문 그대로. **입력한 무게와 곱해서 금액을 보여 주지 말 것**

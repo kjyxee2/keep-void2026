@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { chipFlows, neighborCounts, referencePriceIds, routeShare, type Flow } from './fit.ts';
+import { chipFlows, neighborCounts, pickStored, referencePriceIds, routeShare, type Flow, type Proc } from './fit.ts';
 
 const root = new URL('../', import.meta.url);
 const zip = new URL('data/refit_demo_data.zip', root).pathname;
@@ -73,4 +73,22 @@ test('공개 단가: 폐합성수지는 U001, U035, U161, U176 네 개', () => {
   assert.deepEqual(referencePriceIds(chips.C04, prices),
     ['U018', 'U026', 'U039', 'U077', 'U087', 'U100', 'U148', 'U149', 'U150', 'U151', 'U176']);
   for (const c of Object.values(chips)) assert.ok(referencePriceIds(c, prices).every(id => id !== 'U177'), c.id);
+});
+
+test('저장 후보에서 에너지회수 업체 0곳(P0235 포함 3행 제외)', () => {
+  const procs = new Map<string, Proc>(demoCsv('processors').map(r => [r.id,
+    { id: r.id, method: r.method || null, confirmed: r.confirmed === 'True', lat: null, lng: null, coord_verified: null }]));
+  const sets = new Map<string, ReturnType<typeof demoCsv>>();
+  for (const r of demoCsv('fit_candidates')) {
+    const k = `${r.factory_id}|${r.waste_group}`;
+    sets.set(k, [...(sets.get(k) ?? []), r]);
+  }
+  let picked = 0;
+  for (const rows of sets.values()) {
+    const out = pickStored(rows.map(r => ({ processor_id: r.candidate_processor_id, fit_score: Number(r.fit_score),
+      evidence_rows: Number(r.evidence_rows), distance_km: null, distance_quality: null, candidate_confirmed: r.candidate_confirmed === 'True' })), procs);
+    picked += out.length;
+    for (const c of out) assert.ok(!['에너지회수', '소각', '매립'].includes(procs.get(c.processor_id)?.method ?? ''), c.processor_id);
+  }
+  assert.ok(picked > 0);
 });
