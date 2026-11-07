@@ -1,6 +1,7 @@
 // 개발용 컴포넌트 목록. production에서는 404
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
+import { MotionDemo } from './MotionDemo';
 import { UiDemo } from './UiDemo';
 import styles from './dev.module.css';
 
@@ -13,6 +14,7 @@ export default function DevComponentsPage() {
       <h1 className={styles.title}>공용 컴포넌트</h1>
       <p className={styles.lead}>Figma 03 공용 컴포넌트와 1:1로 맞춘 목록이에요. 개발 서버에서만 열려요.</p>
       <UiDemo />
+      <MotionDemo />
     </main>
   );
 }
