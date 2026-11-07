@@ -84,14 +84,17 @@
   display: none;
 }
 
+/* 글자 블록 뒤 반투명 띠(Figma Veil (behind message)): 사진 전체 폭, 흰색 72% */
+.band {
+  width: 100%;
+  padding-block: var(--space-42);
+  background: color-mix(in srgb, var(--color-bg-page) 72%, transparent);
+}
+
 .inner {
   display: flex;
   flex-direction: column;
   gap: var(--space-35);
-  /* 글자 블록 뒤 반투명 판(Figma Veil (behind message)): 흰색 72%, 모서리 10 */
-  padding: var(--space-42);
-  border-radius: var(--radius-lg);
-  background: color-mix(in srgb, var(--color-bg-page) 72%, transparent);
 }
 
 .headline {
@@ -205,9 +208,11 @@
     object-position: 10% 50%;
   }
   /* 좁은 화면: 글자가 화면 전체에 걸치므로 위에서 아래로 */
+  .band {
+    padding-block: var(--space-21);
+  }
   .inner {
     gap: var(--space-21);
-    padding: var(--space-21);
   }
   .line {
     display: block;
