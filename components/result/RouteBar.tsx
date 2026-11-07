@@ -1,9 +1,9 @@
 // 안산 공장들이 이 폐기물을 보내는 길: 처리 방식별 신고 비율 막대(API pct 그대로, 합치거나 다시 계산하지 않음).
-// 결과 화면의 유일한 자동 연출: 구간마다 scaleX 채움(RouteFills, ScaleXBar와 같은 값 800ms, 80ms 간격). 비율은 글자로 범례에 같이 적는다.
+// 결과 화면의 유일한 자동 연출: 구간마다 scaleX 채움(공용 ScaleXBar, 800ms, 80ms 간격, 화면 진입은 구간 칸으로 잼). 비율은 글자로 범례에 같이 적는다.
+import { ScaleXBar } from '@/components/motion';
 import { Footnote } from '@/components/ui/Footnote';
 import { SOURCE_REPORTS, num, objectParticle, routeKind } from '@/lib/result-copy';
 import type { RouteShare } from '@/lib/types';
-import { RouteFills } from './RouteFills';
 import styles from './RouteBar.module.css';
 
 /** 막대 안에 글자를 넣을 최소 비율(%) */
@@ -41,19 +41,19 @@ export function RouteBar({
             ))}
           </div>
         )}
-        <RouteFills
-          className={styles.bar}
-          cells={rows.map((r) => {
+        <div className={styles.bar} aria-hidden="true">
+          {rows.map((r, i) => {
             const k = routeKind(r.method);
-            return {
-              key: r.method,
-              grow: r.pct,
-              cellClass: styles.cell,
-              fillClass: `${styles.fill} ${styles[k]}`,
-              label: r.pct >= INLINE_MIN ? <span className={`${styles.inline} ${styles[`on_${k}`]} ${r.pct < NARROW_MIN ? styles.narrow : ''} count`}>{r.pct}%</span> : undefined,
-            };
+            return (
+              <span key={r.method} className={styles.cell} style={{ flexGrow: r.pct }}>
+                <ScaleXBar as="span" ratio={1} index={i} className={`${styles.fill} ${styles[k]}`} />
+                {r.pct >= INLINE_MIN && (
+                  <span className={`${styles.inline} ${styles[`on_${k}`]} ${r.pct < NARROW_MIN ? styles.narrow : ''} count`}>{r.pct}%</span>
+                )}
+              </span>
+            );
           })}
-        />
+        </div>
       </div>
       <ul role="list" className={styles.legend} aria-label="처리 방식별 신고 비율">
         {rows.map((r, i) => (

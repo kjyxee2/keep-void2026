@@ -4,11 +4,11 @@
 // 축의 끝은 공개 단가와 입력값 중 가장 큰 값. 차액, 절감액 같은 계산은 하지 않는다.
 'use client';
 import { useId, useState } from 'react';
+import { MOTION, ScaleXBar } from '@/components/motion';
 import { Footnote } from '@/components/ui/Footnote';
 import { Input } from '@/components/ui/Input';
 import type { HomePriceRow } from '@/lib/home-prices';
 import { axisMax, formatThousands, parseWon } from '@/lib/home-format';
-import { PriceBar } from './PriceBar';
 import styles from './PriceCheck.module.css';
 
 const won = (n: number) => `${n.toLocaleString('ko-KR')}원`;
@@ -57,7 +57,7 @@ export function PriceCheck({ rows }: { rows: HomePriceRow[] }) {
               </div>
               <div className={styles.value}>
                 <div className={`${styles.track} ${styles.trackMine}`}>
-                  <PriceBar ratio={mine ? mine / max : 0} className={`${styles.bar} ${styles.mine}`} />
+                  <ScaleXBar ratio={mine ? mine / max : 0} duration={MOTION.emphasis} className={`${styles.bar} ${styles.mine}`} />
                 </div>
                 {mine ? (
                   <p className={styles.amount}>{won(mine)}</p>
@@ -79,7 +79,7 @@ export function PriceCheck({ rows }: { rows: HomePriceRow[] }) {
                 </div>
                 <div className={styles.value}>
                   <div className={styles.track}>
-                    <PriceBar ratio={r.price_won / max} index={i + 1} className={`${styles.bar} ${styles[r.tone]}`} />
+                    <ScaleXBar ratio={r.price_won / max} index={i + 1} duration={MOTION.emphasis} className={`${styles.bar} ${styles[r.tone]}`} />
                   </div>
                   <p className={styles.amount}>{won(r.price_won)}</p>
                 </div>

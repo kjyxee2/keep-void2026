@@ -1,4 +1,4 @@
-/* 처리비 점검(Figma 106:673 PC, 106:732 모바일). 막대는 transform scaleX만(components/home/PriceBar) */
+/* 처리비 점검(Figma 106:673 PC, 106:732 모바일). 막대는 transform scaleX만(공용 ScaleXBar, 입력 반응 400ms) */
 .section {
   background: var(--color-bg-page);
   padding-block: var(--space-84);
