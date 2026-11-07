@@ -1,0 +1,8 @@
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · posture: restrained · screen: 1분 진단, step list beside one question per step · signature: 서류 사진 한 장으로 값이 채워짐 · surface: absolute */
+/* Hallmark · pre-emit critique: steps mirror Figma 172:3136, 128:876, 75:307, 128:922 · weakest: step 3 has no map, only the dong badge, until the map task lands */
+/* 1분 진단 바탕. Figma 04 Pages 1분 진단(172:3136 외)의 회색 바탕 */
+.main {
+  flex: 1;
+  background: var(--color-bg-subtle);
+  padding-bottom: var(--section-md);
+}

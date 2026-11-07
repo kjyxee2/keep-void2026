@@ -1,0 +1,459 @@
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · posture: restrained · screen: 1분 진단, step list beside one question per step · signature: 서류 사진 한 장으로 값이 채워짐 · surface: absolute */
+/* Hallmark · pre-emit critique: steps mirror Figma 172:3136, 128:876, 75:307, 128:922 · weakest: step 3 has no map, only the dong badge, until the map task lands */
+/* 1분 진단 흐름(Figma 172:3136, 128:876, 75:307, 128:922, 모바일 172:3663, 75:243). 값은 styles/tokens.css 변수만 */
+
+.flow {
+  width: 100%;
+  max-width: calc(var(--container-narrow) + var(--layout-gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--layout-gutter);
+}
+
+.restoring {
+  padding-block: var(--section-md);
+  font-size: var(--font-size-p2);
+  color: var(--color-text-secondary);
+}
+
+.backRow {
+  display: flex;
+  padding-block: var(--space-21) var(--space-14);
+}
+.back {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  padding-inline: var(--space-7);
+  margin-left: calc(var(--space-7) * -1);
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  text-decoration: underline;
+  text-decoration-color: transparent;
+  text-underline-offset: var(--space-7);
+}
+.back:hover {
+  text-decoration-color: currentColor;
+}
+.back:active:not(:disabled) {
+  color: var(--color-text-secondary);
+}
+.back:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+.back:disabled {
+  color: var(--color-text-tertiary);
+  cursor: not-allowed;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+  gap: var(--space-70);
+  align-items: start;
+  padding-top: var(--space-28);
+}
+
+/* ---------- 단계 목록 ---------- */
+.aside {
+  position: sticky;
+  top: calc(var(--layout-header-h) + var(--space-28));
+}
+.stepList {
+  list-style: none;
+  border-left: var(--border-width-1) solid var(--color-border-default);
+}
+.stepItem {
+  display: flex;
+  gap: var(--space-14);
+  padding: var(--space-14) var(--space-21);
+  margin-left: calc(var(--border-width-1) * -1);
+  border-left: var(--border-width-3) solid transparent;
+}
+.stepItem[data-state="current"] {
+  border-left-color: var(--color-text-primary);
+}
+.stepNo {
+  flex: none;
+  min-width: var(--space-28);
+  font-size: var(--font-size-h7);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.3;
+  color: var(--color-text-secondary);
+  font-variant-numeric: tabular-nums;
+}
+.stepItem[data-state="current"] .stepNo,
+.stepItem[data-state="done"] .stepNo {
+  color: var(--color-text-primary);
+}
+.stepText {
+  display: flex;
+  flex-direction: column;
+  gap: var(--radius-sm);
+  min-width: 0;
+}
+.stepTitle {
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+.stepItem[data-state="current"] .stepTitle,
+.stepItem[data-state="done"] .stepTitle {
+  color: var(--color-text-primary);
+}
+.stepSub {
+  font-size: var(--font-size-p3);
+  color: var(--color-text-primary);
+}
+.stepSub[data-filled] {
+  color: var(--color-text-accent);
+}
+
+/* ---------- 본문 ---------- */
+.main {
+  min-width: 0;
+}
+.progress {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+}
+.progressText {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-14);
+  flex-wrap: wrap;
+}
+.progressLabel {
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-bold);
+}
+.progressHint {
+  font-size: var(--font-size-p3);
+  color: var(--color-text-accent);
+}
+.progressTrack {
+  height: var(--space-7);
+  border-radius: var(--radius-xs);
+  background: var(--color-bg-tint-4);
+  overflow: hidden;
+}
+.progressFill {
+  height: 100%;
+  border-radius: var(--radius-xs);
+  background: var(--color-bg-accent);
+}
+
+.stepBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-35);
+  padding-top: var(--space-42);
+}
+
+.heading {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.35;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+/* 단계 제목은 조작 요소가 아니라 초점만 받는다(스크린리더 위치 안내). 테두리는 그리지 않는다 */
+.heading:focus,
+.heading:focus-visible {
+  outline: none;
+}
+
+.subHeading {
+  margin-top: var(--space-14);
+  font-size: var(--font-size-h5);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.4;
+}
+
+.summary {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-7) var(--space-14);
+  margin-bottom: calc(var(--space-14) * -1);
+  font-size: var(--font-size-p3);
+}
+.summaryLabel {
+  color: var(--color-text-secondary);
+}
+.summaryValue {
+  font-weight: var(--font-weight-bold);
+}
+.summaryChange,
+.textBtn {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  padding-inline: var(--space-7);
+  border-radius: var(--radius-xs);
+  color: var(--color-text-link);
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-semibold);
+  text-decoration: underline;
+  text-underline-offset: var(--radius-sm);
+}
+.textBtn {
+  align-self: flex-start;
+  margin-left: calc(var(--space-7) * -1);
+}
+.summaryChange:hover,
+.textBtn:hover {
+  color: var(--color-text-brand);
+}
+.summaryChange:active,
+.textBtn:active {
+  color: var(--color-text-primary);
+}
+.summaryChange:focus-visible,
+.textBtn:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+.notice {
+  padding: var(--space-14) var(--space-21);
+  border-left: var(--border-width-3) solid var(--color-border-brand);
+  background: var(--color-bg-page);
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+
+.group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+  border: 0;
+  min-width: 0;
+}
+.optionGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-14);
+}
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-10);
+}
+.moreBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+  padding-top: var(--space-14);
+}
+.moreTitle {
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+
+.field {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+/* 라벨 옆 "서류에서 읽음" 태그: 라벨 줄 오른쪽 끝에 둔다 */
+.labelTag {
+  position: absolute;
+  top: 0;
+  right: 0;
+}
+.fieldLabel {
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+.fieldHelp,
+.docNote {
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+.docNote {
+  color: var(--color-text-warning);
+}
+.fieldError,
+.formError {
+  font-size: var(--font-size-p3);
+  color: var(--color-text-error);
+}
+
+.actionsWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+}
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-21);
+}
+
+/* ---------- 3단계 ---------- */
+.search {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+.searchField {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.searchIcon {
+  position: absolute;
+  left: var(--space-21);
+  width: var(--icon-md);
+  height: var(--icon-md);
+  color: var(--color-text-secondary);
+  pointer-events: none;
+}
+.searchInput {
+  width: 100%;
+  min-height: var(--control-input-h);
+  padding: 0 var(--space-21) 0 calc(var(--space-21) + var(--icon-md) + var(--space-10));
+  border: var(--border-width-2) solid var(--color-border-control);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-page);
+  font-size: var(--font-size-p1);
+  color: var(--color-text-primary);
+}
+.searchInput::placeholder {
+  color: var(--color-text-placeholder);
+}
+.searchInput:hover {
+  border-color: var(--color-border-strong);
+}
+.searchInput:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+  border-color: var(--color-border-focus);
+}
+.searchPanel {
+  position: absolute;
+  z-index: 10;
+  top: calc(var(--control-input-h) + var(--space-35));
+  left: 0;
+  right: 0;
+}
+.searchMessage {
+  padding: var(--space-14) var(--space-21);
+  border: var(--border-width-1) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-page);
+  box-shadow: var(--shadow-dropdown);
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+
+.factoryCard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  padding: var(--space-28);
+  border: var(--border-width-1) solid var(--color-border-default);
+  border-radius: var(--radius-lg);
+  background: var(--color-bg-page);
+}
+.factoryPlace {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-10) var(--space-14);
+  padding-top: var(--space-7);
+}
+.dongBadge {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--space-35);
+  padding: 0 var(--space-10);
+  border: var(--border-width-1) solid var(--color-text-primary);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-page);
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-bold);
+}
+.factoryCaption {
+  font-size: var(--font-size-p4);
+  color: var(--color-text-secondary);
+}
+.factoryName {
+  font-size: var(--font-size-h7);
+  font-weight: var(--font-weight-bold);
+}
+.factoryName:focus,
+.factoryName:focus-visible {
+  outline: none;
+}
+.factoryAddr,
+.factoryNote {
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+.factoryNote {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ---------- 모바일 ---------- */
+@media (max-width: 1023px) {
+  .layout {
+    gap: var(--space-42);
+  }
+}
+
+@media (max-width: 767px) {
+  .layout {
+    grid-template-columns: minmax(0, 1fr);
+    padding-top: 0;
+  }
+  .aside {
+    display: none;
+  }
+  .stepBody {
+    padding-top: var(--space-28);
+    gap: var(--space-28);
+  }
+  .optionGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .factoryCard {
+    padding: var(--space-21);
+  }
+  /* 아래에 붙은 버튼 뒤로 칸이 숨지 않도록 스크롤 여백을 둔다 */
+  .stepBody :is(input, label, button, [tabindex]) {
+    scroll-margin-bottom: calc(var(--control-button-h) + var(--space-56));
+  }
+  /* 다음 버튼은 화면 아래에 붙인다(Figma 75:243) */
+  .actionsWrap {
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    margin-inline: calc(var(--layout-gutter) * -1);
+    padding: var(--space-14) var(--layout-gutter);
+    background: var(--color-bg-page);
+    box-shadow: var(--shadow-sticky-bar);
+  }
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-7);
+  }
+  .actions > * {
+    width: 100%;
+  }
+  .actions .textBtn {
+    justify-content: center;
+    margin-left: 0;
+  }
+}

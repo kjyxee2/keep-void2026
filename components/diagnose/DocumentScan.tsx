@@ -1,10 +1,20 @@
 'use client';
-// 서류 사진 자동 입력. 사진을 찍으면 서버가 인쇄된 값만 읽어 오고, 사용자가 확인한 뒤 onApply로 넘긴다.
-// 이 컴포넌트는 진단을 직접 저장(PATCH)하지 않는다.
-import { useEffect, useId, useRef, useState } from 'react';
+// 서류 사진 자동 입력(Figma Document Upload 167:447: Empty, Dragover, Reading, Result, Error).
+// 사진을 올리면 서버가 인쇄된 값만 읽어 오고, 사용자가 확인한 뒤 onApply로 넘긴다.
+// 이 컴포넌트는 진단을 저장(PATCH)하지 않는다. 사진은 브라우저에서 다시 그려(위치 정보 등 메타데이터 제거) 줄인 뒤 보낸다.
+import { useEffect, useId, useRef, useState, type DragEvent } from 'react';
+import { Button } from '@/components/ui/Button';
+import { confidenceLevel, fmtKg, formatWeightInput, parseWeight, type DocValues } from '@/lib/diagnose-state';
+import { ScanIcon } from './ScanIcon';
 import styles from './DocumentScan.module.css';
 
-export type DocumentScanApply = { weight_kg: number | null; chip_id: string | null; processor_id: string | null };
+/** 읽은 값(DocValues) + 서류에 없어서 사용자가 이 화면에서 직접 넣은 값 */
+export type DocumentScanApply = DocValues & {
+  typed_weight_kg: number | null;
+  typed_processor_name: string | null;
+};
+
+export type DocumentScanPhase = 'idle' | 'reading' | 'done' | 'error';
 
 type OcrResponse = {
   document_type: '계량표' | '인계서' | '기타' | '판독불가';
@@ -12,17 +22,19 @@ type OcrResponse = {
   weight_unit_raw: string | null;
   waste_type_raw: string | null;
   processor_name_raw: string | null;
-  transporter_name_raw: string | null;
-  date_raw: string | null;
-  confidence: { weight_kg: number; waste_type_raw: number; processor_name_raw: number };
-  evidence: { weight_kg: string | null; waste_type_raw: string | null; processor_name_raw: string | null;
-              transporter_name_raw: string | null; date_raw: string | null };
+  confidence: Partial<Record<'weight_kg' | 'waste_type_raw' | 'processor_name_raw', number>>;
+  evidence: Partial<Record<'weight_kg' | 'waste_type_raw' | 'processor_name_raw', string | null>>;
   mapped: { chip_id: string | null; chip_label: string | null; processor_id: string | null; processor_name: string | null };
 };
 
 type Props = {
   onApply: (values: DocumentScanApply) => void;
   onManual?: () => void;
+  onPhaseChange?: (phase: DocumentScanPhase) => void;
+  /** 적용 중(진단 만드는 중)이면 버튼을 잠근다 */
+  applying?: boolean;
+  /** 적용 중 서버 오류 */
+  applyError?: string | null;
   diagnosisId?: string;
   anonToken?: string;
   endpoint?: string;
@@ -32,186 +44,430 @@ type State =
   | { step: 'idle' }
   | { step: 'reading' }
   | { step: 'done'; result: OcrResponse }
-  | { step: 'error'; message: string };
+  | { step: 'error'; message: string; unavailable?: boolean };
 
-// Claude 고해상도 이미지 한도(긴 변 2576px)에 맞춰 줄인다. 업로드 크기도 줄어 서버 본문 한도 안에 든다
+// Claude 이미지 한도(긴 변 2576px)에 맞춰 줄인다. Vercel 요청 본문 한도(4.5MB) 안에 들도록 품질을 낮춰 다시 시도한다
 const MAX_EDGE = 2576;
+const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
+// 브라우저 메모리를 지키려고 원본도 상한을 둔다(휴대폰 원본 사진은 보통 10MB 안팎)
+const MAX_SOURCE_BYTES = 40 * 1024 * 1024;
+
+class ScanError extends Error {}
 
 async function shrink(file: File): Promise<Blob> {
+  let bmp: ImageBitmap;
   try {
-    const bmp = await createImageBitmap(file);
-    const scale = Math.min(1, MAX_EDGE / Math.max(bmp.width, bmp.height));
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.round(bmp.width * scale);
-    canvas.height = Math.round(bmp.height * scale);
-    canvas.getContext('2d')?.drawImage(bmp, 0, 0, canvas.width, canvas.height);
-    bmp.close();
-    const blob = await new Promise<Blob | null>(r => canvas.toBlob(r, 'image/jpeg', 0.88));
-    return blob ?? file;
+    bmp = await createImageBitmap(file, { imageOrientation: 'from-image' });
   } catch {
-    return file;   // 브라우저가 못 여는 형식(HEIC 등)은 그대로 보내고 서버 안내를 보여 준다
+    // 이 브라우저가 못 여는 형식(HEIC 등). 원본을 그대로 보내면 메타데이터가 같이 가므로 보내지 않는다
+    throw new ScanError('이 사진 형식은 열 수 없어요. JPG나 PNG로 찍어 다시 올리거나 직접 입력해 주세요.');
   }
+  try {
+    for (const [edge, quality] of [[MAX_EDGE, 0.88], [MAX_EDGE, 0.75], [2000, 0.75]] as const) {
+      const scale = Math.min(1, edge / Math.max(bmp.width, bmp.height));
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(bmp.width * scale));
+      canvas.height = Math.max(1, Math.round(bmp.height * scale));
+      const ctx = canvas.getContext('2d');
+      if (!ctx) break;
+      ctx.drawImage(bmp, 0, 0, canvas.width, canvas.height);
+      const blob = await new Promise<Blob | null>((r) => canvas.toBlob(r, 'image/jpeg', quality));
+      if (blob && blob.size <= MAX_UPLOAD_BYTES) return blob;
+    }
+  } finally {
+    bmp.close();
+  }
+  throw new ScanError('사진을 줄이지 못했어요. 다시 찍거나 직접 입력해 주세요.');
 }
 
-const fmtKg = (n: number) => `${n.toLocaleString('ko-KR')} kg`;
-
-function ConfidenceHint({ value }: { value: number | undefined }) {
-  if (value === undefined) return null;
-  if (value >= 0.85) return <span className={styles.hintOk}>또렷하게 읽음</span>;
-  if (value >= 0.6) return <span className={styles.hintWarn}>한 번 더 확인</span>;
-  return <span className={styles.hintLow}>흐릿함, 꼭 확인</span>;
+function retryAfterText(res: Response) {
+  const s = Number(res.headers.get('Retry-After'));
+  return Number.isFinite(s) && s > 0 ? ` ${Math.ceil(s)}초 뒤에 다시 올릴 수 있어요.` : '';
 }
 
-export default function DocumentScan({ onApply, onManual, diagnosisId, anonToken, endpoint = '/api/ocr/document' }: Props) {
-  const inputId = useId();
+export default function DocumentScan({
+  onApply,
+  onManual,
+  onPhaseChange,
+  applying = false,
+  applyError,
+  diagnosisId,
+  anonToken,
+  endpoint = '/api/ocr/document',
+}: Props) {
+  const uid = useId();
   const inputRef = useRef<HTMLInputElement>(null);
-  const resultRef = useRef<HTMLDivElement>(null);
+  const resultRef = useRef<HTMLHeadingElement>(null);
+  const errorRef = useRef<HTMLHeadingElement>(null);
   const abortRef = useRef<AbortController | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
   const [state, setState] = useState<State>({ step: 'idle' });
+  const [dragging, setDragging] = useState(false);
+  const [coarse, setCoarse] = useState(false);
+  const [typedWeight, setTypedWeight] = useState('');
+  const [typedProcessor, setTypedProcessor] = useState('');
 
+  useEffect(() => {
+    try {
+      setCoarse(window.matchMedia('(pointer: coarse)').matches);
+    } catch {
+      /* 무시 */
+    }
+  }, []);
   useEffect(() => () => { if (preview) URL.revokeObjectURL(preview); }, [preview]);
   useEffect(() => () => abortRef.current?.abort(), []);
-  useEffect(() => { if (state.step === 'done') resultRef.current?.focus(); }, [state.step]);
+  useEffect(() => {
+    onPhaseChange?.(state.step);
+    if (state.step === 'done') resultRef.current?.focus();
+    if (state.step === 'error') errorRef.current?.focus();
+  }, [state.step, onPhaseChange]);
 
-  async function onPick(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    e.target.value = '';
-    if (!file) return;
-    setPreview(URL.createObjectURL(file));
-    setState({ step: 'reading' });
+  async function read(file: File) {
+    if (file.type && !file.type.startsWith('image/')) {
+      setState({ step: 'error', message: '사진 파일만 올릴 수 있어요. 계량표나 인계서를 찍은 사진을 골라 주세요.' });
+      return;
+    }
+    if (file.size > MAX_SOURCE_BYTES) {
+      setState({ step: 'error', message: '사진이 너무 커요. 다시 찍거나 작게 줄여 올려 주세요.' });
+      return;
+    }
     abortRef.current?.abort();
     const ac = new AbortController();
     abortRef.current = ac;
+    setTypedWeight('');
+    setTypedProcessor('');
+    setPreview(URL.createObjectURL(file));
+    setState({ step: 'reading' });
     try {
       const form = new FormData();
       form.append('image', await shrink(file), 'document.jpg');
       if (diagnosisId) form.append('diagnosis_id', diagnosisId);
       const res = await fetch(endpoint, {
-        method: 'POST', body: form, signal: ac.signal,
+        method: 'POST',
+        body: form,
+        signal: ac.signal,
         headers: anonToken ? { 'x-anon-token': anonToken } : undefined,
       });
       const data = await res.json().catch(() => null);
-      if (!res.ok || !data) {
-        setState({ step: 'error', message: data?.error ?? '서류를 읽지 못했어요. 다시 찍거나 직접 입력해 주세요.' });
+      if (ac.signal.aborted) return;
+      if (!res.ok || !data || typeof data !== 'object') {
+        const msg = typeof data?.error === 'string' ? data.error : '서류를 읽지 못했어요. 다시 찍거나 직접 입력해 주세요.';
+        // 503: 자동 입력을 지금 쓸 수 없음 → 직접 입력을 앞에 둔다
+        setState({ step: 'error', message: res.status === 429 ? msg + retryAfterText(res) : msg, unavailable: res.status === 503 });
         return;
       }
       setState({ step: 'done', result: data as OcrResponse });
     } catch (err) {
       if ((err as Error).name === 'AbortError') return;
-      setState({ step: 'error', message: '연결이 불안정해요. 다시 시도하거나 직접 입력해 주세요.' });
+      setState({
+        step: 'error',
+        message: err instanceof ScanError ? err.message : '연결이 불안정해요. 다시 시도하거나 직접 입력해 주세요.',
+      });
     }
+  }
+
+  function onPick(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (file) void read(file);
+  }
+
+  function pick() {
+    inputRef.current?.click();
   }
 
   function retake() {
     abortRef.current?.abort();
-    setState({ step: 'idle' });
     setPreview(null);
-    inputRef.current?.click();
+    setState({ step: 'idle' });
+    pick();
+  }
+
+  function onDrag(e: DragEvent<HTMLDivElement>, over: boolean) {
+    if (state.step !== 'idle' && state.step !== 'error') return;
+    e.preventDefault();
+    setDragging(over);
+  }
+
+  function onDrop(e: DragEvent<HTMLDivElement>) {
+    if (state.step !== 'idle' && state.step !== 'error') return;
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) void read(file);
   }
 
   const result = state.step === 'done' ? state.result : null;
-  const applicable = result && (result.weight_kg !== null || result.mapped.chip_id || result.mapped.processor_id);
+
+  function apply() {
+    if (!result) return;
+    const typed = parseWeight(typedWeight);
+    onApply({
+      document_type: result.document_type,
+      weight_kg: result.weight_kg,
+      chip_id: result.mapped.chip_id,
+      chip_label: result.mapped.chip_label,
+      waste_type_raw: result.waste_type_raw,
+      processor_id: result.mapped.processor_id,
+      processor_name: result.mapped.processor_name ?? result.processor_name_raw,
+      typed_weight_kg: result.weight_kg === null && typed !== null && typed > 0 ? typed : null,
+      typed_processor_name: !result.processor_name_raw && typedProcessor.trim() ? typedProcessor.trim().slice(0, 100) : null,
+    });
+  }
+
   const status =
-    state.step === 'reading' ? '서류를 읽는 중이에요.'
-    : state.step === 'error' ? state.message
-    : result && !applicable ? '서류에서 입력할 값을 찾지 못했어요. 다시 찍거나 직접 입력해 주세요.'
-    : result ? '읽은 값을 확인해 주세요. 맞으면 이 값으로 입력을 눌러 주세요.'
+    state.step === 'reading' ? '서류를 읽는 중이에요. 10초쯤 걸려요.'
+    : state.step === 'done' ? '서류를 다 읽었어요. 읽은 값을 확인해 주세요.'
+    : state.step === 'error' ? `사진을 읽지 못했어요. ${state.message}`
     : '';
 
+  const fileInput = (
+    <input
+      ref={inputRef}
+      className={styles.file}
+      type="file"
+      accept="image/*"
+      capture={coarse ? 'environment' : undefined}
+      tabIndex={-1}
+      aria-hidden="true"
+      onChange={onPick}
+    />
+  );
+
+  const pickLabel = (
+    <span className={styles.btnLabel}>
+      <ScanIcon className={styles.btnIcon} />
+      {coarse ? '사진 찍기' : '사진 올리기'}
+    </span>
+  );
+
   return (
-    <section className={styles.root} aria-labelledby={`${inputId}-title`}>
-      <h3 id={`${inputId}-title`} className={styles.title}>서류 사진으로 입력</h3>
-      <p className={styles.help}>계량표나 올바로 인계서를 찍으면 서류에 적힌 무게, 폐기물 종류, 처리업체를 읽어 와요. 사진은 저장하지 않아요.</p>
+    <div className={styles.root}>
+      {fileInput}
+      <p className="sr-only" role="status" aria-live="polite">{status}</p>
 
-      <input
-        ref={inputRef}
-        id={inputId}
-        className={styles.file}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        aria-label="서류 사진 찍기"
-        onChange={onPick}
-        disabled={state.step === 'reading'}
-      />
-      {state.step === 'idle' && (
-        <label htmlFor={inputId} className={styles.primary}>서류 사진 찍기</label>
+      {(state.step === 'idle' || state.step === 'error') && (
+        <div
+          className={[styles.box, styles.drop, dragging && styles.dragging, state.step === 'error' && styles.errorBox]
+            .filter(Boolean)
+            .join(' ')}
+          onDragOver={(e) => onDrag(e, true)}
+          onDragEnter={(e) => onDrag(e, true)}
+          onDragLeave={(e) => onDrag(e, false)}
+          onDrop={onDrop}
+        >
+          <span className={[styles.tile, state.step === 'error' && styles.tileError].filter(Boolean).join(' ')}>
+            <ScanIcon className={styles.tileIcon} />
+          </span>
+          {state.step === 'error' ? (
+            <>
+              <h2 ref={errorRef} tabIndex={-1} className={styles.boxTitle}>사진을 읽지 못했어요.</h2>
+              <p className={styles.boxHelp}>{state.message}</p>
+            </>
+          ) : dragging ? (
+            <>
+              <h2 className={styles.boxTitle}>여기에 놓으면 바로 읽어 드려요</h2>
+              <p className={styles.boxHelp}>사진 한 장을 놓아 주세요. 사진은 저장하지 않아요.</p>
+            </>
+          ) : (
+            <>
+              <h2 className={styles.boxTitle}>계량표나 인계서 사진을 올려 주세요</h2>
+              <p className={styles.boxHelp}>찍은 사진에서 무게와 폐기물 종류, 지금 처리업체를 읽어 드려요. 사진은 저장하지 않아요.</p>
+            </>
+          )}
+          <div className={styles.boxActions}>
+            {state.step === 'error' && state.unavailable && onManual ? (
+              <>
+                <Button className={styles.pickBtn} onClick={onManual}>직접 입력할게요</Button>
+                <button type="button" className={styles.manual} onClick={retake}>
+                  다시 찍기
+                </button>
+              </>
+            ) : state.step === 'error' ? (
+              <Button className={styles.pickBtn} onClick={retake}>
+                <span className={styles.btnLabel}>
+                  <ScanIcon className={styles.btnIcon} />
+                  다시 찍기
+                </span>
+              </Button>
+            ) : (
+              <Button className={styles.pickBtn} onClick={pick}>
+                {pickLabel}
+              </Button>
+            )}
+            {onManual && !(state.step === 'error' && state.unavailable) && (
+              <button type="button" className={styles.manual} onClick={onManual}>
+                직접 입력할게요
+              </button>
+            )}
+          </div>
+        </div>
       )}
-
-      {preview && (
-        // eslint-disable-next-line @next/next/no-img-element -- 로컬 blob 미리보기라 next/image 최적화 대상이 아님
-        <img src={preview} alt="찍은 서류 미리보기" className={styles.preview} />
-      )}
-
-      <p className={state.step === 'error' ? styles.error : styles.status} role="status" aria-live="polite">{status}</p>
 
       {state.step === 'reading' && (
-        <div className={styles.skeleton} aria-hidden="true">
-          <span /><span /><span />
+        <div className={[styles.box, styles.reading].join(' ')} aria-busy="true">
+          <div className={styles.thumb}>
+            {preview ? (
+              // eslint-disable-next-line @next/next/no-img-element -- 로컬 blob 미리보기라 next/image 대상이 아님
+              <img src={preview} alt="" className={styles.thumbImg} />
+            ) : (
+              <ScanIcon className={styles.tileIcon} />
+            )}
+          </div>
+          <div className={styles.skeleton} aria-hidden="true">
+            {[0, 1, 2].map((i) => (
+              <div key={i} className={styles.skGroup}>
+                <span className={styles.skLabel} />
+                <span className={styles.skValue} />
+                <span className={styles.skNote} />
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
       {result && (
-        <div ref={resultRef} tabIndex={-1} className={styles.result}>
-          <table className={styles.table}>
-            <caption className={styles.caption}>서류에서 읽은 값({result.document_type})</caption>
-            <thead>
-              <tr><th scope="col">항목</th><th scope="col">읽은 값</th><th scope="col">서류에 적힌 글자</th></tr>
-            </thead>
-            <tbody>
-              <Row label="무게"
-                value={result.weight_kg !== null ? fmtKg(result.weight_kg)
-                  : result.weight_unit_raw ? `kg로 바꿀 수 없는 단위(${result.weight_unit_raw})` : null}
-                evidence={result.evidence.weight_kg}
-                confidence={result.weight_kg !== null ? result.confidence.weight_kg : undefined}
-                note={result.weight_kg !== null ? '서류 한 장의 무게예요. 한 달 배출량과 다르면 다음 단계에서 고쳐 주세요.' : undefined} />
-              <Row label="폐기물 종류"
-                value={result.mapped.chip_label ?? (result.waste_type_raw ? `${result.waste_type_raw} (목록에서 못 찾음)` : null)}
-                evidence={result.evidence.waste_type_raw}
-                confidence={result.waste_type_raw ? result.confidence.waste_type_raw : undefined} />
-              <Row label="처리업체"
-                value={result.mapped.processor_name ?? (result.processor_name_raw ? `${result.processor_name_raw} (목록에서 못 찾음)` : null)}
-                evidence={result.evidence.processor_name_raw}
-                confidence={result.processor_name_raw ? result.confidence.processor_name_raw : undefined} />
-              <Row label="운반업체" value={result.transporter_name_raw} evidence={result.evidence.transporter_name_raw} />
-              <Row label="날짜" value={result.date_raw} evidence={result.evidence.date_raw} />
-            </tbody>
-          </table>
-          <p className={styles.help}>목록에서 못 찾은 값과 서류에 없는 값은 입력하지 않아요.</p>
-        </div>
-      )}
+        <div className={[styles.box, styles.result].join(' ')}>
+          <div className={styles.resultHead}>
+            <span className={[styles.tile, styles.tileMuted].join(' ')}>
+              <ScanIcon className={styles.tileIcon} />
+            </span>
+            <div>
+              <h2 ref={resultRef} tabIndex={-1} className={styles.resultTitle}>서류에서 읽은 값을 확인해 주세요</h2>
+              <p className={styles.boxHelp}>
+                {result.document_type === '판독불가'
+                  ? '서류에서 값을 읽지 못했어요. 다시 찍거나 비어 있는 칸을 직접 채워 주세요.'
+                  : '틀린 값은 다음 단계에서 고칠 수 있어요.'}
+              </p>
+            </div>
+          </div>
 
-      {state.step !== 'idle' && (
-        <div className={styles.actions}>
-          {result && (
-            <button type="button" className={styles.primary} disabled={!applicable}
-              onClick={() => onApply({ weight_kg: result.weight_kg, chip_id: result.mapped.chip_id, processor_id: result.mapped.processor_id })}>
-              이 값으로 입력
-            </button>
+          <dl className={styles.rows}>
+            <Row
+              label="무게"
+              value={result.weight_kg !== null ? fmtKg(result.weight_kg) : null}
+              evidence={result.evidence.weight_kg}
+              confidence={result.weight_kg !== null ? result.confidence.weight_kg : undefined}
+              note={result.weight_kg !== null ? '서류 한 장에 적힌 무게예요.' : undefined}
+              missing={
+                <>
+                  <p className={styles.missingText}>
+                    {result.weight_unit_raw
+                      ? `kg로 바꿀 수 없는 단위(${result.weight_unit_raw})라 비워 뒀어요`
+                      : '서류에서 찾지 못했어요'}
+                  </p>
+                  <div className={styles.inlineField}>
+                    <input
+                      id={`${uid}-w`}
+                      className={styles.inlineInput}
+                      inputMode="numeric"
+                      autoComplete="off"
+                      placeholder="한 달 무게를 적어 주세요"
+                      aria-label="한 달 배출 무게(kg)"
+                      value={typedWeight}
+                      onChange={(e) => setTypedWeight(formatWeightInput(e.target.value))}
+                    />
+                    <span className={styles.inlineUnit} aria-hidden="true">kg</span>
+                  </div>
+                </>
+              }
+            />
+            <Row
+              label="폐기물"
+              value={result.mapped.chip_label ?? null}
+              evidence={result.evidence.waste_type_raw}
+              confidence={result.mapped.chip_label ? result.confidence.waste_type_raw : undefined}
+              missing={
+                <p className={styles.missingText}>
+                  {result.waste_type_raw
+                    ? `"${result.waste_type_raw}"(으)로 읽었지만 목록에서 찾지 못했어요. 다음 단계에서 골라 주세요`
+                    : '서류에서 찾지 못했어요. 다음 단계에서 골라 주세요'}
+                </p>
+              }
+            />
+            <Row
+              label="처리업체"
+              value={result.mapped.processor_name ?? result.processor_name_raw}
+              evidence={result.evidence.processor_name_raw}
+              confidence={result.processor_name_raw ? result.confidence.processor_name_raw : undefined}
+              missing={
+                <>
+                  <p className={styles.missingText}>서류에서 찾지 못했어요</p>
+                  <input
+                    className={[styles.inlineInput, styles.inlineAlone].join(' ')}
+                    autoComplete="off"
+                    placeholder="지금 맡기는 업체 이름(선택)"
+                    aria-label="지금 맡기는 처리업체 이름(선택)"
+                    maxLength={100}
+                    value={typedProcessor}
+                    onChange={(e) => setTypedProcessor(e.target.value)}
+                  />
+                </>
+              }
+            />
+          </dl>
+
+          {applyError && (
+            <p className={styles.applyError} role="alert">
+              {applyError}
+            </p>
           )}
-          <button type="button" className={styles.secondary} onClick={retake}>다시 찍기</button>
-          {onManual && <button type="button" className={styles.ghost} onClick={onManual}>직접 입력</button>}
+          <div className={styles.resultActions}>
+            <Button onClick={apply} loading={applying}>
+              이 값으로 입력
+            </Button>
+            <Button variant="secondary" onClick={retake} disabled={applying}>
+              다시 찍기
+            </Button>
+          </div>
         </div>
       )}
-      {state.step === 'idle' && onManual && (
-        <button type="button" className={styles.ghost} onClick={onManual}>직접 입력</button>
-      )}
-    </section>
+    </div>
   );
 }
 
-function Row({ label, value, evidence, confidence, note }:
-  { label: string; value: string | null; evidence: string | null; confidence?: number; note?: string }) {
+function Row({
+  label,
+  value,
+  evidence,
+  confidence,
+  note,
+  missing,
+}: {
+  label: string;
+  value: string | null;
+  evidence: string | null | undefined;
+  confidence?: number;
+  note?: string;
+  missing: React.ReactNode;
+}) {
+  const c = value ? confidenceLevel(confidence) : null;
   return (
-    <tr>
-      <th scope="row">{label}</th>
-      <td>
-        {value ?? <span className={styles.missing}>서류에 없음</span>}
-        {value && <> <ConfidenceHint value={confidence} /></>}
-        {note && <span className={styles.note}>{note}</span>}
-      </td>
-      <td className={styles.evidence}>{evidence ?? '없음'}</td>
-    </tr>
+    <div className={styles.row}>
+      <dt className={styles.rowLabel}>{label}</dt>
+      <dd className={styles.rowBody}>
+        {value ? (
+          <>
+            <p className={styles.rowValue}>{value}</p>
+            {evidence && <p className={styles.rowEvidence}>서류에서 읽은 글자 &ldquo;{evidence}&rdquo;</p>}
+            {note && <p className={styles.rowEvidence}>{note}</p>}
+          </>
+        ) : (
+          missing
+        )}
+      </dd>
+      <dd className={styles.rowConf}>
+        {c && (
+          <>
+            <span className={styles.confText}>{c.text}</span>
+            <span className={styles.confBar} data-level={c.level} aria-hidden="true">
+              <span />
+              <span />
+              <span />
+            </span>
+          </>
+        )}
+      </dd>
+    </div>
   );
 }
