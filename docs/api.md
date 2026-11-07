@@ -58,7 +58,7 @@ POST /api/requests/:id/cancel         요청 취소
 
 ### PATCH /api/diagnoses/:id (x-anon-token)
 
-보낼 수 있는 필드만(나머지는 400). 여러 번 나눠 보내도 된다. 완료된 진단은 409.
+보낼 수 있는 필드만(나머지는 400). 여러 번 나눠 보내도 된다. **draft 진단만** 수정되고 완료된 진단은 409(수정 도중 완료된 경우도 409). DB 정책도 같다: 로그인 사용자의 직접 수정(RLS `own_update`)은 `status = 'draft'`일 때만.
 
 | 필드 | 값 |
 |---|---|
@@ -66,6 +66,7 @@ POST /api/requests/:id/cancel         요청 취소
 | `weight_source` | `계량표`, `올바로 인계서`, `기타` |
 | `current_method` | `소각`, `매립`, `에너지회수`, `모름`. **완료에 필수** |
 | `current_cost_won_per_month` | 청구서 처리비(원, 0 이상 정수). 선택 |
+| `current_price_won_per_ton` | 지금 내는 톤당 처리 단가(원/톤, 0 이상 10억 이하 정수). 선택. 공개 단가 옆에 그대로 보여 주기만 하고 계산에 쓰지 않음 |
 | `factory_id` | 공장 찾기에서 고른 id. 선택 |
 | `lat`, `lng` | 함께 보내야 함. 선택 |
 | `location_source` | `주소`, `현재위치`, `신고공장` |
@@ -85,7 +86,7 @@ POST /api/requests/:id/cancel         요청 취소
     "chip": { "id": "C01", "label": "폐합성수지", "display_text": "…" },
     "volume_option": { "id": "V2", "label": "2~4개" },
     "weight_kg_per_month": 2000, "weight_source": "계량표", "current_method": "소각",
-    "current_cost_won_per_month": 550000, "factory_id": "F0001", "lat": null, "lng": null, "location_source": "신고공장"
+    "current_cost_won_per_month": 550000, "current_price_won_per_ton": 260000, "factory_id": "F0001", "lat": null, "lng": null, "location_source": "신고공장"
   },
   "current_route": {
     "total_reports": 1209,
@@ -133,11 +134,11 @@ POST /api/requests/:id/cancel         요청 취소
   - 다른 칩: `unit_prices.waste_group`이 칩의 폐기물군과 같은 `고시 처리단가` 행 전부 + `공제조합 소각처리단가(일반, 지정, 건설)` 행 전부. 공제조합 소각 행이 하나라도 있으면(소각 비교) U176(민간 소각 평균)을 더한다. U177(민간 매립 평균), 지정 공공처리시설 반입수수료, 운반비는 넣지 않는다
   - `waste_group`이 빈 행(예: U001 "폐유, 폐유기용제(비할로겐족), 폐합성수지, 폐합성고무")은 C01 고정 목록 말고는 나오지 않는다. 폐유, 폐유기용제 칩에 U001을 보여 줄지는 기획 결정 대기
   - 예: C04 폐유 → U018, U026, U039, U077, U087, U100(고시 2022, 2027), U148~U151(공제조합 지정 2020, 2021), U176
-- `current_cost_won_per_month`는 사용자가 넣은 값을 되돌려 줄 뿐 계산에 쓰지 않음
+- `current_cost_won_per_month`, `current_price_won_per_ton`은 사용자가 넣은 값을 되돌려 줄 뿐 계산에 쓰지 않음(톤당 단가는 `reference_prices`의 `price_won`과 같은 단위 원/톤이라 나란히 비교만)
 
 ### GET /api/diagnoses/:id
 
-완료된 진단만(아니면 404). `x-anon-token`이 맞으면 위와 같은 전체 응답, 없거나 틀리면 **공유 링크용**: `user_input`에서 `factory_id`, `lat`, `lng`, `location_source`, `current_cost_won_per_month`를 뺀다. 카톡 공유 링크는 토큰 없이 이 주소를 연다.
+완료된 진단만(아니면 404). `x-anon-token`이 맞으면 위와 같은 전체 응답, 없거나 틀리면 **공유 링크용**: `user_input`에서 `factory_id`, `lat`, `lng`, `location_source`, `current_cost_won_per_month`, `current_price_won_per_ton`을 뺀다. 카톡 공유 링크는 토큰 없이 이 주소를 연다.
 
 ### POST /api/requests → 201 (x-anon-token)
 

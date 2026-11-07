@@ -9,6 +9,7 @@ export type Diagnosis = {
   id: string; user_id: string | null; anon_token: string | null; factory_id: string | null;
   chip_id: string | null; waste_group: string | null; volume_option_id: string | null;
   weight_kg_per_month: number | null; weight_source: string | null; current_cost_won_per_month: number | null;
+  current_price_won_per_ton: number | null;
   current_method: string | null; lat: number | null; lng: number | null; location_source: string | null;
   status: 'draft' | 'completed'; created_at: string; completed_at: string | null;
 };
@@ -95,7 +96,7 @@ async function candidateCards(diagnosisId: string) {
   });
 }
 
-// full=false: 공유 링크용. 공장, 위치, 처리비, 연락처는 넣지 않는다
+// full=false: 공유 링크용. 공장, 위치, 처리비, 톤당 단가, 연락처는 넣지 않는다
 export async function buildResult(diag: Diagnosis, full: boolean, flows?: DiagFlows) {
   const group = diag.waste_group!;
   flows ??= await diagnosisFlows(diag);
@@ -120,6 +121,7 @@ export async function buildResult(diag: Diagnosis, full: boolean, flows?: DiagFl
       current_method: diag.current_method,
       ...(full && {
         current_cost_won_per_month: diag.current_cost_won_per_month,
+        current_price_won_per_ton: diag.current_price_won_per_ton,
         factory_id: diag.factory_id, lat: diag.lat, lng: diag.lng, location_source: diag.location_source,
       }),
     },

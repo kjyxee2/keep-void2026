@@ -51,6 +51,12 @@ ok(await fails('authenticated',A,`insert into events (user_id,name) values ('${B
 ok((await as('authenticated',A,`update diagnoses set current_method='소각', lat=37.3, weight_kg_per_month=2000, weight_source='계량표' where id='10000000-0000-0000-0000-000000000001' returning id`)).length===1, 'A edits own diagnosis inputs');
 for (const col of ["completed_at=now()", "status='completed'", "anon_token='x'", "user_id='${B}'", "waste_group='x'"])
   ok(await fails('authenticated',A,`update diagnoses set ${col} where id='10000000-0000-0000-0000-000000000001'`), `A cannot set diagnoses.${col.split('=')[0]}`);
+ok((await as('authenticated',A,`update diagnoses set current_price_won_per_ton=260000 where id='10000000-0000-0000-0000-000000000001' returning id`)).length===1, 'A sets current_price_won_per_ton on draft');
+ok(await fails('authenticated',A,`update diagnoses set current_price_won_per_ton=-1 where id='10000000-0000-0000-0000-000000000001'`), 'current_price_won_per_ton must be >= 0');
+await db.exec(`update diagnoses set status='completed', completed_at=now() where id='10000000-0000-0000-0000-000000000001'`);
+ok((await as('authenticated',A,`update diagnoses set current_method='매립' where id='10000000-0000-0000-0000-000000000001' returning id`)).length===0, 'A cannot edit own completed diagnosis');
+ok((await as('authenticated',A,`select id from diagnoses where id='10000000-0000-0000-0000-000000000001'`)).length===1, 'A still reads own completed diagnosis');
+await db.exec(`update diagnoses set status='draft', completed_at=null where id='10000000-0000-0000-0000-000000000001'`);
 ok((await as('authenticated',A,`insert into group_memberships (group_id,diagnosis_id,user_id) values ('G0001','10000000-0000-0000-0000-000000000001','${A}') returning id`)).length===1, 'A joins group with own diagnosis');
 ok(await fails('authenticated',A,`insert into group_memberships (group_id,diagnosis_id,user_id) values ('G0001','10000000-0000-0000-0000-000000000002','${A}')`), 'A cannot join with B diagnosis');
 ok(await fails('authenticated',A,`update group_memberships set diagnosis_id='10000000-0000-0000-0000-000000000002' where user_id='${A}'`), 'A cannot repoint membership to B diagnosis');
