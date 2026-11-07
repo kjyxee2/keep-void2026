@@ -97,6 +97,29 @@
   color: var(--color-text-tertiary);
 }
 
+/* 팀 줄 끝의 VOID 워드마크: 글자 높이에 맞추고 글자색을 그대로 쓴다 */
+.team {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-10);
+}
+.void {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  color: inherit;
+}
+.void img {
+  display: block;
+  width: auto;
+  height: var(--font-size-p4);
+}
+.void:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
 @media (max-width: 767px) {
   .inner {
     grid-template-columns: minmax(0, 1fr);

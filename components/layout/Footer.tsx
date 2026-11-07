@@ -70,7 +70,13 @@ export function Footer() {
           ))}
         </nav>
         <div className={styles.bottom}>
-          <p className={styles.team}>RE:FIT, 임수원, 당현송, 최윤형, 이경준, VOID 2026</p>
+          <p className={styles.team}>
+            RE:FIT, 임수원, 당현송, 최윤형, 이경준
+            <a className={styles.void} href="https://hyvoid.kr/" target="_blank" rel="noopener noreferrer" aria-label="VOID 2026 해커톤 (새 창)">
+              {/* VOID 2026 워드마크(hyvoid.kr 공개 에셋, currentColor로 글자색과 맞춤) */}
+              <img src="/brand/partners/void-wordmark.svg" alt="VOID 2026" width="1364" height="224" />
+            </a>
+          </p>
           <p className={styles.note}>숫자 출처는 각 화면 아래에 표시</p>
         </div>
       </div>
