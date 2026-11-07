@@ -1,7 +1,7 @@
 // 실행: npm run test:web (Node 22 타입 제거로 바로 실행)
 import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { ApiError, createDiagnosis, getChips, getDiagnosis, getFactory, patchDiagnosis, tokenStore } from '../lib/api-client.ts';
+import { ApiError, cacheMode, createDiagnosis, getChips, getDiagnosis, getFactory, patchDiagnosis, searchFactories, tokenStore } from '../lib/api-client.ts';
 
 class MemStorage {
   data = new Map<string, string>();
@@ -127,4 +127,16 @@ test('PATCH 본문에 current_processor_id, current_processor_name_raw를 그대
   mockFetch(200, { id: 'd1' });
   await patchDiagnosis('d1', { current_processor_id: 'P0065', current_processor_name_raw: null });
   assert.deepEqual(JSON.parse(String(calls[0].init.body)), { current_processor_id: 'P0065', current_processor_name_raw: null });
+});
+
+test('공개 GET은 브라우저 기본 캐시, 쓰기와 토큰이 붙는 조회는 no-store', async () => {
+  mockFetch(200, {});
+  await getChips();
+  await searchFactories('성곡');
+  tokenStore.set('d1', 't1');
+  await getDiagnosis('d1');
+  await patchDiagnosis('d1', { current_processor_id: null });
+  assert.deepEqual(calls.map((c) => c.init.cache), ['default', 'default', 'no-store', 'no-store']);
+  assert.equal(cacheMode({ method: 'POST' }), 'no-store');
+  assert.equal(cacheMode({ cache: 'reload' }), 'reload');
 });

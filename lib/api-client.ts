@@ -98,7 +98,15 @@ type Options = {
   /** 이 진단의 anon_token을 x-anon-token 헤더로 보냄 */
   diagnosisId?: string;
   signal?: AbortSignal;
+  /** 생략하면 공개 GET은 브라우저 기본 캐시(서버 cached()의 Cache-Control을 따름), 쓰기와 토큰이 붙는 조회는 no-store */
+  cache?: RequestCache;
 };
+
+/** 공개 참고 데이터 GET(칩, 지도, 홈 통계, 대시보드, 공장 검색)만 캐시한다. 쓰기와 사용자별 조회(x-anon-token)는 항상 새로 받는다 */
+export function cacheMode(opts: Pick<Options, 'method' | 'diagnosisId' | 'cache'>): RequestCache {
+  if (opts.cache) return opts.cache;
+  return (opts.method ?? 'GET') === 'GET' && !opts.diagnosisId ? 'default' : 'no-store';
+}
 
 /** 서버 컴포넌트에서 쓸 때는 절대 주소가 필요하다(NEXT_PUBLIC_SITE_URL 또는 VERCEL_URL) */
 function baseUrl() {
@@ -122,7 +130,7 @@ export async function request<T>(path: string, opts: Options = {}): Promise<T> {
       headers,
       body: opts.body === undefined ? undefined : JSON.stringify(opts.body),
       signal: opts.signal,
-      cache: 'no-store',
+      cache: cacheMode(opts),
     });
   } catch (e) {
     if ((e as { name?: string })?.name === 'AbortError') throw e;

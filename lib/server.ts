@@ -22,7 +22,7 @@ export function db() {
 }
 
 export const json = (data: unknown, status = 200) => Response.json(data, { status });
-// 공개 참고 데이터 GET(지도, 칩, 홈 통계, 대시보드): CDN 1시간, 만료 뒤 하루 동안은 옛 값 주며 갱신. 오류 응답에는 붙이지 않는다
+// 공개 참고 데이터 GET(지도, 칩, 홈 통계, 대시보드, 공장 한 곳과 검색): CDN 1시간, 만료 뒤 하루 동안은 옛 값 주며 갱신. 오류 응답에는 붙이지 않는다
 export const CACHE_PUBLIC = 'public, s-maxage=3600, stale-while-revalidate=86400';
 export const cached = (data: unknown) => Response.json(data, { headers: { 'Cache-Control': CACHE_PUBLIC } });
 export const fail = (status: number, error: string) => json({ error }, status);
