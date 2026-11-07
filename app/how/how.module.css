@@ -1,0 +1,37 @@
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) 08 기능 설명 · theme: RE:FIT v3 (by request) · genre: modern-minimal · posture: restrained · hero: headline and one sentence, no action (explainer page, actions sit on each step) · motion: none */
+/* Hallmark · pre-emit critique: intro is Figma Intro 186:3713 as drawn · weakest: no primary action in the first screen; every step carries its own link to the live screen instead */
+
+.main {
+  padding-block: var(--space-84) var(--section-md);
+}
+
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-21);
+  max-width: var(--container-narrow);
+  padding-bottom: var(--space-56);
+}
+
+.title {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+  color: var(--color-text-primary);
+}
+
+.lead {
+  max-width: var(--container-text);
+  font-size: var(--font-size-p1);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+
+@media (max-width: 767px) {
+  .main {
+    padding-top: var(--space-56);
+  }
+  .br {
+    display: none;
+  }
+}
