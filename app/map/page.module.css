@@ -1,0 +1,17 @@
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · posture: restrained · screen: /map 이웃 공장 지도 (Figma 82:1550, 82:547) · signature: 처리 방식 모양 점 지도 · surface: absolute */
+/* Hallmark · pre-emit critique: page shell only, the map screen lives in components/map/Map.module.css · weakest: none on its own */
+.page {
+  flex: 1;
+  padding-block: var(--section-md);
+  background: var(--color-bg-subtle);
+}
+.title {
+  overflow-wrap: break-word;
+  min-width: 0;
+  color: var(--color-text-primary);
+}
+@media (max-width: 767px) {
+  .page {
+    padding-block: var(--space-42) var(--section-md);
+  }
+}

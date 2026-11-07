@@ -1,0 +1,553 @@
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · posture: restrained · screen: /map 이웃 공장 지도 (Figma 82:1550, 82:547) · signature: 처리 방식 모양 점 지도 · surface: absolute */
+/* Hallmark · pre-emit critique: map dots carry shape and colour together, chips cross-fade the dot layer only on user choice · weakest: dense same-building clusters at mobile zoom */
+/* Hallmark · waive 26b · no disabled controls on /map · the chips, zoom and summary are always available, so there is no disabled state to style */
+/* 이웃 공장 지도(Figma 82:1550 PC, 82:547 모바일, Map Overlay 139:1781). 값은 전부 styles/tokens.css 변수 */
+
+/* ---------- 화면 배치 ---------- */
+.intro {
+  max-width: var(--container-text);
+  margin-top: var(--space-21);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-p3);
+}
+.layout {
+  display: grid;
+  grid-template-columns: minmax(0, 20fr) minmax(0, 9fr);
+  gap: var(--space-42);
+  align-items: start;
+  margin-top: var(--space-56);
+}
+.main,
+.side {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-28);
+  min-width: 0;
+}
+.side {
+  gap: var(--space-42);
+}
+.cta {
+  display: none;
+}
+
+/* 1023 이하는 한 줄: 칩, 지도, 범례, 안내, 지역 막대(Figma 모바일 82:547 순서) */
+@media (max-width: 1023px) {
+  .layout {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-28);
+    margin-top: var(--space-28);
+  }
+  .main,
+  .side {
+    display: contents;
+  }
+  .chips {
+    order: 1;
+  }
+  .frameWrap {
+    order: 2;
+  }
+  .caption {
+    order: 3;
+  }
+  .legendBlock {
+    order: 4;
+  }
+  .notice {
+    order: 5;
+  }
+  .region {
+    order: 6;
+  }
+  .info {
+    order: 7;
+  }
+  .cta {
+    order: 8;
+    display: block;
+  }
+}
+
+/* ---------- 칩 ---------- */
+.chips {
+  border: 0;
+  min-width: 0;
+}
+.chipsLegend {
+  margin-bottom: var(--space-14);
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+.chipList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+
+/* ---------- 지도 틀 ---------- */
+.skip {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+.skip:focus-visible {
+  position: static;
+  width: auto;
+  height: auto;
+  clip-path: none;
+  align-self: flex-start;
+  padding: var(--space-10) var(--space-14);
+  background: var(--color-bg-brand);
+  color: var(--color-text-inverse);
+  border-radius: var(--radius-sm);
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+.chips:focus {
+  outline: none;
+}
+.frameWrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  min-width: 0;
+}
+.frame {
+  --map-h: calc(var(--space-56) * 8);
+  position: relative;
+  height: var(--map-h);
+  overflow: hidden;
+  border: var(--border-width-1) solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+  isolation: isolate;
+}
+.placeholder {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  object-fit: contain;
+  z-index: 0;
+}
+.canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  opacity: 0;
+}
+.canvas[data-ready] {
+  opacity: 1;
+}
+.count {
+  position: absolute;
+  top: var(--space-14);
+  left: var(--space-14);
+  z-index: 2;
+  max-width: calc(100% - var(--touch-min) - var(--space-42));
+  padding: var(--space-7) var(--space-14);
+  background: var(--color-bg-page);
+  border: var(--border-width-1) solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+  pointer-events: none;
+}
+.status {
+  position: absolute;
+  left: var(--space-14);
+  max-width: calc(100% - var(--space-28));
+  bottom: var(--space-42);
+  z-index: 3;
+  padding: var(--space-10) var(--space-14);
+  background: var(--color-bg-page);
+  border: var(--border-width-1) solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-p3);
+  color: var(--color-text-primary);
+}
+.statusError {
+  border-color: var(--color-border-error);
+  color: var(--color-text-error);
+}
+.loadError {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  padding: var(--space-21);
+  background: var(--color-bg-glass-soft);
+}
+
+/* Leaflet 기본 모양을 우리 토큰으로 */
+.frame :global(.leaflet-container) {
+  font-family: var(--font-family-base);
+  background: var(--color-bg-subtle);
+}
+/* 바탕 지도는 흑백으로 옅게: 점의 모양과 색이 먼저 보이게(Figma 회색 바탕) */
+.frame :global(.leaflet-tile-pane) {
+  filter: grayscale(1);
+  opacity: 0.55;
+}
+.frame :global(.leaflet-control-attribution) {
+  padding: var(--space-7) var(--space-10);
+  background: var(--color-bg-page);
+  font-size: var(--font-size-p4);
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+}
+.frame :global(.leaflet-control-attribution a) {
+  color: var(--color-text-link);
+}
+.frame :global(.leaflet-bar) {
+  border: var(--border-width-1) solid var(--color-border-default);
+  border-radius: var(--radius-sm);
+  box-shadow: none;
+}
+.frame :global(.leaflet-bar a) {
+  width: var(--touch-min);
+  height: var(--touch-min);
+  line-height: var(--touch-min);
+  font-size: var(--font-size-h6);
+  color: var(--color-text-primary);
+  background: var(--color-bg-page);
+}
+.frame :global(.leaflet-bar a:hover) {
+  background: var(--color-bg-subtle);
+}
+.frame :global(.leaflet-bar a:active) {
+  background: var(--color-bg-tint-4);
+}
+.frame :global(.leaflet-bar a:first-child) {
+  border-top-left-radius: var(--radius-sm);
+  border-top-right-radius: var(--radius-sm);
+}
+.frame :global(.leaflet-bar a:last-child) {
+  border-bottom-left-radius: var(--radius-sm);
+  border-bottom-right-radius: var(--radius-sm);
+}
+.frame :global(.leaflet-container a:focus-visible),
+.frame :global(.leaflet-container:focus-visible) {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: calc(var(--focus-ring-offset) * -1);
+}
+
+/* ---------- 점 레이어(칩 전환 때 투명도 교차) ---------- */
+.overlay {
+  transition: opacity var(--duration-emphasis) var(--ease-standard);
+}
+@media (prefers-reduced-motion: reduce) {
+  .overlay {
+    transition: none;
+  }
+}
+
+.marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 0;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+}
+.marker:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+  transition: none;
+}
+.dot {
+  display: flex;
+}
+.dot .shape {
+  width: var(--space-14);
+  height: var(--space-14);
+}
+.shape {
+  display: inline-block;
+  flex: none;
+  width: var(--space-14);
+  height: var(--space-14);
+  stroke-width: 1.5;
+}
+.recycle {
+  fill: var(--color-chart-recycle);
+  stroke: var(--color-bg-page);
+}
+.burn {
+  fill: var(--color-chart-burn);
+  stroke: var(--color-bg-page);
+}
+.landfill {
+  fill: var(--color-chart-landfill);
+  stroke: var(--color-bg-page);
+}
+.unknown {
+  fill: var(--color-bg-page);
+  stroke: var(--color-chart-landfill);
+  stroke-width: 2;
+}
+
+.cluster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-full);
+  border: var(--border-width-2) solid var(--color-bg-page);
+  background: var(--color-bg-brand);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.cluster_l {
+  font-size: var(--font-size-p3);
+}
+
+.processor {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.bubble {
+  width: 100%;
+  height: 100%;
+  fill: var(--color-bg-page);
+  stroke: var(--color-border-strong);
+  stroke-width: 1.5;
+}
+.processorIcon {
+  position: absolute;
+  left: 50%;
+  top: 40%;
+  display: flex;
+  color: var(--color-text-primary);
+  transform: translate(-50%, -50%);
+}
+.processorIcon svg,
+.ttIcon svg {
+  width: var(--space-14);
+  height: var(--space-14);
+}
+
+/* ---------- 툴팁(Figma Map/Tooltip) ---------- */
+.frame .tooltip {
+  width: max-content;
+  max-width: calc(var(--space-84) * 3.5);
+  padding: var(--space-14) var(--space-21);
+  background: var(--color-bg-page);
+  border: var(--border-width-1) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-popover);
+  color: var(--color-text-primary);
+  white-space: normal;
+  word-break: keep-all;
+}
+.frame .tooltip::before {
+  display: none;
+}
+.ttTitle {
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.5;
+}
+.ttSub {
+  margin-top: var(--space-7);
+  font-size: var(--font-size-p4);
+  color: var(--color-text-secondary);
+  line-height: 1.5;
+}
+.ttMethod {
+  display: flex;
+  align-items: center;
+  gap: var(--space-7);
+  margin-top: var(--space-10);
+  font-size: var(--font-size-p4);
+  line-height: 1.5;
+}
+.ttIcon {
+  display: flex;
+}
+.ttList {
+  margin-top: var(--space-7);
+  padding-left: var(--space-21);
+  font-size: var(--font-size-p4);
+  line-height: 1.5;
+}
+
+/* ---------- 지도 아래 ---------- */
+.caption {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-p3);
+}
+.legendBlock {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-10) var(--space-28);
+  list-style: none;
+}
+.legendItem {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-10);
+  font-size: var(--font-size-p4);
+  color: var(--color-text-primary);
+}
+.mark {
+  display: inline-flex;
+}
+.legendCluster {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--icon-md);
+  height: var(--icon-md);
+  border-radius: var(--radius-full);
+  background: var(--color-bg-brand);
+  color: var(--color-text-inverse);
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+.legendBubble {
+  width: var(--icon-md);
+  height: var(--icon-md);
+  fill: var(--color-bg-page);
+  stroke: var(--color-border-strong);
+  stroke-width: 1.5;
+}
+
+.notice {
+  padding: var(--space-21);
+  background: var(--color-bg-page);
+  border: var(--border-width-1) solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-p3);
+  color: var(--color-text-primary);
+}
+.noticeSub {
+  margin-top: var(--space-7);
+  font-size: var(--font-size-p4);
+  color: var(--color-text-secondary);
+}
+.unlocated {
+  margin-top: var(--space-14);
+}
+.unlocated summary {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-link);
+  cursor: pointer;
+}
+.unlocated summary:active {
+  color: var(--color-text-brand);
+}
+.unlocated summary:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+.unlocatedList {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--space-84) * 2), 1fr));
+  gap: var(--space-7) var(--space-21);
+  margin-top: var(--space-10);
+  list-style: none;
+  font-size: var(--font-size-p4);
+  color: var(--color-text-secondary);
+}
+.unlocatedList span {
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 오른쪽: 지역 막대 ---------- */
+.region {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+}
+.regionTitle {
+  font-size: var(--font-size-h6);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.4;
+  color: var(--color-text-primary);
+}
+.regionLead {
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+  margin-block: var(--space-7);
+  list-style: none;
+}
+.bar {
+  display: grid;
+  grid-template-columns: var(--space-84) minmax(0, 1fr) max-content;
+  align-items: center;
+  gap: var(--space-14);
+  font-size: var(--font-size-p3);
+}
+.barTrack {
+  height: var(--space-10);
+  background: var(--color-progress-track);
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+}
+.barFill {
+  display: block;
+  height: 100%;
+  background: var(--color-bg-accent);
+  transform: scaleX(var(--ratio));
+  transform-origin: left;
+}
+.barUnknown {
+  background: var(--color-chart-unknown);
+}
+.barValue {
+  text-align: right;
+  font-weight: var(--font-weight-semibold);
+  font-variant-numeric: tabular-nums;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+  padding: var(--space-21);
+  background: var(--color-bg-page);
+  border: var(--border-width-1) solid var(--color-border-subtle);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+.info strong {
+  color: var(--color-text-primary);
+  font-weight: var(--font-weight-semibold);
+}
