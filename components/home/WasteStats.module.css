@@ -22,7 +22,8 @@
 }
 .fieldset {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, calc(var(--space-84) * 2 + var(--space-28) + var(--space-7))));
+  /* Figma 75:173: 컨테이너 폭을 5칸이 똑같이 나눠 채운다(간격 12, 가장 가까운 토큰 --space-14) */
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: var(--space-14);
   border: 0;
   padding: 0;
