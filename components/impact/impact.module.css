@@ -1,6 +1,6 @@
-/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · route: /impact · hero: Figma 184:3536 text-only head + one sentence · signature: 2024 공식 톤수 네 개와 고시 단가 차이 · motion: one auto reveal (scale CountUp on first view), everything else still · surface: absolute */
-/* Hallmark · pre-emit critique: every number is an app_summary, home_waste_stats or unit_prices raw value; money is multiplied only from the viewer's own inputs or the labelled assumption calculator · weakest: scenario percentages are fixed values from the research run */
-/* Hallmark · waive 26b · no :active or :disabled rules here · every control on /impact is the shared Button or Input, whose modules carry all eight states */
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) 05 Pages v2 07 기대효과 184:3536, 185:3615 · theme: RE:FIT v3 (by request) · genre: modern-minimal · route: /impact · hero: photo opener s15_plant, label and two-line headline bottom left · signature: four 2024 official tonnages at H1 beside a 200px label column, three 1px-rule tables · motion: Reveal (opacity, translateY) once per block, CountUp on the numbers, reduced motion 0ms · surface: absolute */
+/* Hallmark · pre-emit critique: every number is an app_summary, home_waste_stats or unit_prices raw value; money is multiplied only from the viewer's own inputs in 우리 공장 계산 and the labelled 가정 계산기 · weakest: the quote comparison sits inside the 자세히 보기 row */
+/* Hallmark · waive 26b · no :active or :disabled rules here · every control on /impact is the shared Input or AccordionRow, whose modules carry the states */
 
 .main {
   display: flex;
@@ -8,438 +8,194 @@
   flex: 1;
 }
 
-.intro {
-  padding-block: var(--space-84) var(--space-56);
+/* 블록: 오프너(또는 섹션 머리)와 본문 사이 56, 블록 사이 140(모바일 24, 96) */
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-56);
+  width: 100%;
+  min-width: 0;
 }
-.h1 {
-  max-width: var(--container-text);
-  font-size: var(--font-size-h4);
-  font-weight: var(--font-weight-bold);
-  line-height: 1.45;
+.block + .block {
+  margin-top: var(--editorial-section-gap);
 }
-.lead {
-  margin-top: var(--space-21);
-  margin-bottom: var(--space-28);
-  font-size: var(--font-size-p2);
+
+/* 오프너 헤드라인은 Figma처럼 한 줄을 끊어 둔 두 줄. 공용 64% 폭 제한 대신 줄바꿈으로 */
+.opener :global(h1),
+.opener :global(h2) {
+  max-width: none;
+}
+.br {
+  display: inline;
+}
+
+/* 오프너 아래 한 문장: P1 Regular text/secondary */
+.sentence {
+  font-size: var(--font-size-p1);
+  line-height: 1.7;
   color: var(--color-text-secondary);
 }
 
-/* 첫 화면의 "우리 공장 계산" 이동 링크(#impact-factory)가 닿는 제목. 초점 고리는 공용 값 */
-.h2:focus-visible {
-  outline: var(--focus-ring-width) solid var(--color-border-focus);
-  outline-offset: var(--focus-ring-offset);
-}
-.band {
-  padding-block: var(--space-70);
-  background: var(--color-bg-page);
-}
-.tint {
-  background: var(--color-bg-subtle);
-}
-.h2 {
-  scroll-margin-top: calc(var(--layout-header-h) + var(--space-21));
-  font-size: var(--font-size-h6);
-  font-weight: var(--font-weight-bold);
-  line-height: 1.5;
-}
-.sub {
-  margin-top: var(--space-10);
-  font-size: var(--font-size-p3);
-  color: var(--color-text-secondary);
-}
-.foot {
-  margin-top: var(--space-21);
+/* 글 열 안 내용: 항목 사이 24 */
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--editorial-gap-24);
+  width: 100%;
+  min-width: 0;
 }
 
-/* 규모: 2열 x 2행 */
-.scaleGrid {
+/* 규모 2x2, 바꿀 길 3열 */
+.stats2 {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-42) var(--space-35);
-  margin-top: var(--space-42);
+  gap: var(--editorial-gap-24);
 }
-.scaleGrid > .scaleStat,
-.pathGrid > .pathStat {
-  background: transparent;
-  padding-inline: 0;
-  align-content: start;
-}
-.scaleStat :global(.count) span,
-.pathStat :global(.count) {
-  white-space: nowrap;
-  font-variant-numeric: tabular-nums;
-}
-
-/* 바꿀 수 있는 길: 3열 */
-.pathGrid {
+.stats3 {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: var(--space-35);
-  margin-top: var(--space-42);
+  gap: var(--editorial-gap-24);
 }
-
-/* 왼쪽 설명, 오른쪽 내용 */
-.split {
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  gap: var(--space-56);
-  align-items: start;
+/* Figma Stat: 숫자 H1 Bold text/primary, 명사구 P3 text/secondary, 간격 12 */
+.stat {
+  gap: var(--editorial-gap-12);
 }
-.splitIntro {
-  min-width: 0;
-}
-.splitIntro .h2 {
-  font-size: var(--font-size-h6);
-}
-
-/* 고시 단가 */
-.priceTable {
-  min-width: 0;
-  border-top: var(--border-width-2) solid var(--color-border-brand);
-}
-.priceRow {
-  display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-  gap: var(--space-21);
-  align-items: center;
-  padding-block: var(--space-21);
-  border-bottom: var(--border-width-1) solid var(--color-border-subtle);
-}
-.priceRow dt {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-7);
-  min-width: 0;
-}
-.priceName {
-  font-size: var(--font-size-p3);
-  font-weight: var(--font-weight-semibold);
-}
-.priceDetail {
-  font-size: var(--font-size-p4);
-  color: var(--color-text-tertiary);
-}
-.priceValue {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--space-14);
-  align-items: center;
-  min-width: 0;
-}
-.priceTrack {
-  display: block;
-  min-width: 0;
-}
-/* 정지된 막대: 길이는 단가 비율(애니메이션 없음) */
-.priceBar {
-  display: block;
-  height: var(--space-10);
-  border-radius: var(--radius-xs);
-  transform: scaleX(var(--ratio));
-  transform-origin: left center;
-}
-.burn {
-  background: var(--color-chart-burn);
-}
-.recycle {
-  background: var(--color-chart-recycle);
-}
-.priceAmount {
-  font-size: var(--font-size-h7);
-  font-weight: var(--font-weight-bold);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.priceDiff {
-  font-size: var(--font-size-h6);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-brand);
-  font-variant-numeric: tabular-nums;
-}
-
-/* 우리 공장 계산 */
-.panel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-21);
-  min-width: 0;
-  padding: var(--space-28);
-  border: var(--border-width-1) solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-page);
-}
-.pair {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--space-14);
-}
-.outRow {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-10) var(--space-21);
-  padding-block: var(--space-14);
-  border-top: var(--border-width-1) solid var(--color-border-subtle);
-  border-bottom: var(--border-width-1) solid var(--color-border-subtle);
-}
-.outLabel {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-7);
-  min-width: 0;
-}
-.outName {
-  font-size: var(--font-size-p3);
-  font-weight: var(--font-weight-semibold);
-}
-.outFormula {
-  font-size: var(--font-size-p4);
-  color: var(--color-text-tertiary);
-}
-.outEmpty {
+.stat > p:not(:global(.count)) {
   font-size: var(--font-size-p3);
   color: var(--color-text-secondary);
 }
-.outValue {
-  font-size: var(--font-size-h6);
-  font-weight: var(--font-weight-bold);
-  font-variant-numeric: tabular-nums;
-}
 
-/* 성과 지표 표 */
-.measure {
-  width: 100%;
-  margin-top: var(--space-35);
-  border-collapse: collapse;
-  border-top: var(--border-width-2) solid var(--color-text-primary);
-  text-align: left;
-}
-.measure th,
-.measure td {
-  padding: var(--space-21) var(--space-14) var(--space-21) 0;
-  border-bottom: var(--border-width-1) solid var(--color-border-default);
-  vertical-align: middle;
-}
-.measure thead th {
-  padding-block: var(--space-14);
+/* 출처 한 줄: P4 Medium text/tertiary */
+.source {
   font-size: var(--font-size-p4);
   font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-}
-.measure tbody th {
-  font-size: var(--font-size-p3);
-  font-weight: var(--font-weight-semibold);
-}
-.measureValue {
-  font-size: var(--font-size-h6);
-  font-weight: var(--font-weight-bold);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.measureDir {
-  font-size: var(--font-size-p3);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-brand);
-  white-space: nowrap;
-}
-.measureHow {
-  font-size: var(--font-size-p4);
-  color: var(--color-text-secondary);
+  line-height: 1.7;
+  color: var(--color-text-tertiary);
 }
 
-/* 가정 계산(안산 안 후보 시나리오 바로 아래 계산기). 작은 한 칸 폭, 위아래로 붙인다 */
-.assumeWrap {
+/* 1px 선 표: 이름 왼쪽, 값 오른쪽, 위아래 1px border/default, 안쪽 여백 16 */
+.rows {
   display: flex;
   flex-direction: column;
-  gap: var(--space-35);
-}
-.assumeCol {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-14);
   width: 100%;
-}
-@media (min-width: 768px) {
-  .assumeCol {
-    max-width: calc(var(--container-text) / 2 + var(--space-84));
-  }
-}
-.sources {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-10);
-  padding-top: var(--space-21);
-  border-top: var(--border-width-1) solid var(--color-border-subtle);
-}
-
-.ansan,
-.calc {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-14);
   min-width: 0;
-  padding: var(--space-21);
-  border: var(--border-width-1) solid var(--color-border-default);
-  border-radius: var(--radius-md);
-  background: var(--color-bg-page);
+  border-top: var(--border-width-1) solid var(--color-border-default);
 }
-.ansanTitle,
-.calcTitle {
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--editorial-gap-24);
+  padding-block: var(--editorial-gap-16);
+  border-bottom: var(--border-width-1) solid var(--color-border-default);
+}
+.rowLabel {
   font-size: var(--font-size-p2);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+.rowLabelStrong {
+  font-size: var(--font-size-p2);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+.rowValue {
+  font-size: var(--font-size-h4);
   font-weight: var(--font-weight-bold);
   line-height: 1.5;
-}
-.ansanLead,
-.ansanNote,
-.calcLead {
-  font-size: var(--font-size-p4);
-  color: var(--color-text-secondary);
-}
-.assumeTag {
-  align-self: flex-start;
-  padding: var(--space-7) var(--space-10);
-  border: var(--border-width-1) solid var(--color-text-warning);
-  border-radius: var(--radius-xs);
-  font-size: var(--font-size-p4);
-  font-weight: var(--font-weight-semibold);
-  color: var(--color-text-warning);
-}
-.ansanTable {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-.ansanTable th,
-.ansanTable td {
-  padding: var(--space-10) 0;
-  border-bottom: var(--border-width-1) solid var(--color-border-subtle);
-  font-size: var(--font-size-p4);
-}
-.ansanTable thead th {
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-tertiary);
-}
-.ansanTable tbody th {
-  font-weight: var(--font-weight-regular);
-  padding-right: var(--space-14);
-}
-.ansanTable td {
-  text-align: right;
-  font-size: var(--font-size-p3);
-  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-}
-.ansanTable thead th:last-child {
   text-align: right;
 }
+.rowText {
+  font-size: var(--font-size-p2);
+  line-height: 1.7;
+  color: var(--color-text-primary);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+.rowText:has(:global(.filled)),
+.rowText :global(.filled) {
+  font-weight: var(--font-weight-bold);
+}
 
-.formula {
+/* 우리 공장 계산 입력 두 칸 */
+.inputs {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--editorial-gap-24);
+}
+/* 자세히 보기 안의 견적 칸과 차이 행 */
+.quote {
   display: flex;
   flex-direction: column;
-  gap: var(--space-7);
-  padding: var(--space-14);
-  border-radius: var(--radius-sm);
-  background: var(--color-bg-subtle);
+  gap: var(--editorial-gap-16);
 }
-.formulaHead,
-.formulaNote {
-  font-size: var(--font-size-p4);
-  color: var(--color-text-secondary);
+
+/* 가정 계산기: 계산식이 헤드라인 자리(H5 Bold), 경고는 결과 바로 위 */
+.assume {
+  display: flex;
+  flex-direction: column;
+  gap: var(--editorial-gap-16);
+  width: 100%;
+  min-width: 0;
 }
-.formulaBody {
-  font-size: var(--font-size-p3);
+.formula {
+  font-size: var(--font-size-h5);
   font-weight: var(--font-weight-bold);
+  line-height: 1.4;
+  color: var(--color-text-primary);
   font-variant-numeric: tabular-nums;
 }
 .warning {
-  padding-left: var(--space-10);
-  border-left: var(--border-width-3) solid var(--color-text-warning);
+  padding-left: var(--editorial-gap-12);
+  padding-block: var(--radius-xs);
+  border-left: var(--border-width-2) solid var(--color-text-warning);
   font-size: var(--font-size-p4);
-  font-weight: var(--font-weight-semibold);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.7;
   color: var(--color-text-warning);
 }
-.result {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: var(--space-7) var(--space-14);
-}
-.resultLabel {
-  font-size: var(--font-size-p3);
-  font-weight: var(--font-weight-semibold);
-}
-.resultEmpty {
-  font-size: var(--font-size-p4);
-  color: var(--color-text-secondary);
-}
-.resultValue {
-  font-size: var(--font-size-p2);
-  font-weight: var(--font-weight-bold);
-  font-variant-numeric: tabular-nums;
-}
 
-@media (max-width: 1023px) {
-  .split {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-35);
-  }
-  .pathGrid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-28);
-  }
-  /* 두 열일 때 큰 숫자가 칸을 넘지 않게 한 단계 작게 */
-  .scaleGrid :global(.count) {
-    font-size: var(--font-size-h1);
-  }
+/* 맨 아래 출처 한 줄(Figma Footer Footnote): 어두운 격자 아래, 공용 푸터 위 */
+.sources {
+  padding-block: var(--editorial-gap-24) var(--space-42);
 }
 
 @media (max-width: 767px) {
-  .intro {
-    padding-block: var(--space-42) var(--space-35);
+  .block {
+    gap: var(--editorial-gap-24);
   }
-  .band {
-    padding-block: var(--space-42);
+  .br {
+    display: none;
   }
-  .scaleGrid {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-28);
+  .sentence {
+    font-size: var(--font-size-p2);
   }
-  .priceRow {
-    grid-template-columns: minmax(0, 1fr);
-    gap: var(--space-10);
+  .content {
+    gap: var(--editorial-gap-16);
   }
-  .panel {
-    padding: var(--space-21) var(--space-14);
+  .stats2,
+  .stats3 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--editorial-gap-16);
   }
-  .pair {
-    grid-template-columns: minmax(0, 1fr);
-  }
-  /* 표는 행마다 블록으로 쌓는다. 머리 행은 스크린리더용으로만 */
-  .measure thead {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0, 0, 0, 0);
-  }
-  .measure tr {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-    gap: var(--space-7) var(--space-14);
-    padding-block: var(--space-21);
-    border-bottom: var(--border-width-1) solid var(--color-border-default);
-  }
-  .measure th,
-  .measure td {
-    padding: 0;
-    border: 0;
-  }
-  .measure tbody th {
+  /* 바꿀 길: 첫 숫자는 한 줄 전체 */
+  .stats3 > :first-child {
     grid-column: 1 / -1;
   }
-  .measureHow {
-    grid-column: 1 / -1;
+  /* 두 열에서 큰 숫자는 단위 앞(<wbr>)에서만 줄을 바꾼다 */
+  .stat > :global(.count) {
+    white-space: normal;
+    overflow-wrap: normal;
+  }
+  .rowValue {
+    font-size: var(--font-size-h4);
+  }
+  .inputs {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--editorial-gap-16);
   }
 }
