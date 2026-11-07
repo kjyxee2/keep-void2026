@@ -1,7 +1,7 @@
 // 진단 결과 조립(complete, GET 공용). 금액 계산 없음.
 import { db, fetchAll, LABELS } from './server';
 import {
-  BURN_METHODS, EXCLUDED_GROUPS, chipFlows, pickStored, rankComputed, referencePriceIds, resolveCurrentMethod, routeShare,
+  BURN_METHODS, EXCLUDED_GROUPS, chipFlows, pickStored, rankComputed, priceYearLabel, referencePriceIds, resolveCurrentMethod, routeShare,
   type Flow, type Proc, type Ranked,
 } from './fit';
 
@@ -43,7 +43,7 @@ export async function referencePrices(diag: Pick<Diagnosis, 'chip_id' | 'waste_g
   if (error) throw error;
   const rows = data ?? [];
   const ids = new Set(referencePriceIds({ id: diag.chip_id ?? '', waste_group: diag.waste_group }, rows));
-  return rows.filter(r => ids.has(r.id));
+  return rows.filter(r => ids.has(r.id)).map(r => ({ ...r, year_label: priceYearLabel(r) }));
 }
 
 async function origin(diag: Diagnosis) {

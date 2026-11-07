@@ -140,20 +140,51 @@ export function rankComputed(opts: {
 }
 
 // 결과 화면 공개 단가(unit_prices 원문 행). 무게와 곱하지 않는다.
-// C01 폐합성수지: 결정 3의 4개 고정(U001 고시 처분, U035 고시 재활용, U161 공제조합 소각, U176 민간 소각 평균)
-// 다른 칩: 그 칩 폐기물군의 '고시 처리단가' 행 + '공제조합 소각처리단가(...)' 행, 공제조합 소각 행이 있을 때만(소각 비교) U176
-export const FIXED_PRICE_IDS: Record<string, string[]> = { C01: ['U001', 'U035', 'U161', 'U176'] };
+// 고시 처리단가: 칩마다 그 칩 폐기물을 item 원문이 가리키는 행을 아래 표로 고정(퍼지 매칭 없음, item 문자열 완전 일치).
+// 같은 item이 2022 적용분과 2027 시행분에 모두 있으므로 둘 다 나온다(priceYearLabel로 구분).
+// 공제조합 소각처리단가(일반, 지정, 건설): 칩 폐기물군과 waste_group이 같은 행 전부. C01만 결정 3대로 U161.
+// 공제조합 소각 행이 있을 때만(소각 비교) U176(민간 소각 평균). U177, 반입수수료, 운반비는 넣지 않는다.
+// 표 원문과 근거: docs/api.md "reference_prices 고르는 규칙"
+export const NOTICE_ITEMS: Record<string, string[]> = {
+  C01: ['폐유, 폐유기용제(비할로겐족), 폐합성수지, 폐합성고무', '폐합성수지'],
+  C02: ['소각대상 오니류, 기타 소각대상 사업장일반폐기물', '무기성 (폐수처리)오니', '유기성 (폐수처리)오니', '유기성오니'],
+  C03: ['폐흡수재, 폐흡착재'],
+  C04: ['폐유, 폐유기용제(비할로겐족), 폐합성수지, 폐합성고무', '폐윤활유', '폐오일필터', '폐유(폐윤활유가 혼합된 경우 포함)'],
+  C05: ['폐유, 폐유기용제(비할로겐족), 폐합성수지, 폐합성고무', '폐유기용제(할로겐족)', '폐유기용제(기타)'],
+  C06: ['분진(일반)', '분진(지정)'],
+  C07: ['소각잔재물, 연소재(일반)', '소각잔재물, 연소재(지정)'],
+  C08: ['폐목재', '폐유리, 폐목재중 톱밥'],
+  C09: ['폐내화물, 도자기편류'],
+  C10: ['동물성잔재물', '식물성잔재물', '폐식용유', '음식물류폐기물', '폐가죽류(가죽스크랩)', '폐가죽류(피혁가공잔재물)'],
+  C11: ['폐페인트 및 폐락카', '폐페인트'],
+  C12: ['폐유리, 폐목재중 톱밥'],
+  C13: ['폐광재(지정폐기물)', '광재(일반)', '광재(지정)', '철강슬래그'],
+  C14: [],
+  C15: ['폐주물사, 폐사'],
+  C16: ['폐산, 폐알칼리'],
+  C17: ['폐합성섬유', '폐섬유류'],
+};
+export const NOTICE_CATEGORY = '고시 처리단가';
+export const FIXED_MUTUAL_IDS: Record<string, string[]> = { C01: ['U161'] };
 export const BURN_AVG_PRICE_ID = 'U176';
 export function referencePriceIds(
   chip: { id: string; waste_group: string | null },
-  prices: Array<{ id: string; category: string | null; waste_group: string | null }>,
+  prices: Array<{ id: string; category: string | null; waste_group: string | null; item: string | null }>,
 ) {
-  if (FIXED_PRICE_IDS[chip.id]) return FIXED_PRICE_IDS[chip.id];
-  const own = prices.filter(p => p.waste_group && p.waste_group === chip.waste_group);
-  const notice = own.filter(p => p.category === '고시 처리단가');
-  const mutual = own.filter(p => p.category?.startsWith('공제조합 소각처리단가'));
+  const items = new Set(NOTICE_ITEMS[chip.id] ?? []);
+  const notice = prices.filter(p => p.category === NOTICE_CATEGORY && p.item != null && items.has(p.item));
+  const mutual = FIXED_MUTUAL_IDS[chip.id]
+    ? prices.filter(p => FIXED_MUTUAL_IDS[chip.id].includes(p.id))
+    : prices.filter(p => p.waste_group && p.waste_group === chip.waste_group && p.category?.startsWith('공제조합 소각처리단가'));
   const burnAvg = mutual.length && prices.some(p => p.id === BURN_AVG_PRICE_ID) ? [BURN_AVG_PRICE_ID] : [];
   return [...notice, ...mutual].map(p => p.id).concat(burnAvg).sort();
+}
+
+// 공개 단가 연도 표시. 고시는 2022 적용분과 2027-01-01 시행분(기후에너지환경부고시 제2026-67호)을 나눠 적는다
+export function priceYearLabel(p: { category: string | null; year: number | null }) {
+  if (p.year == null) return null;
+  if (p.category === NOTICE_CATEGORY) return p.year >= 2027 ? `${p.year} 시행` : `${p.year} 적용`;
+  return `${p.year}년`;
 }
 
 // 영업일 n일 뒤(Asia/Seoul 기준 주말 제외)

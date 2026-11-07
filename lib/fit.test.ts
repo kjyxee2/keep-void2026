@@ -1,7 +1,7 @@
 // 실행: npm run test:api (Node 22 타입 제거로 바로 실행)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { addBusinessDays, chipFlows, neighborCounts, referencePriceIds, pickStored, rankComputed, resolveCurrentMethod, routeShare, type Flow, type Proc } from './fit.ts';
+import { addBusinessDays, chipFlows, neighborCounts, referencePriceIds, priceYearLabel, pickStored, rankComputed, resolveCurrentMethod, routeShare, type Flow, type Proc } from './fit.ts';
 
 const f = (factory_id: string, processor_id: string | null, method: string, weight = 1, other = false): Flow =>
   ({ factory_id, processor_id, method, method_by_other_group_permit: other, region: '안산', weight });
@@ -67,15 +67,32 @@ test('business days skip weekend in KST', () => {
   assert.equal(due.toISOString(), '2026-11-10T06:00:00.000Z');
 });
 
-test('reference prices: C01 fixed four, other chips own 고시 + 공제조합 rows, U176 only with a 소각 comparison', () => {
-  const u = (id: string, category: string, waste_group: string | null) => ({ id, category, waste_group });
-  const prices = [u('U001', '고시 처리단가', null), u('U035', '고시 처리단가', '폐합성수지류'), u('U096', '고시 처리단가', '폐합성수지류'),
-    u('U161', '공제조합 소각처리단가(일반)', '폐합성수지류'), u('U129', '지정 공공처리시설 반입수수료', '폐합성수지류'),
-    u('U018', '고시 처리단가', '폐유'), u('U148', '공제조합 소각처리단가(지정)', '폐유'), u('U121', '지정 공공처리시설 반입수수료', '폐유'),
-    u('U052', '고시 처리단가', '폐목재'), u('U176', '민간 평균 처리단가', null), u('U177', '민간 평균 처리단가', null)];
-  assert.deepEqual(referencePriceIds({ id: 'C01', waste_group: '폐합성수지류' }, prices), ['U001', 'U035', 'U161', 'U176']);
-  assert.deepEqual(referencePriceIds({ id: 'C04', waste_group: '폐유' }, prices), ['U018', 'U148', 'U176']);
+test('reference prices: 칩별 고시 item 원문 매핑(2022, 2027 둘 다) + 공제조합 행, 소각 비교가 있을 때만 U176', () => {
+  const u = (id: string, category: string, waste_group: string | null, item: string, year = 2022) => ({ id, category, waste_group, item, year });
+  const U001 = '폐유, 폐유기용제(비할로겐족), 폐합성수지, 폐합성고무';
+  const prices = [u('U001', '고시 처리단가', null, U001), u('U060', '고시 처리단가', null, U001, 2027),
+    u('U035', '고시 처리단가', '폐합성수지류', '폐합성수지'), u('U096', '고시 처리단가', '폐합성수지류', '폐합성수지', 2027),
+    u('U028', '고시 처리단가', null, '폐플라스틱 용기'),
+    u('U160', '공제조합 소각처리단가(일반)', '폐합성수지류', '폐합성수지, 폐합성고무', 2020),
+    u('U161', '공제조합 소각처리단가(일반)', '폐합성수지류', '폐합성수지, 폐합성고무', 2021),
+    u('U129', '지정 공공처리시설 반입수수료', '폐합성수지류', '폐합성수지'),
+    u('U018', '고시 처리단가', '폐유', '폐윤활유'), u('U148', '공제조합 소각처리단가(지정)', '폐유', '폐유 액상', 2020),
+    u('U121', '지정 공공처리시설 반입수수료', '폐유', '폐유'),
+    u('U052', '고시 처리단가', '폐목재', '폐목재'), u('U176', '민간 평균 처리단가', null, '소각 평균 처리단가', 2023),
+    u('U177', '민간 평균 처리단가', null, '매립 평균 처리단가', 2023)];
+  // C01: 결정 3의 4개 + 2027 고시(U060, U096). 공제조합은 결정 3대로 U161만
+  assert.deepEqual(referencePriceIds({ id: 'C01', waste_group: '폐합성수지류' }, prices), ['U001', 'U035', 'U060', 'U096', 'U161', 'U176']);
+  // C04 폐유: U001 item 원문에 폐유가 있으므로 포함
+  assert.deepEqual(referencePriceIds({ id: 'C04', waste_group: '폐유' }, prices), ['U001', 'U018', 'U060', 'U148', 'U176']);
   assert.deepEqual(referencePriceIds({ id: 'C08', waste_group: '폐목재' }, prices), ['U052']);   // 공제조합 소각 행 없음 → U176 없음
+  assert.deepEqual(referencePriceIds({ id: 'C99', waste_group: '폐목재' }, prices), []);   // 매핑 없는 칩은 고시 없음
+});
+
+test('reference price label: 고시 2022 적용, 2027 시행, 나머지는 연도', () => {
+  assert.equal(priceYearLabel({ category: '고시 처리단가', year: 2022 }), '2022 적용');
+  assert.equal(priceYearLabel({ category: '고시 처리단가', year: 2027 }), '2027 시행');
+  assert.equal(priceYearLabel({ category: '공제조합 소각처리단가(일반)', year: 2021 }), '2021년');
+  assert.equal(priceYearLabel({ category: '민간 평균 처리단가', year: null }), null);
 });
 
 test('candidates drop processors whose method is 에너지회수, 소각, 매립', () => {

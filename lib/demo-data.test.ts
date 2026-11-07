@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { findGroups, type GroupRow } from './groups.ts';
-import { chipFlows, neighborCounts, pickStored, referencePriceIds, routeShare, type Flow, type Proc } from './fit.ts';
+import { chipFlows, neighborCounts, pickStored, referencePriceIds, routeShare, NOTICE_ITEMS, type Flow, type Proc } from './fit.ts';
 
 const root = new URL('../', import.meta.url);
 const zip = new URL('data/refit_demo_data.zip', root).pathname;
@@ -44,6 +44,7 @@ const flows: Flow[] = demoCsv('flows').map(r => ({
 const chips: Record<string, { id: string; waste_group: string }> = Object.fromEntries(demoCsv('waste_chips').map(c => [c.id, { id: c.id, waste_group: c.waste_group }]));
 const chipTypes: Record<string, string[]> = dataJson('chip_waste_types.json');
 const home: Record<string, { reports: number; burn_factories: number; recycle_factories: number }> = dataJson('home_waste_stats.json');
+const prices = demoCsv('unit_prices').map(r => ({ id: r.id, category: r.category, item: r.item, waste_group: r.waste_group || null, year: Number(r.year) }));
 const forChip = (id: string) => chipFlows(flows.filter(f => f.waste_group === chips[id].waste_group), chipTypes[id]);
 
 test('폐합성수지 칩: 원 표기 기준 총 신고 1,209, 소각 445, 재활용 125(본인 공장 포함)', () => {
@@ -68,12 +69,27 @@ test('칩 waste_types는 모두 그 칩의 폐기물군 안에 있음', () => {
   assert.equal(Object.keys(chipTypes).length, Object.keys(chips).length);
 });
 
-test('공개 단가: 폐합성수지는 U001, U035, U161, U176 네 개', () => {
-  const prices = demoCsv('unit_prices').map(r => ({ id: r.id, category: r.category, waste_group: r.waste_group || null }));
-  assert.deepEqual(referencePriceIds(chips.C01, prices), ['U001', 'U035', 'U161', 'U176']);
+test('공개 단가: 폐합성수지 U001, U035, U161, U176 + 2027 고시 U060, U096', () => {
+  assert.deepEqual(referencePriceIds(chips.C01, prices), ['U001', 'U035', 'U060', 'U096', 'U161', 'U176']);
+});
+
+test('공개 단가: 폐유 칩에 U001(폐유, 폐유기용제(비할로겐족), 폐합성수지, 폐합성고무)과 2027 U060', () => {
   assert.deepEqual(referencePriceIds(chips.C04, prices),
-    ['U018', 'U026', 'U039', 'U077', 'U087', 'U100', 'U148', 'U149', 'U150', 'U151', 'U176']);
-  for (const c of Object.values(chips)) assert.ok(referencePriceIds(c, prices).every(id => id !== 'U177'), c.id);
+    ['U001', 'U018', 'U026', 'U039', 'U060', 'U077', 'U087', 'U100', 'U148', 'U149', 'U150', 'U151', 'U176']);
+});
+
+test('공개 단가: 매핑의 item 원문이 모두 실제 고시 행에 있고, 고르는 고시 행은 2022, 2027이 짝', () => {
+  const notice = prices.filter(p => p.category === '고시 처리단가');
+  const items = new Set(notice.map(p => p.item));
+  for (const [id, list] of Object.entries(NOTICE_ITEMS)) for (const it of list) assert.ok(items.has(it), `${id} ${it}`);
+  for (const c of Object.values(chips)) {
+    const ids = referencePriceIds(c, prices);
+    assert.ok(ids.every(id => id !== 'U177'), c.id);
+    const years = notice.filter(p => ids.includes(p.id)).map(p => p.year);
+    assert.equal(years.filter(y => y === 2022).length, years.filter(y => y === 2027).length, c.id);
+  }
+  assert.deepEqual(referencePriceIds(chips.C05, prices),
+    ['U001', 'U002', 'U016', 'U017', 'U060', 'U061', 'U075', 'U076', 'U152', 'U153', 'U154', 'U155', 'U176']);
 });
 
 test('저장 후보에서 에너지회수 업체 0곳(P0235 포함 3행 제외)', () => {
