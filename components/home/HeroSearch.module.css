@@ -6,7 +6,8 @@
   flex-direction: column;
   gap: var(--space-7);
   width: 100%;
-  max-width: calc(var(--space-84) * 4);
+  /* 자리 표시 문구("사업장 이름 (예: 디와이코스메틱)")가 잘리지 않는 폭 */
+  max-width: calc(var(--space-84) * 5);
   min-width: 0;
 }
 
