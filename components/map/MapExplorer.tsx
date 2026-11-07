@@ -88,10 +88,11 @@ export function MapExplorer() {
     return p;
   }, []);
 
-  // 처음: 전체 공장(첫 화면 범위 계산), 처리업체, 지역 비율
+  // 처음: 전체 공장(첫 화면 범위 계산), 처리업체, 지역 비율. 지도 스크립트(MapView, Leaflet)도 같이 받기 시작한다
   useEffect(() => {
     let alive = true;
     setError(null);
+    void import('./MapView').catch(() => undefined);
     load(MAP_CHIPS[0])
       .then((d) => alive && setByChip((m) => ({ ...m, [MAP_CHIPS[0].key]: d })))
       .catch(() => alive && setError('지도 자료를 불러오지 못했어요. 다시 시도해 주세요'));

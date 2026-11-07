@@ -8,7 +8,7 @@ import type { MapMethod } from '@/lib/map';
 import outline from '@/public/brand/map/banwol_outline.json';
 import { clusterSpec, factorySpec, processorSpec, readingOrder, type FactoryFeature, type ProcessorFeature } from './markers';
 import { osmProvider } from './osm';
-import type { MapHandle, MapProvider, OverlayLayer } from './provider';
+import type { MapHandle, MapProvider, MarkerSpec, OverlayLayer } from './provider';
 import styles from './Map.module.css';
 
 /** 화면 격자 한 칸(px). 이 안에 든 점은 숫자 묶음 하나로. 멀리 볼수록(모바일 첫 화면) 칸을 키워 점이 뭉치지 않게 */
@@ -48,20 +48,33 @@ export default function MapView({ bounds, factories, dataKey, processors, onTile
     key: string | null;
   } | null>(null);
   const dataRef = useRef<FactoryFeature[]>(factories);
+  /** 묶음 계산 결과를 칩과 확대 단계별로 기억한다(같은 단계로 돌아오면 다시 계산하지 않음) */
+  const built = useRef<{ key: string | null; byZoom: Map<number, MarkerSpec[]> }>({ key: null, byZoom: new Map() });
   const fadeTimer = useRef<number>(0);
   const [ready, setReady] = useState(false);
   const callbacks = useRef({ onTileFailure, onReady });
   callbacks.current = { onTileFailure, onReady };
 
-  const build = (h: MapHandle, list: FactoryFeature[]) =>
-    gridCluster(list, (f) => f.geometry.coordinates, h.project, cellPx(h.getZoom()))
+  const build = (h: MapHandle, list: FactoryFeature[], key: string) => {
+    const zoom = h.getZoom();
+    const memo = built.current;
+    if (memo.key !== key) {
+      memo.key = key;
+      memo.byZoom.clear();
+    }
+    const hit = memo.byZoom.get(zoom);
+    if (hit) return hit;
+    const specs = gridCluster(list, (f) => f.geometry.coordinates, h.project, cellPx(zoom))
       .map((c) => {
         if (c.items.length === 1) return factorySpec(c.items[0]);
-        const canZoom = !c.samePlace && h.getZoom() < h.maxZoom;
+        const canZoom = !c.samePlace && zoom < h.maxZoom;
         const b = boundsOf(c.items.map((f) => f.geometry.coordinates));
         return clusterSpec(c, canZoom && b ? () => h.zoomInto(b) : undefined);
       })
       .sort(readingOrder);
+    memo.byZoom.set(zoom, specs);
+    return specs;
+  };
 
   // 지도 만들기(한 번)
   useEffect(() => {
@@ -78,6 +91,7 @@ export default function MapView({ bounds, factories, dataKey, processors, onTile
           minZoom: MIN_ZOOM,
           fallback: { url: OUTLINE_URL, bounds: OUTLINE_BOUNDS },
           overlayClassName: styles.overlay,
+          hitClassName: styles.hit,
           tooltipClassName: styles.tooltip,
           label: '이웃 공장 지도. 방향키로 움직이고 더하기, 빼기 키로 확대해요. Tab으로 점을 고르면 이름과 처리 방식이 보여요',
           zoomInLabel: '확대',
@@ -98,7 +112,7 @@ export default function MapView({ bounds, factories, dataKey, processors, onTile
             if (!s) return;
             window.clearTimeout(fadeTimer.current);
             s.dots[s.active === 0 ? 1 : 0].clear();
-            s.dots[s.active].setMarkers(build(h, dataRef.current));
+            s.dots[s.active].setMarkers(build(h, dataRef.current, s.key ?? ''));
           }),
           h.onTileFailure(() => callbacks.current.onTileFailure()),
         ];
@@ -144,7 +158,7 @@ export default function MapView({ bounds, factories, dataKey, processors, onTile
     const next: 0 | 1 = prev === 0 ? 1 : 0;
     window.clearTimeout(fadeTimer.current);
     h.hideTooltip();
-    s.dots[next].setMarkers(build(h, factories));
+    s.dots[next].setMarkers(build(h, factories, dataKey));
     if (first) {
       s.dots[next].setVisible(true, false);
       s.dots[prev].setVisible(false, false);
