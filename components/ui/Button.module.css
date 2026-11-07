@@ -23,6 +23,7 @@
 }
 
 .pc {
+  min-height: var(--control-button-h-sm);
   min-width: calc(var(--space-84) * 2 + var(--space-70));
 }
 .mobile {

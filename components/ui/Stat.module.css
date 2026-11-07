@@ -8,6 +8,7 @@
 }
 .light {
   background: var(--color-bg-subtle);
+  padding-inline: var(--space-14);
 }
 .dark {
   background: var(--color-bg-brand);

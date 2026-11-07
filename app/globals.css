@@ -1,5 +1,12 @@
-/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · posture: restrained · nav: edge-aligned, lockup and three links, sheet on mobile · footer: source footnotes over team line · hero: Task 7 · surface: flat */
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · posture: restrained · nav: edge-aligned, lockup and three links, sheet on mobile · footer: source footnotes over team line · hero: Task 7 · surface: absolute */
 /* Hallmark · pre-emit critique: components mirror Figma 03 공용 컴포넌트 one to one · weakest: dev page is a catalogue, not a page; it is 404 in production */
+/* Hallmark · waive 44c · first screen is the catalogue title on /dev/components · the dev catalogue route has no hero by design and is 404 in production */
+/* Hallmark · waive 77 · catalogue rows on /dev/components show one component each · the dev catalogue lists Figma components at their real size, not marketing sections */
+/* Hallmark · waive 78 · section heads on /dev/components are component names · the dev catalogue names Figma components; real page heads come with Task 7 */
+/* Hallmark · waive 79 · space under the /dev/components title holds the Figma link · the dev catalogue opens straight into the token swatches */
+/* Hallmark · waive 7b · bg/page and text/inverse resolve to Figma primitive white · RE:FIT v3 Color sets the page surface to white, so the tokens keep the Figma value */
+/* Hallmark · dismissed 59 · /dev/components lists every Figma component on one route · section count rule fits pages, not the dev catalogue */
+/* Hallmark · dismissed F19 · Figma RE:FIT v3 text styles use Regular, Medium, SemiBold and Bold · four weights are the design system's own type ramp */
 
 @import "../styles/tokens.css";
 @import "../styles/motion.css";
@@ -74,6 +81,7 @@ h3,
 h4 {
   overflow-wrap: break-word;
   min-width: 0;
+  text-wrap: balance;
 }
 
 ul[role="list"],

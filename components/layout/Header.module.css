@@ -118,3 +118,9 @@
     display: inline-flex;
   }
 }
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet[open] {
+    animation: none;
+  }
+}

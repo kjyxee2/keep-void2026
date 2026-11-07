@@ -1,7 +1,7 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: var(--space-56);
+  gap: var(--section-lg);
   padding-block: var(--space-56) var(--section-md);
 }
 .title {
@@ -9,8 +9,13 @@
   font-weight: var(--font-weight-bold);
   line-height: 1.5;
 }
+.intro {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-21);
+}
 .lead {
-  margin-top: calc(var(--space-56) * -1 + var(--space-10));
   font-size: var(--font-size-p1);
   color: var(--color-text-secondary);
 }
@@ -53,7 +58,7 @@
 }
 .mobileFrame {
   width: 100%;
-  max-width: calc(var(--space-84) * 4 + var(--space-14));
+  max-width: 21.875rem;
 }
 .caption {
   font-size: var(--font-size-p4);
