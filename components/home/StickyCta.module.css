@@ -1,0 +1,30 @@
+/* 모바일 하단 고정 버튼(Figma 75:125). PC에서는 없음 */
+.bar {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .bar {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    display: block;
+    padding: var(--space-14) var(--layout-gutter) calc(var(--space-21) + env(safe-area-inset-bottom));
+    background: var(--color-bg-page);
+    box-shadow: var(--shadow-sticky-bar);
+    transform: translateY(0);
+    transition: transform var(--motion-base) var(--motion-ease);
+  }
+  /* 숨김은 스크립트가 있을 때만(layout이 html에 js 클래스를 붙임) */
+  :global(.js) .bar[data-hidden] {
+    transform: translateY(110%);
+  }
+}
+
+.label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-10);
+}

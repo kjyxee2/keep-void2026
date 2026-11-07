@@ -1,0 +1,75 @@
+/* 히어로 보조 동작: 사업장 검색(Figma Search Group 170:3111, 열린 상태 120:512) */
+.group {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  width: calc(var(--space-84) * 4);
+  min-width: 0;
+}
+
+.caption {
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.7;
+  color: var(--color-text-inverse-muted);
+}
+
+/* 입력창 자체가 흰 칸(어두운 사진 위에서 가장자리가 보이도록). 아이콘은 칸 안 왼쪽에 겹친다 */
+.field {
+  position: relative;
+  display: flex;
+  align-items: center;
+  color: var(--color-text-secondary);
+}
+.field > svg {
+  position: absolute;
+  left: var(--space-21);
+  pointer-events: none;
+}
+
+.input {
+  flex: 1;
+  min-width: 0;
+  min-height: var(--control-input-h);
+  padding: 0 var(--space-21) 0 calc(var(--space-21) + var(--icon-md) + var(--space-10));
+  background: var(--color-bg-page);
+  border: var(--border-width-2) solid var(--color-bg-page);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-p1);
+  color: var(--color-text-primary);
+}
+.input:hover {
+  border-color: var(--color-border-subtle);
+}
+.input::placeholder {
+  color: var(--color-text-placeholder);
+}
+.input:focus,
+.input:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-text-inverse-accent);
+  outline-offset: var(--focus-ring-offset);
+}
+.input:disabled {
+  background: var(--color-bg-tint-4);
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+}
+
+.panel {
+  position: absolute;
+  top: calc(100% + var(--space-7));
+  left: 0;
+  right: 0;
+  z-index: 20;
+  max-height: 60vh;
+  overflow-y: auto;
+  border-radius: var(--radius-md);
+  color: var(--color-text-primary);
+}
+
+@media (max-width: 1100px) {
+  .group {
+    width: 100%;
+  }
+}

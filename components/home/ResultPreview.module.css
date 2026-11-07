@@ -1,0 +1,48 @@
+/* 결과 미리보기(Figma 121:706, 121:737) */
+.section {
+  background: var(--color-bg-page);
+  padding-block: var(--space-84);
+}
+.inner {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-28);
+}
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+.title {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+}
+.note {
+  font-size: var(--font-size-p2);
+  color: var(--color-text-secondary);
+}
+.card {
+  width: 100%;
+  max-width: calc(var(--space-84) * 9 - var(--space-14));
+  min-width: 0;
+}
+.action {
+  min-width: calc(var(--space-84) * 2 + var(--space-14));
+}
+.more {
+  margin-left: calc(var(--space-7) * -1);
+}
+
+@media (max-width: 767px) {
+  .section {
+    padding-block: var(--space-42);
+  }
+  .title {
+    font-size: var(--font-size-h5);
+  }
+  .inner {
+    gap: var(--space-21);
+  }
+}
