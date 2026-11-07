@@ -3,7 +3,8 @@
 import Anthropic from '@anthropic-ai/sdk';
 import { anthropicProvider } from '@/lib/ocr/anthropic';
 import { matchChip, matchProcessor } from '@/lib/ocr/mapping';
-import { normalizeExtraction } from '@/lib/ocr/normalize';
+import { withChipCheck, withProcessorCheck } from '@/lib/ocr/checks';
+import { normalizeExtraction, publicFields } from '@/lib/ocr/normalize';
 import { OcrModelError, selectProvider } from '@/lib/ocr/provider';
 import { createLimiter } from '@/lib/ocr/ratelimit';
 import { loadReference } from '@/lib/ocr/reference';
@@ -21,6 +22,7 @@ const LABELS = {
   values: '서류에 인쇄된 글자만 옮김. 서류에 없는 값은 null. 입력 전 꼭 확인',
   weight: '서류 한 장에 적힌 무게. 톤으로 적힌 경우만 kg로 바꿈(1톤 = 1000kg). 한 달 배출량과 다를 수 있음',
   mapping: '목록 이름과 정확히 같을 때만 연결. 못 찾으면 null, 읽은 글자는 그대로',
+  check: '확인됨: 서류의 칸 이름, 값 모양이 맞고 종류, 처리업체는 목록에도 있음. 철자까지 보장하지는 않음. 확인 필요: 그 밖의 경우(빈칸 포함). 모델 신뢰도는 쓰지 않음',
   privacy: '사진은 저장하지 않음',
 } as const;
 
@@ -70,21 +72,25 @@ export async function POST(req: Request) {
     return providerFail(e);
   }
 
-  const fields = normalizeExtraction(raw);
+  let fields = normalizeExtraction(raw);
   let chip_id: string | null = null, chip_label: string | null = null;
   let processor: { id: string; name: string } | null = null;
   try {
     const ref = await loadReference();
     chip_id = matchChip(ref.chips, fields.waste_type_raw);
     chip_label = chip_id ? ref.chipLabels.get(chip_id) ?? null : null;
+    fields = withChipCheck(fields, chip_id);   // 칩 목록에 연결되지 않은 종류는 '확인 필요'
     processor = matchProcessor(ref.processors, fields.processor_name_raw);
+    fields = withProcessorCheck(fields, processor?.id ?? null);   // 처리업체 목록에 없으면 '확인 필요'
   } catch (e) {
-    // 목록을 못 읽어도 읽은 값은 돌려준다(연결만 null)
+    // 목록을 못 읽어도 읽은 값은 돌려준다(연결만 null, 종류는 '확인 필요')
+    fields = withProcessorCheck(withChipCheck(fields, null), null);
     console.error('ocr reference error:', (e as { message?: string })?.message);
   }
 
+  // 모델 confidence는 틀린 값에도 높게 나와 응답에서 뺀다. 화면은 check, flags, needs_review를 쓴다
   return json({
-    ...fields,
+    ...publicFields(fields),
     mapped: { chip_id, chip_label, processor_id: processor?.id ?? null, processor_name: processor?.name ?? null },
     diagnosis_id: diagnosisId ?? null,
     provider: { name: provider.name, model: provider.model },
