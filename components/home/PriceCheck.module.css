@@ -1,7 +1,14 @@
-/* 처리비 점검(Figma 106:673 PC, 106:732 모바일). 막대는 transform scaleX만(공용 ScaleXBar, 입력 반응 400ms) */
+/* Hallmark · component: price check · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma Price Check 106:673 PC, 106:732 mobile · states: input empty, filled · motion: Reveal in order, bars scaleX once in view, input response 400ms */
+/* 처리비 점검. 막대는 transform scaleX만(공용 ScaleXBar). 한 화면 높이를 채우고 내용은 가운데(스크롤 스냅 구역) */
 .section {
+  display: flex;
+  align-items: center;
+  min-height: calc(100svh - var(--layout-header-h));
   background: var(--color-bg-page);
   padding-block: var(--space-84);
+}
+.section > :global(.container) {
+  width: 100%;
 }
 
 .layout {

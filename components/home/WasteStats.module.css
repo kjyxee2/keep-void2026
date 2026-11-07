@@ -1,7 +1,14 @@
-/* 폐기물 칩과 지표(Figma Quick Start 75:171 + Proof 75:190). 배경은 Figma 페이지 회색 */
+/* Hallmark · component: waste stats · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma Quick Start 75:171 + Proof 75:190 · states: chip checked, unknown · motion: Reveal in order (title, chips, stats), CountUp from zero once in view */
+/* 폐기물 칩과 지표. 배경은 Figma 페이지 회색. 한 화면 높이를 채우고 내용은 가운데(스크롤 스냅 구역) */
 .section {
+  display: flex;
+  align-items: center;
+  min-height: calc(100svh - var(--layout-header-h));
   background: var(--color-bg-subtle);
   padding-block: var(--space-84) var(--section-md);
+}
+.section > :global(.container) {
+  width: 100%;
 }
 
 .title {
@@ -11,10 +18,12 @@
 }
 
 .options {
+  margin-top: var(--space-21);
+}
+.fieldset {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, calc(var(--space-84) * 2 + var(--space-28) + var(--space-7))));
   gap: var(--space-14);
-  margin-top: var(--space-21);
   border: 0;
   padding: 0;
   min-width: 0;
@@ -24,12 +33,15 @@
 }
 
 .stats {
+  margin-top: var(--space-42);
+}
+.statsGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: var(--space-42);
-  margin-top: var(--space-42);
 }
-.stats[hidden] {
+.statsGrid[hidden],
+.stats:has(> [hidden]) {
   display: none;
 }
 .stat {
@@ -56,7 +68,7 @@
 }
 
 @media (max-width: 1100px) {
-  .options {
+  .fieldset {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
@@ -65,13 +77,15 @@
   .section {
     padding-block: var(--space-35) var(--space-42);
   }
-  .options {
+  .fieldset {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-10);
   }
-  .stats {
+  .statsGrid {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-28);
+  }
+  .stats {
     margin-top: var(--space-28);
   }
   .unknown {

@@ -1,10 +1,12 @@
-/* 히어로 보조 동작: 사업장 검색(Figma Search Group 170:3111, 열린 상태 120:512) */
+/* Hallmark · component: hero search · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma Search Group 170:3111, open list 120:512 · states: idle, hover, focus, disabled, open · motion: none */
+/* 히어로 보조 동작: 사업장 검색. 밝은 사진 위라 설명은 본문 글자색(대비), 입력창은 흰 칸에 기본 테두리 */
 .group {
   position: relative;
   display: flex;
   flex-direction: column;
   gap: var(--space-7);
-  width: calc(var(--space-84) * 4);
+  width: 100%;
+  max-width: calc(var(--space-84) * 4);
   min-width: 0;
 }
 
@@ -12,10 +14,10 @@
   font-size: var(--font-size-p4);
   font-weight: var(--font-weight-medium);
   line-height: 1.7;
-  color: var(--color-text-inverse-muted);
+  color: var(--color-text-primary);
 }
 
-/* 입력창 자체가 흰 칸(어두운 사진 위에서 가장자리가 보이도록). 아이콘은 칸 안 왼쪽에 겹친다 */
+/* 입력창 자체가 흰 칸. 아이콘은 칸 안 왼쪽에 겹친다 */
 .field {
   position: relative;
   display: flex;
@@ -34,20 +36,21 @@
   min-height: var(--control-input-h);
   padding: 0 var(--space-21) 0 calc(var(--space-21) + var(--icon-md) + var(--space-10));
   background: var(--color-bg-page);
-  border: var(--border-width-2) solid var(--color-bg-page);
+  border: var(--border-width-2) solid var(--color-border-default);
   border-radius: var(--radius-md);
   font-size: var(--font-size-p1);
   color: var(--color-text-primary);
 }
 .input:hover {
-  border-color: var(--color-border-subtle);
+  border-color: var(--color-border-control);
 }
 .input::placeholder {
   color: var(--color-text-placeholder);
 }
 .input:focus,
 .input:focus-visible {
-  outline: var(--focus-ring-width) solid var(--color-text-inverse-accent);
+  border-color: var(--color-border-focus);
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
   outline-offset: var(--focus-ring-offset);
 }
 .input:disabled {
@@ -70,6 +73,6 @@
 
 @media (max-width: 1100px) {
   .group {
-    width: 100%;
+    max-width: none;
   }
 }

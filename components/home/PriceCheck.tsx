@@ -1,10 +1,10 @@
 // 처리비 점검(Figma Price Check 106:673 PC, 106:732 모바일).
-// 공개 단가 막대가 이 화면의 유일한 자동 연출(ScaleXBar, 화면에 들어올 때 한 번).
+// 구역에 들어오면 제목, 설명, 입력, 표 순으로 나타나고(Reveal) 공개 단가 막대는 화면에 들어올 때 한 번 자란다(ScaleXBar).
 // 톤당 금액을 넣으면 "우리 공장" 빈 막대가 그 값만큼 채워진다(사용자 입력 반응, 400ms).
 // 축의 끝은 공개 단가와 입력값 중 가장 큰 값. 차액, 절감액 같은 계산은 하지 않는다.
 'use client';
 import { useId, useState } from 'react';
-import { MOTION, ScaleXBar } from '@/components/motion';
+import { MOTION, Reveal, ScaleXBar } from '@/components/motion';
 import { Footnote } from '@/components/ui/Footnote';
 import { Input } from '@/components/ui/Input';
 import type { HomePriceRow } from '@/lib/home-prices';
@@ -23,15 +23,20 @@ export function PriceCheck({ rows }: { rows: HomePriceRow[] }) {
     <section className={styles.section} aria-labelledby="home-price-title">
       <div className={`container ${styles.layout}`}>
         <div className={styles.intro}>
-          <h2 id="home-price-title" className={styles.title}>
-            지금 처리비,
-            <br />
-            공개된 기준과 비교해 보세요.
-          </h2>
-          <p className={styles.lead}>
-            계약서나 세금계산서의 톤당 금액을 넣으면 같은 폐기물의 공개 단가와 나란히 보여 드려요. 아래는 폐합성수지
-            기준입니다.
-          </p>
+          <Reveal index={0}>
+            <h2 id="home-price-title" className={styles.title}>
+              지금 처리비,
+              <br />
+              공개된 기준과 비교해 보세요.
+            </h2>
+          </Reveal>
+          <Reveal index={1}>
+            <p className={styles.lead}>
+              계약서나 세금계산서의 톤당 금액을 넣으면 같은 폐기물의 공개 단가와 나란히 보여 드려요. 아래는 폐합성수지
+              기준입니다.
+            </p>
+          </Reveal>
+          <Reveal index={2}>
           <Input
             id={inputId}
             label="지금 내는 톤당 처리비"
@@ -46,9 +51,10 @@ export function PriceCheck({ rows }: { rows: HomePriceRow[] }) {
           <p id={`${inputId}-note`} className="sr-only">
             입력한 금액은 저장하지 않고, 아래 표의 우리 공장 막대로만 보여 드려요.
           </p>
+          </Reveal>
         </div>
 
-        <div className={styles.table}>
+        <Reveal index={3} className={styles.table}>
           <ul role="list" className={styles.rows}>
             <li className={styles.row}>
               <div className={styles.label}>
@@ -90,7 +96,7 @@ export function PriceCheck({ rows }: { rows: HomePriceRow[] }) {
             고시 단가는 방치폐기물 보증보험 산출용이며 실제 계약가가 아닙니다. 공제조합, 상장사 단가는 공개 자료
             원값입니다.
           </Footnote>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

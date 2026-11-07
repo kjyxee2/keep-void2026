@@ -13,11 +13,17 @@
   --motion-data: var(--duration-data);
   --motion-stagger: var(--stagger-base);
   --motion-ease: var(--ease-standard);
+  /* 홈 히어로 슬라이드 교차(opacity): emphasis의 두 배 */
+  --motion-slow: calc(var(--duration-emphasis) * 2);
+  /* 홈 히어로 한 장이 머무는 시간(2초). 사진의 느린 확대(1.04에서 1)도 이 길이 */
+  --motion-dwell: calc(var(--duration-data) * 2.5);
   --color-focus: var(--color-border-focus);
   /* 이동 거리 (docs/REFIT_motion_tokens.css 값) */
   --motion-shift-step: 24px;
   --motion-shift-reveal: 8px;
   --motion-shift-expand: 4px;
+  /* 홈 히어로 글자 어절이 올라오는 거리 */
+  --motion-shift-hero: 36px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -27,6 +33,8 @@
     --motion-emphasis: 0ms;
     --motion-data: 0ms;
     --motion-stagger: 0ms;
+    --motion-slow: 0ms;
+    --motion-dwell: 0ms;
   }
 }
 
