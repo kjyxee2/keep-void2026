@@ -10,7 +10,8 @@
   border: var(--border-width-2) solid transparent;
   font-size: var(--font-size-p1);
   font-weight: var(--font-weight-bold);
-  line-height: 1.7;
+  /* 글자와 아이콘은 flex 가운데 정렬로 세로 중심을 맞춘다. 줄 높이는 1: 줄 상자가 아니라 버튼 높이가 세로 중심을 정한다 */
+  line-height: 1;
   text-align: left;
   cursor: pointer;
   user-select: none;
@@ -32,7 +33,10 @@
   width: 100%;
 }
 
+/* 라벨 안에 아이콘+글자(inline-flex)가 들어와도 기준선 정렬로 밀리지 않도록 라벨 자체를 flex로 둔다 */
 .label {
+  display: flex;
+  align-items: center;
   min-width: 0;
 }
 

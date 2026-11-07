@@ -84,10 +84,11 @@
   color: var(--color-text-secondary);
 }
 
+/* 같은 줄의 버튼과 글자 버튼은 높이를 같은 토큰으로 맞추고 줄 안에서 늘려 밑선을 같게 둔다 */
 .boxActions {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: stretch;
   justify-content: center;
   gap: var(--space-21);
   margin-top: var(--space-7);
@@ -108,12 +109,15 @@
 }
 
 .manual {
-  min-height: var(--touch-min);
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--control-button-h-sm);
   padding: 0 var(--space-7);
   border-radius: var(--radius-xs);
   color: var(--color-text-link);
   font-size: var(--font-size-p1);
   font-weight: var(--font-weight-bold);
+  line-height: 1;
   text-decoration: underline;
   text-underline-offset: var(--space-7);
 }
@@ -350,6 +354,7 @@
 .resultActions {
   display: flex;
   flex-wrap: wrap;
+  align-items: stretch;
   gap: var(--space-14);
 }
 
