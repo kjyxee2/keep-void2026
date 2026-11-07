@@ -138,6 +138,23 @@ export function rankComputed(opts: {
     .map((r, i) => ({ ...r, rank: i + 1, source: 'computed' as const }));
 }
 
+// 결과 화면 공개 단가(unit_prices 원문 행). 무게와 곱하지 않는다.
+// C01 폐합성수지: 결정 3의 4개 고정(U001 고시 처분, U035 고시 재활용, U161 공제조합 소각, U176 민간 소각 평균)
+// 다른 칩: 그 칩 폐기물군의 '고시 처리단가' 행 + '공제조합 소각처리단가(...)' 행, 공제조합 소각 행이 있을 때만(소각 비교) U176
+export const FIXED_PRICE_IDS: Record<string, string[]> = { C01: ['U001', 'U035', 'U161', 'U176'] };
+export const BURN_AVG_PRICE_ID = 'U176';
+export function referencePriceIds(
+  chip: { id: string; waste_group: string | null },
+  prices: Array<{ id: string; category: string | null; waste_group: string | null }>,
+) {
+  if (FIXED_PRICE_IDS[chip.id]) return FIXED_PRICE_IDS[chip.id];
+  const own = prices.filter(p => p.waste_group && p.waste_group === chip.waste_group);
+  const notice = own.filter(p => p.category === '고시 처리단가');
+  const mutual = own.filter(p => p.category?.startsWith('공제조합 소각처리단가'));
+  const burnAvg = mutual.length && prices.some(p => p.id === BURN_AVG_PRICE_ID) ? [BURN_AVG_PRICE_ID] : [];
+  return [...notice, ...mutual].map(p => p.id).concat(burnAvg).sort();
+}
+
 // 영업일 n일 뒤(Asia/Seoul 기준 주말 제외)
 // ponytail: 공휴일 미반영. 실제 SLA 운영 시 공휴일 표 추가
 export function addBusinessDays(from: Date, n: number) {

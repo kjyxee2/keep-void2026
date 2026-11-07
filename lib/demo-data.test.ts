@@ -3,7 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
-import { chipFlows, neighborCounts, routeShare, type Flow } from './fit.ts';
+import { chipFlows, neighborCounts, referencePriceIds, routeShare, type Flow } from './fit.ts';
 
 const root = new URL('../', import.meta.url);
 const zip = new URL('data/refit_demo_data.zip', root).pathname;
@@ -40,7 +40,7 @@ const flows: Flow[] = demoCsv('flows').map(r => ({
   method_by_other_group_permit: r.method_by_other_group_permit === 'True', region: r.region || null,
   waste_type: r.waste_type || null, waste_group: r.waste_group || null, weight: Number(r.weight),
 }));
-const chips = Object.fromEntries(demoCsv('waste_chips').map(c => [c.id, c]));
+const chips: Record<string, { id: string; waste_group: string }> = Object.fromEntries(demoCsv('waste_chips').map(c => [c.id, { id: c.id, waste_group: c.waste_group }]));
 const chipTypes: Record<string, string[]> = dataJson('chip_waste_types.json');
 const home: Record<string, { reports: number; burn_factories: number; recycle_factories: number }> = dataJson('home_waste_stats.json');
 const forChip = (id: string) => chipFlows(flows.filter(f => f.waste_group === chips[id].waste_group), chipTypes[id]);
@@ -65,4 +65,12 @@ test('칩 waste_types는 모두 그 칩의 폐기물군 안에 있음', () => {
     assert.ok(types.length > 0 && types.every(t => inGroup.has(t)), id);
   }
   assert.equal(Object.keys(chipTypes).length, Object.keys(chips).length);
+});
+
+test('공개 단가: 폐합성수지는 U001, U035, U161, U176 네 개', () => {
+  const prices = demoCsv('unit_prices').map(r => ({ id: r.id, category: r.category, waste_group: r.waste_group || null }));
+  assert.deepEqual(referencePriceIds(chips.C01, prices), ['U001', 'U035', 'U161', 'U176']);
+  assert.deepEqual(referencePriceIds(chips.C04, prices),
+    ['U018', 'U026', 'U039', 'U077', 'U087', 'U100', 'U148', 'U149', 'U150', 'U151', 'U176']);
+  for (const c of Object.values(chips)) assert.ok(referencePriceIds(c, prices).every(id => id !== 'U177'), c.id);
 });

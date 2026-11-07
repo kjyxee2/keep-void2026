@@ -1,7 +1,7 @@
 // 실행: npm run test:api (Node 22 타입 제거로 바로 실행)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { addBusinessDays, chipFlows, neighborCounts, pickStored, rankComputed, resolveCurrentMethod, routeShare, type Flow, type Proc } from './fit.ts';
+import { addBusinessDays, chipFlows, neighborCounts, referencePriceIds, pickStored, rankComputed, resolveCurrentMethod, routeShare, type Flow, type Proc } from './fit.ts';
 
 const f = (factory_id: string, processor_id: string | null, method: string, weight = 1, other = false): Flow =>
   ({ factory_id, processor_id, method, method_by_other_group_permit: other, region: '안산', weight });
@@ -65,4 +65,15 @@ test('business days skip weekend in KST', () => {
   // 2026-11-06(금) 15:00 KST → 11-10(화) 15:00 KST
   const due = addBusinessDays(new Date('2026-11-06T06:00:00Z'), 2);
   assert.equal(due.toISOString(), '2026-11-10T06:00:00.000Z');
+});
+
+test('reference prices: C01 fixed four, other chips own 고시 + 공제조합 rows, U176 only with a 소각 comparison', () => {
+  const u = (id: string, category: string, waste_group: string | null) => ({ id, category, waste_group });
+  const prices = [u('U001', '고시 처리단가', null), u('U035', '고시 처리단가', '폐합성수지류'), u('U096', '고시 처리단가', '폐합성수지류'),
+    u('U161', '공제조합 소각처리단가(일반)', '폐합성수지류'), u('U129', '지정 공공처리시설 반입수수료', '폐합성수지류'),
+    u('U018', '고시 처리단가', '폐유'), u('U148', '공제조합 소각처리단가(지정)', '폐유'), u('U121', '지정 공공처리시설 반입수수료', '폐유'),
+    u('U052', '고시 처리단가', '폐목재'), u('U176', '민간 평균 처리단가', null), u('U177', '민간 평균 처리단가', null)];
+  assert.deepEqual(referencePriceIds({ id: 'C01', waste_group: '폐합성수지류' }, prices), ['U001', 'U035', 'U161', 'U176']);
+  assert.deepEqual(referencePriceIds({ id: 'C04', waste_group: '폐유' }, prices), ['U018', 'U148', 'U176']);
+  assert.deepEqual(referencePriceIds({ id: 'C08', waste_group: '폐목재' }, prices), ['U052']);   // 공제조합 소각 행 없음 → U176 없음
 });

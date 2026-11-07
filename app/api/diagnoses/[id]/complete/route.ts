@@ -17,7 +17,7 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
 
     const flows = await diagnosisFlows(diag);
     const method = resolveCurrentMethod(diag.current_method, flows.chip).method;
-    const [ranked, prices] = await Promise.all([computeCandidates(diag, flows.group, method), referencePrices(diag.waste_group)]);
+    const [ranked, prices] = await Promise.all([computeCandidates(diag, flows.group, method), referencePrices(diag)]);
     const n = neighborCounts(flows.chip);   // 칩 원 표기 기준, 본인 공장 포함(홈 칩 통계와 같은 기준)
 
     // 다시 시도해도 같은 결과가 되도록 upsert(중간 실패 대비)

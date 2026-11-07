@@ -1,7 +1,7 @@
 // 진단 결과 조립(complete, GET 공용). 금액 계산 없음.
 import { db, fetchAll, LABELS } from './server';
 import {
-  BURN_METHODS, EXCLUDED_GROUPS, chipFlows, pickStored, rankComputed, resolveCurrentMethod, routeShare,
+  BURN_METHODS, EXCLUDED_GROUPS, chipFlows, pickStored, rankComputed, referencePriceIds, resolveCurrentMethod, routeShare,
   type Flow, type Proc, type Ranked,
 } from './fit';
 
@@ -36,10 +36,13 @@ export async function diagnosisFlows(diag: Diagnosis): Promise<DiagFlows> {
   return { group, chip: chipFlows(group, chip?.waste_types as string[] | null) };
 }
 
-export async function referencePrices(group: string) {
-  const { data, error } = await db().from('unit_prices').select('*').eq('waste_group', group).order('id');
+// 공개 단가 원문 행(규칙은 lib/fit.ts referencePriceIds). unit_prices는 177행이라 한 번에 받아 고른다
+export async function referencePrices(diag: Pick<Diagnosis, 'chip_id' | 'waste_group'>) {
+  const { data, error } = await db().from('unit_prices').select('*').order('id');
   if (error) throw error;
-  return data ?? [];
+  const rows = data ?? [];
+  const ids = new Set(referencePriceIds({ id: diag.chip_id ?? '', waste_group: diag.waste_group }, rows));
+  return rows.filter(r => ids.has(r.id));
 }
 
 async function origin(diag: Diagnosis) {
@@ -99,7 +102,7 @@ export async function buildResult(diag: Diagnosis, full: boolean, flows?: DiagFl
   const [{ data: result }, cards, prices, { data: chip }, { data: volume }] = await Promise.all([
     db().from('diagnosis_results').select('*').eq('diagnosis_id', diag.id).maybeSingle(),
     candidateCards(diag.id),
-    referencePrices(group),
+    referencePrices(diag),
     db().from('waste_chips').select('id,label,display_text').eq('id', diag.chip_id ?? '').maybeSingle(),
     db().from('volume_options').select('id,label').eq('id', diag.volume_option_id ?? '').maybeSingle(),
   ]);
