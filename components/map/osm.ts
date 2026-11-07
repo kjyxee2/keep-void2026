@@ -9,6 +9,9 @@ import type { Bounds, LngLat } from '@/lib/map-geo';
 import { defineDotLayer, readPaint, type DotLayer } from './canvas';
 import type { MapHandle, MapOptions, MapProvider, MarkerSpec, OverlayLayer } from './provider';
 
+/** Leaflet 묶음은 이 파일이 실릴 때 바로 받기 시작한다(지도 자료 요청과 나란히) */
+const leafletModule = typeof window === 'undefined' ? null : import('leaflet');
+
 const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
 const ATTRIBUTION = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> 기여자';
 /** 타일이 하나도 안 오고 이만큼 실패하거나, 이 시간 안에 하나도 안 오면 정적 윤곽으로 바꾼다 */
@@ -25,7 +28,7 @@ export const osmProvider: MapProvider = {
   id: 'osm-leaflet',
   attribution: ATTRIBUTION,
   async create(el: HTMLElement, opts: MapOptions, signal?: AbortSignal): Promise<MapHandle> {
-    const L = (await import('leaflet')).default;
+    const L = (await (leafletModule ?? import('leaflet'))).default;
     if (signal?.aborted) throw new DOMException('지도 만들기 취소', 'AbortError');
     const reduce = reducedMotion();
 
