@@ -1,16 +1,21 @@
 """data/demo CSV와 summary.json을 참고 테이블 INSERT SQL로 만든다(명세 2-7).
 
 사용:
-  python3 -I scripts/seed.py data/demo out_dir/
+  python3 -I scripts/seed.py data/demo out_dir/ [--reset]
   for f in out_dir/*.sql; do supabase db query --remote --yes -f "$f"; done   # 파일 이름 순 = FK 순
+
+--reset: 데모 데이터를 새 버전으로 바꿀 때. 0_reset.sql이 참고 테이블을 비운다.
+         앱 테이블(진단, 요청 등)에 행이 하나라도 있으면 예외를 내고 아무것도 지우지 않는다.
 
 빈 칸은 NULL. 'True'/'False', JSON 문자열은 Postgres가 열 타입으로 변환한다.
 테이블에 이미 행이 있으면 그 파일은 예외를 내고 아무것도 넣지 않는다(중복 시드 방지).
-waste_chips, volume_options는 마대 무게(기획 결정, 명세 2-9) 확정 후 따로 넣는다.
 """
 import csv, json, pathlib, sys
 
-TABLES = ['factories', 'processors', 'flows', 'fit_candidates', 'group_fit', 'unit_prices']  # FK 순서
+TABLES = ['factories', 'processors', 'flows', 'fit_candidates', 'group_fit', 'unit_prices',
+          'waste_chips', 'volume_options']  # FK 순서(README 3절)
+APP_TABLES = ['profiles', 'diagnoses', 'diagnosis_results', 'diagnosis_candidates', 'connection_requests',
+              'request_events', 'group_memberships', 'demand_listings', 'events']
 BATCH = 500
 
 
@@ -23,9 +28,19 @@ def guard(t):
             f"raise exception '{t} already seeded'; end if; end $$;\n")
 
 
-def main(src, out):
+def reset_sql():
+    checks = ' or '.join(f'exists (select 1 from {t})' for t in APP_TABLES)
+    # 앱 테이블이 비었음을 확인했으므로 cascade는 참고 테이블만 비운다
+    return (f"begin;\ndo $$ begin if {checks} then "
+            f"raise exception 'app tables have rows; refusing to reset reference data'; end if; end $$;\n"
+            f"truncate {', '.join(TABLES)}, app_summary cascade;\ncommit;\n")
+
+
+def main(src, out, reset=False):
     src, out = pathlib.Path(src), pathlib.Path(out)
     out.mkdir(parents=True, exist_ok=True)
+    if reset:
+        (out / '0_reset.sql').write_text(reset_sql(), encoding='utf-8')
     for i, t in enumerate(TABLES, 1):
         rows = list(csv.reader(open(src / f'{t}.csv', encoding='utf-8-sig', newline='')))
         cols, body = rows[0], rows[1:]
@@ -44,4 +59,4 @@ def main(src, out):
 
 
 if __name__ == '__main__':
-    main(*sys.argv[1:3])
+    main(sys.argv[1], sys.argv[2], '--reset' in sys.argv[3:])
