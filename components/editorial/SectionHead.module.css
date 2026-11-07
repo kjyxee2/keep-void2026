@@ -1,0 +1,56 @@
+/* Hallmark · component: editorial section head · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma Editorial/Section Head 265:5502 (PC label column 200, mobile stacked, optional divider) · states: light, dark · motion: none */
+.head {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-42);
+  width: 100%;
+  min-width: 0;
+}
+.headline {
+  color: var(--color-text-primary);
+  overflow-wrap: break-word;
+  min-width: 0;
+  text-wrap: balance;
+}
+/* Editorial/Headline: 56/32 SemiBold, 행간 1.15, 자간 -1% */
+.editorial {
+  font-size: var(--font-size-editorial-headline);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+/* Pages v2: H2 40 Bold (모바일 H5 26) */
+.h2 {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+}
+.sentence {
+  font-size: var(--font-size-p1);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+.divider {
+  border: 0;
+  border-top: var(--border-width-1) solid var(--color-border-default);
+}
+.dark .headline,
+.dark .sentence {
+  color: var(--color-text-inverse);
+}
+.dark .divider {
+  border-top-color: var(--color-border-on-dark-subtle);
+}
+
+@media (max-width: 767px) {
+  .head {
+    gap: var(--space-28);
+  }
+  .h2 {
+    font-size: var(--font-size-h5);
+    line-height: 1.4;
+  }
+  .sentence {
+    font-size: var(--font-size-p2);
+  }
+}
