@@ -1,15 +1,11 @@
 import type { Metadata, Viewport } from 'next';
-import localFont from 'next/font/local';
 import { Footer } from '@/components/layout/Footer';
 import { Header } from '@/components/layout/Header';
 import './globals.css';
 
-const pretendard = localFont({
-  src: '../public/fonts/PretendardVariable.woff2',
-  display: 'swap',
-  weight: '45 920',
-  variable: '--font-pretendard',
-});
+// 글꼴은 styles/fonts.css의 Pretendard 동적 서브셋(unicode-range 92조각). 화면에 쓰인 글자가 든 조각만 내려받는다.
+// 첫 화면 제목에 가장 많이 쓰이는 두 조각(90: 자주 쓰는 한글, 91: 라틴 글자와 숫자)만 먼저 받는다.
+const PRELOAD_FONTS = ['/fonts/pretendard/PretendardVariable.subset.90.woff2', '/fonts/pretendard/PretendardVariable.subset.91.woff2'];
 
 export const metadata: Metadata = {
   title: 'RE:FIT',
@@ -23,8 +19,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="ko" className={pretendard.variable} suppressHydrationWarning>
+    <html lang="ko" suppressHydrationWarning>
       <head>
+        {PRELOAD_FONTS.map((href) => (
+          <link key={href} rel="preload" as="font" type="font/woff2" href={href} crossOrigin="anonymous" />
+        ))}
         {/* 모션 숨김 상태는 스크립트가 있을 때만(styles/motion.css .js) */}
         <script dangerouslySetInnerHTML={{ __html: "document.documentElement.classList.add('js')" }} />
       </head>
