@@ -1,4 +1,4 @@
-/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · route: / · hero: Figma 75:150 photo-first, headline + one sentence + 서류 사진으로 시작 + 사업장 검색 · signature: 신고 자료 칩 지표와 공개 단가 막대 · motion: one auto reveal (price bars), CountUp on chip change only · surface: absolute */
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · route: / · hero: Figma 75:150 photo-first, headline + one sentence + 서류 사진으로 시작 + 사업장 검색 · signature: 신고 자료 칩 지표와 공개 단가 막대 · motion: hero word-by-word rise and photo scale-in, each section reveals in order on entry (Reveal stagger, CountUp and price bars when in view), html scroll-snap y proximity · surface: absolute */
 /* Hallmark · pre-emit critique: every number is a home_waste_stats or unit_prices raw value, no arithmetic on money · weakest: result preview is a static copy of the documented F0001 response */
 /* Hallmark · waive 39b · hero 서류 사진으로 시작 button at 56px · Figma hero 75:150 draws the button and the search field at one height (60px); the token --control-input-h (56px) keeps both actions level */
 /* Hallmark · waive 77 · 진단하면 이렇게 나와요 card at about half width · Figma 121:706 shows the candidate card at the width the result page uses, so the preview reads as the real card, not a widened mock */
@@ -9,4 +9,20 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+}
+
+/* 구역 전환 보정: 홈이 열려 있을 때만 문서 스크롤에 느슨한 스냅(proximity). 각 구역은 헤더 아래에 맞춰 선다 */
+:global(html):has(.main) {
+  scroll-snap-type: y proximity;
+}
+.main > section {
+  scroll-snap-align: start;
+  scroll-margin-top: var(--layout-header-h);
+}
+
+/* 줄임 모드: 스냅 해제 */
+@media (prefers-reduced-motion: reduce) {
+  :global(html):has(.main) {
+    scroll-snap-type: none;
+  }
 }

@@ -41,3 +41,20 @@ export function SearchIcon() {
     </Svg>
   );
 }
+
+export function PauseIcon() {
+  return (
+    <Svg>
+      <path d="M8 5v14" />
+      <path d="M16 5v14" />
+    </Svg>
+  );
+}
+
+export function PlayIcon() {
+  return (
+    <Svg>
+      <path d="M7 4.5v15l12-7.5z" />
+    </Svg>
+  );
+}

@@ -1,5 +1,5 @@
-/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · posture: restrained · surface: footer (logo, slogan, one source line, team) · motion: none */
-/* Hallmark · waive 26b · no :active or :disabled rules here · the footer's only control is the home logo link, which has no disabled state; its hover and active come from Logo.module.css */
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · posture: restrained · surface: footer (logo and slogan left, three link columns right, one team line and one source line) · motion: none */
+/* Hallmark · waive 26b · no :disabled rules here · the footer holds only links (home logo, nine site links); links have hover, active and focus-visible and no disabled state */
 .footer {
   margin-top: auto;
   background: var(--color-bg-subtle);
@@ -7,20 +7,23 @@
 }
 .inner {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
-  gap: var(--space-28) var(--space-56);
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: var(--space-42) var(--space-84);
   max-width: calc(var(--container-full) + var(--layout-gutter) * 2);
   margin-inline: auto;
-  padding: var(--space-56) var(--layout-gutter);
+  padding: var(--space-70) var(--layout-gutter) var(--space-42);
 }
+
 .brand {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: var(--space-10);
+  gap: var(--space-14);
 }
 .logo {
   display: inline-flex;
+  min-height: var(--touch-min);
+  align-items: center;
   border-radius: var(--radius-xs);
 }
 .logo:focus-visible {
@@ -28,24 +31,84 @@
   outline-offset: var(--focus-ring-offset);
 }
 .slogan {
-  font-size: var(--font-size-p3);
+  font-size: var(--font-size-p2);
+  font-weight: var(--font-weight-medium);
   color: var(--color-text-secondary);
 }
-.sources {
-  align-self: end;
+
+/* 사이트 구조 3열 */
+.columns {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-28);
+}
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  min-width: 0;
+}
+/* 열 제목: 본문보다 한 단계 작은 글자, 문장 대소문자 그대로 */
+.colTitle {
   font-size: var(--font-size-p4);
-  line-height: 1.6;
+  font-weight: var(--font-weight-semibold);
   color: var(--color-text-tertiary);
 }
-.team {
+.list {
+  display: flex;
+  flex-direction: column;
+}
+.link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--touch-min);
+  margin-left: calc(var(--space-7) * -1);
+  padding-inline: var(--space-7);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-primary);
+}
+.link:hover {
+  color: var(--color-text-brand);
+  background: var(--color-bg-tint-4);
+}
+.link:active {
+  background: var(--color-bg-tint-2);
+}
+.link:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+
+/* 아래 줄: 팀 표기, 출처 안내 */
+.bottom {
   grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-7) var(--space-28);
   padding-top: var(--space-21);
   border-top: var(--border-width-1) solid var(--color-border-default);
+}
+.team,
+.note {
   font-size: var(--font-size-p4);
   color: var(--color-text-tertiary);
 }
+
 @media (max-width: 767px) {
   .inner {
     grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-35);
+    padding-block: var(--space-42) var(--space-35);
+  }
+  /* 로고, 열 3개를 세로로, 아래 줄 */
+  .columns {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--space-21);
+  }
+  .bottom {
+    flex-direction: column;
   }
 }

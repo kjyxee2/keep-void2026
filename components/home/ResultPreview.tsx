@@ -1,5 +1,6 @@
 // 결과 미리보기(Figma Result Preview 121:706 PC, 121:737 모바일).
-// 값은 docs/api.md의 실제 진단 응답 예(F0001 성곡동, 폐합성수지)의 1위 후보 그대로. 정지 화면(연출 없음)
+// 값은 docs/api.md의 실제 진단 응답 예(F0001 성곡동, 폐합성수지)의 1위 후보 그대로. 구역에 들어오면 제목, 카드, 링크 순으로 나타난다(Reveal)
+import { Reveal } from '@/components/motion';
 import { Button } from '@/components/ui/Button';
 import { CandidateCard } from '@/components/ui/CandidateCard';
 import styles from './ResultPreview.module.css';
@@ -18,15 +19,15 @@ export function ResultPreview({ startHref }: { startHref: string }) {
   return (
     <section className={styles.section} aria-labelledby="home-preview-title">
       <div className={`container ${styles.inner}`}>
-        <div className={styles.head}>
+        <Reveal index={0} className={styles.head}>
           <h2 id="home-preview-title" className={styles.title}>
             진단하면 이렇게 나와요
           </h2>
           <p className={styles.note}>
             {PREVIEW_EXAMPLE.dong} {PREVIEW_EXAMPLE.waste} 공장 예시입니다.
           </p>
-        </div>
-        <div className={styles.card}>
+        </Reveal>
+        <Reveal index={1} className={styles.card}>
           <CandidateCard
             rank={c.rank}
             name={c.name}
@@ -40,15 +41,15 @@ export function ResultPreview({ startHref }: { startHref: string }) {
               </Button>
             }
           />
-        </div>
-        <div className={styles.links}>
+        </Reveal>
+        <Reveal index={2} className={styles.links}>
           <Button href={exampleHref} variant="text" className={styles.more}>
             전체 결과 예시 보기
           </Button>
           <Button href="/how" variant="text" className={styles.more}>
             어떻게 찾나요
           </Button>
-        </div>
+        </Reveal>
       </div>
     </section>
   );
