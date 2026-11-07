@@ -1,0 +1,27 @@
+{
+ "projection": "equirectangular",
+ "formula": "x = (lng - minLng) * cos(meanLat) * scale; y = (maxLat - lat) * scale",
+ "minLng": 126.570864,
+ "maxLng": 126.822491,
+ "minLat": 37.236628,
+ "maxLat": 37.334383,
+ "meanLat": 37.2855055,
+ "cosMeanLat": 0.7956267563742949,
+ "scale": 4994.975708125251,
+ "viewBox": [
+  0,
+  0,
+  1000.0,
+  488.28385034778074
+ ],
+ "pad_deg": 0.006,
+ "dot_source": "research/waste/demo/factories.csv coord_verified=True (1138)",
+ "simplify": "Douglas-Peucker tolerance 0.8 px (shapely simplify), industrial polygons unioned, gaps under ~40 m closed by buffer +/-0.0004 deg, parts under 60 px^2 dropped",
+ "n_paths": 18,
+ "n_water_polys": 3,
+ "water_source": "natural=water ways and relations (incl. 시화호 relation 4860085), Overpass mirror overpass.kumi.systems timestamp_osm_base 2026-07-28T02:16:18Z, parts under 400 px^2 dropped",
+ "n_coast_lines": 2,
+ "n_industrial_polys": 14,
+ "source": "OpenStreetMap via Overpass API, timestamp_osm_base 2026-11-07T13:14:06Z",
+ "license": "© OpenStreetMap contributors, ODbL"
+}
