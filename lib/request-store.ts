@@ -8,6 +8,8 @@ export type RequestSummary = {
   chip_label: string;
   weight_kg_per_month: number;
   phone_masked: string;
+  /** 진단 공장의 실제 동(없으면 null). 완료 화면 "RE:FIT 순환 공장 {동}" 배지에만 */
+  factory_dong?: string | null;
 };
 
 const PREFIX = 'refit:request:';

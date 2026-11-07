@@ -17,6 +17,7 @@ export function RequestSheet({
   open,
   onClose,
   candidate,
+  factoryDong = null,
   diagnosisId,
   chipLabel,
   weightKg,
@@ -25,6 +26,8 @@ export function RequestSheet({
   open: boolean;
   onClose: () => void;
   candidate: Candidate;
+  /** 진단에 고른 신고 공장의 동(본인 응답 user_input.factory.dong). 완료 화면 배지에만 쓴다 */
+  factoryDong?: string | null;
   diagnosisId: string;
   chipLabel: string;
   weightKg: number;
@@ -91,6 +94,7 @@ export function RequestSheet({
         chip_label: chipLabel,
         weight_kg_per_month: weightKg,
         phone_masked: maskPhone(p),
+        factory_dong: factoryDong,
       });
       router.push(`/request/${res.id}`);
     } catch (err) {

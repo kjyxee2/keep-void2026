@@ -1,30 +1,54 @@
 // 결과 화면(Figma 76:168 PC, 76:11 모바일). 서버가 공유 보기 값을 먼저 그리고,
 // 이 브라우저에 진단 토큰이 있으면 전체 응답과 같이 맡기기 묶음을 다시 받아 바꾼다.
 'use client';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, type ReactNode } from 'react';
 import { Button } from '@/components/ui/Button';
+import { CandidateCard } from '@/components/ui/CandidateCard';
+import { Tag } from '@/components/ui/Tag';
 import { Footnote } from '@/components/ui/Footnote';
 import { EmptyState } from '@/components/ui/States';
 import { RequestSheet } from '@/components/request/RequestSheet';
 import { getDiagnosis, getGroup, tokenStore } from '@/lib/api-client';
 import {
+  ANSAN_CANDIDATE,
   EMPTY_CANDIDATES,
+  candidateEvidence,
   SOURCE_REPORTS,
   neighborsBurnLabel,
   neighborsRecycleLabel,
   num,
   summaryLines,
-  type GroupItem,
-  type GroupsResponse,
 } from '@/lib/result-copy';
-import type { DiagnosisResult } from '@/lib/types';
+import type { Candidate, DiagnosisResult, GroupItem } from '@/lib/types';
 import { GroupFit } from './GroupFit';
 import { ReferencePrices } from './ReferencePrices';
-import { ResultCandidate } from './ResultCandidate';
 import { RouteBar } from './RouteBar';
 import { ShareButton } from './ShareButton';
 import { SwitchGuide } from './SwitchGuide';
 import styles from './result.module.css';
+
+/** 추천 이유 목록. 이웃 수 이유는 근거 한 줄과 같은 문장이라 목록에서 뺀다 */
+const reasonTexts = (c: Candidate) =>
+  (c.reasons ?? []).filter((r) => r && r.type !== 'neighbors_same_group' && typeof r.text === 'string' && r.text).map((r) => r.text);
+
+function ResultCandidate({ candidate: c, tags, action }: { candidate: Candidate; tags?: ReactNode; action?: ReactNode }) {
+  return (
+    <CandidateCard
+      rank={c.rank}
+      headingId={`cand-${c.candidate_id}`}
+      name={c.name}
+      region={c.sigungu ?? '지역 정보 없음'}
+      meta={[c.distance_km == null ? '거리 정보 없음' : `직선 ${c.distance_km}km`]}
+      neighbors={c.neighbors}
+      evidence={candidateEvidence(c.neighbors)}
+      reasons={reasonTexts(c)}
+      tags={tags}
+      note={c.note}
+      source={SOURCE_REPORTS}
+      action={action}
+    />
+  );
+}
 
 export function ResultView({ initial }: { initial: DiagnosisResult }) {
   const [data, setData] = useState(initial);
@@ -32,7 +56,11 @@ export function ResultView({ initial }: { initial: DiagnosisResult }) {
   const [viewer, setViewer] = useState<'unknown' | 'owner' | 'guest'>('unknown');
   const owner = viewer === 'owner';
   const [group, setGroup] = useState<GroupItem | null>(null);
-  const [sheet, setSheet] = useState<{ open: boolean; join: boolean }>({ open: false, join: true });
+  const [sheet, setSheet] = useState<{ open: boolean; join: boolean; candidateId: number | null }>({
+    open: false,
+    join: true,
+    candidateId: null,
+  });
   const id = initial.diagnosis_id;
 
   useEffect(() => {
@@ -53,7 +81,7 @@ export function ResultView({ initial }: { initial: DiagnosisResult }) {
         if (full.user_input.factory_id) {
           getGroup({ diagnosis_id: id }, ac.signal)
             .then((g) => {
-              const first = (g as unknown as GroupsResponse).groups?.[0];
+              const first = g.groups[0];
               if (first) setGroup(first);
             })
             .catch(() => {
@@ -68,15 +96,23 @@ export function ResultView({ initial }: { initial: DiagnosisResult }) {
     return () => ac.abort();
   }, [id]);
 
-  const openSheet = useCallback((join: boolean) => setSheet({ open: true, join }), []);
+  const openSheet = useCallback(
+    (join: boolean, candidateId: number | null = null) => setSheet({ open: true, join, candidateId }),
+    [],
+  );
   const closeSheet = useCallback(() => setSheet((s) => ({ ...s, open: false })), []);
 
   const u = data.user_input;
   const chip = u.chip.label;
   const cands = data.candidates;
   const top = cands[0];
-  const [line1, line2] = summaryLines(u.current_method, cands.length > 0);
+  const ansan = data.ansan_candidate ?? null;
+  const ansanInTop = ansan?.already_in_top ? ansan.candidate_id : null;
+  const ansanCard = ansan && !ansan.already_in_top ? ansan : null;
+  const [line1, line2] = summaryLines(u.current_method, cands.length > 0, u.current_processor);
   const canRequest = owner && !!top;
+  const sheetCandidate = (sheet.candidateId != null && ansanCard?.candidate_id === sheet.candidateId ? ansanCard : null) ?? top;
+  const ansanTag = <Tag tone="basis">{ANSAN_CANDIDATE.tag}</Tag>;
 
   return (
     <main id="main" className={styles.page}>
@@ -129,6 +165,7 @@ export function ResultView({ initial }: { initial: DiagnosisResult }) {
                     <ResultCandidate
                       key={c.candidate_id}
                       candidate={c}
+                      tags={c.candidate_id === ansanInTop ? ansanTag : undefined}
                       action={
                         c.rank === 1 && canRequest ? (
                           <Button onClick={() => openSheet(true)}>연결 요청</Button>
@@ -137,6 +174,31 @@ export function ResultView({ initial }: { initial: DiagnosisResult }) {
                     />
                   ))}
                   <p className={styles.small}>{data.labels.candidates}</p>
+                </div>
+              )}
+              {cands.length > 0 && !ansanInTop && (
+                <div className={styles.ansan} aria-labelledby="ansan-title" role="group">
+                  <h3 id="ansan-title" className={styles.subTitle}>
+                    {ANSAN_CANDIDATE.title}
+                  </h3>
+                  {ansanCard ? (
+                    <>
+                      <p className={styles.small}>{ANSAN_CANDIDATE.lead}</p>
+                      <ResultCandidate
+                        candidate={ansanCard}
+                        tags={ansanTag}
+                        action={
+                          owner ? (
+                            <Button variant="secondary" onClick={() => openSheet(true, ansanCard.candidate_id)}>
+                              연결 요청
+                            </Button>
+                          ) : undefined
+                        }
+                      />
+                    </>
+                  ) : (
+                    <p className={styles.small}>{ANSAN_CANDIDATE.none}</p>
+                  )}
                 </div>
               )}
               {viewer === 'guest' && cands.length > 0 && (
@@ -183,7 +245,8 @@ export function ResultView({ initial }: { initial: DiagnosisResult }) {
           <RequestSheet
             open={sheet.open}
             onClose={closeSheet}
-            candidate={top}
+            candidate={sheetCandidate}
+            factoryDong={u.factory?.dong ?? null}
             diagnosisId={id}
             chipLabel={chip}
             weightKg={u.weight_kg_per_month}

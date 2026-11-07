@@ -51,6 +51,13 @@
 .close:hover {
   background: var(--color-bg-subtle);
 }
+.close:active {
+  background: var(--color-bg-tint-4);
+}
+.close:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: 0;
+}
 .options {
   display: flex;
   flex-direction: column;
@@ -91,6 +98,15 @@
   flex-direction: column;
   gap: var(--space-21);
   min-width: 0;
+}
+.badge {
+  align-self: flex-start;
+  padding: var(--border-width-2) var(--space-10);
+  border: var(--border-width-1) solid var(--color-text-inverse-muted);
+  border-radius: var(--radius-xs);
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-inverse);
 }
 .headline {
   font-size: var(--font-size-h3);

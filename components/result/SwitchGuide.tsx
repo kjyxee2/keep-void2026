@@ -3,7 +3,7 @@
 'use client';
 import { useEffect, useId, useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import footnote from '@/components/ui/Footnote.module.css';
+import { Footnote } from '@/components/ui/Footnote';
 import { SWITCH_GUIDE as G } from '@/lib/result-copy';
 import styles from './result.module.css';
 
@@ -43,10 +43,7 @@ export function SwitchGuide() {
           <p className={styles.stepTitle}>{G.designated.title}</p>
           <p className={styles.stepBody}>{G.designated.body}</p>
         </div>
-        <p className={footnote.footnote}>
-          <span className={footnote.basis}>{G.sourceBasis}</span>
-          <span className={footnote.source}>{G.source}</span>
-        </p>
+        <Footnote basis="법령, 지침 원문">{G.source}</Footnote>
         <p className={styles.small}>{G.disclaimer}</p>
       </div>
       <div className={styles.linkRow}>

@@ -21,17 +21,34 @@ export function routeKind(method: string): RouteKind {
   return 'unknown';
 }
 
-/** 요약 문장(숫자 없음). 지역은 사용자의 지금 처리업체 위치를 모르므로 쓰지 않는다 */
-export function summaryLines(currentMethod: string, hasCandidates: boolean): [string, string] {
+/**
+ * 요약 문장(숫자 없음). 지역은 지금 맡기는 처리업체를 목록에서 알 때(processors.sigungu)만 쓴다.
+ * 처리업체 이름만 적었거나 모르면 지역 없이 쓴다(짐작하지 않음).
+ */
+export function summaryLines(
+  currentMethod: string,
+  hasCandidates: boolean,
+  processor?: { sigungu: string | null } | null,
+): [string, string] {
+  const where = processor?.sigungu ? `${processor.sigungu}의 ` : '';
   const first =
     currentMethod === '모름'
       ? '지금 처리 방식은 모른다고 하셨어요.'
-      : currentMethod === '에너지회수'
-        ? '지금은 에너지회수 업체로 보내고 있어요.'
-        : `지금은 ${currentMethod} 업체로 보내고 있어요.`;
+      : `지금은 ${where}${currentMethod} 업체로 보내고 있어요.`;
   const second = hasCandidates ? '같은 폐기물을 원료로 받는 업체가 있어요.' : '아직 원료로 보내는 기록이 없는 폐기물이에요.';
   return [first, second];
 }
+
+/** 연결 요청 완료 화면 배지. 진단에 고른 신고 공장의 실제 동이 있을 때만(없으면 배지 없이 기본 문구) */
+export const circularBadge = (dong: string | null | undefined) => (dong ? `RE:FIT 순환 공장 ${dong}` : null);
+
+/** 안산 안 후보 카드(결정 A). 순위는 그대로 두고 후보 목록 아래 한 칸 */
+export const ANSAN_CANDIDATE = {
+  tag: '안산 안 업체',
+  lead: '안산에서 나온 자원을 안산 안에서 받는 업체예요. 근거는 위 후보보다 적을 수 있어요.',
+  none: '같은 폐기물을 재활용으로 받는 안산 업체가 아직 없어요',
+  title: '안산 안 후보',
+};
 
 /** 후보 카드 근거 문구. 후보는 폐기물군 기준으로 세므로 "같은 폐기물군" */
 export const candidateEvidence = (neighbors: number) =>
@@ -65,7 +82,6 @@ export const SWITCH_GUIDE = {
     title: '지정폐기물은 30일 안에',
     body: '폐유 등 지정폐기물은 처리자만 바뀌어도 처리계획서와 수탁확인서를 다시 내야 해요.',
   },
-  sourceBasis: '출처 (법령, 지침 원문)',
   source: '배출자신고 업무처리지침 2025-12, 시행규칙 제18조',
   disclaimer: '절차 안내이며 법적 판단이 아닙니다. 최종 확인은 안산시 산단환경과에 해 주세요.',
 };
@@ -90,20 +106,6 @@ export function maskPhone(phone: string): string {
 
 // ---------- 같이 맡기기 묶음(GET /api/groups 실제 응답 모양) ----------
 
-export type GroupPoint = { coordinates: [number, number]; self: boolean };
-export type GroupItem = {
-  group_id: string;
-  waste_group: string;
-  match: 'member' | 'dong';
-  center: [number, number];
-  radius_km: number;
-  n_factories: number;
-  n_processors: number;
-  points: GroupPoint[];
-  label?: string;
-};
-export type GroupsResponse = { groups: GroupItem[]; labels?: Record<string, string> };
-
 /**
  * 점 그림용 좌표 변환(표시만, 값은 바꾸지 않음): [lng, lat] → 중심 기준 km(동쪽 +x, 북쪽 +y).
  * 위도 1도 110.574km, 경도 1도 111.320km x cos(위도)
@@ -124,7 +126,7 @@ export type PriceRowIn = {
   price_won: number;
   unit: string;
   year: number;
-  year_label?: string;
+  year_label?: string | null;
 };
 export type PriceRowOut<R extends PriceRowIn> = {
   /** 큰 숫자로 보여 줄 행: 2022 적용분, 없으면 2027 시행분, 고시가 아니면 그 행 */

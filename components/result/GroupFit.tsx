@@ -2,7 +2,8 @@
 // 점선 원은 중심에서 radius_km. 값은 API 원값 그대로.
 import { Button } from '@/components/ui/Button';
 import { Footnote } from '@/components/ui/Footnote';
-import { SOURCE_REPORTS, num, objectParticle, toLocalKm, type GroupItem } from '@/lib/result-copy';
+import { SOURCE_REPORTS, num, objectParticle, toLocalKm } from '@/lib/result-copy';
+import type { GroupItem } from '@/lib/types';
 import styles from './result.module.css';
 
 /** SVG 좌표계(가로 300, 세로 170). 원 반지름은 세로의 40% */

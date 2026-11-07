@@ -1,6 +1,6 @@
 'use client';
 // 1분 진단 흐름. 0 서류 사진(기본) → 1 품목 → 2 무게와 처리 방식 → 3 위치 → /result/:id
-// 서버에 보내는 값: POST /api/diagnoses { chip_id }, PATCH 무게, 출처, 처리 방식, 공장. 처리 방식은 서류에서 짐작하지 않는다.
+// 서버에 보내는 값: POST /api/diagnoses { chip_id }, PATCH 무게, 출처, 처리 방식, 지금 처리업체, 공장. 처리 방식은 서류에서 짐작하지 않는다.
 // 진행 상태는 진단 id별로 이 브라우저에 저장하고(lib/diagnose-state draftStore) 주소에 ?d=<id>를 남겨 새로고침 때 되살린다.
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
@@ -12,7 +12,7 @@ import { Option } from '@/components/ui/Option';
 import { Tag } from '@/components/ui/Tag';
 import { MethodIcon, WasteIcon, type MethodType, type WasteType } from '@/components/brand/Icon';
 import { SlideStep } from '@/components/motion';
-import { ApiError, completeDiagnosis, createDiagnosis, getChips, patchDiagnosis, tokenStore } from '@/lib/api-client';
+import { ApiError, completeDiagnosis, createDiagnosis, getChips, getFactory, patchDiagnosis, tokenStore } from '@/lib/api-client';
 import type { Chip, DiagnosisPatch, Method, WeightSource } from '@/lib/types';
 import {
   draftStore,
@@ -23,6 +23,7 @@ import {
   parseWeight,
   weightError,
   weightSourceFromDocument,
+  isFactoryId,
   type DocValues,
   type PickedFactory,
   type Step,
@@ -43,7 +44,8 @@ type Errors = Partial<Record<'chip' | 'weight' | 'method' | 'form', string>>;
 
 export type DiagnoseFlowProps = {
   chips: Chip[] | null;
-  initialFactory: PickedFactory | null;
+  /** ?factory= 로 넘어온 신고 공장 id. 브라우저에서 GET /api/factories/:id로 받아 3단계에 미리 채운다 */
+  initialFactoryId: string | null;
   initialStep: 0 | 1;
   resumeId: string | null;
 };
@@ -57,7 +59,7 @@ function apiMessage(e: unknown) {
   return '잠시 문제가 생겼어요. 다시 시도해 주세요.';
 }
 
-export function DiagnoseFlow({ chips: initialChips, initialFactory, initialStep, resumeId }: DiagnoseFlowProps) {
+export function DiagnoseFlow({ chips: initialChips, initialFactoryId, initialStep, resumeId }: DiagnoseFlowProps) {
   const router = useRouter();
   const [ready, setReady] = useState(!resumeId);
   const [chips, setChips] = useState<Chip[] | null>(initialChips);
@@ -73,7 +75,7 @@ export function DiagnoseFlow({ chips: initialChips, initialFactory, initialStep,
   const [weightSource, setWeightSource] = useState<WeightSource | null>(null);
   const [method, setMethod] = useState<Method | null>(null);
   const [processorName, setProcessorName] = useState('');
-  const [factory, setFactory] = useState<PickedFactory | null>(initialFactory);
+  const [factory, setFactory] = useState<PickedFactory | null>(null);
   const [doc, setDoc] = useState<DocValues | null>(null);
   const [fromPhoto, setFromPhoto] = useState(initialStep === 0);
   const [scanPhase, setScanPhase] = useState<DocumentScanPhase>('idle');
@@ -96,6 +98,20 @@ export function DiagnoseFlow({ chips: initialChips, initialFactory, initialStep,
     return () => ac.abort();
   }, [chips]);
 
+  // ?factory= 공장: 공개 열(GET /api/factories/:id)만 받아 3단계에 미리 채운다. 이미 고른 공장이 있으면 그대로
+  useEffect(() => {
+    if (resumeId || !isFactoryId(initialFactoryId)) return;
+    const ac = new AbortController();
+    getFactory(initialFactoryId, ac.signal)
+      .then((f) =>
+        setFactory((cur) => cur ?? { id: f.id, name: f.name, address: '', dong: f.dong, coord_verified: f.coord_verified, n_waste_types: f.n_waste_types ?? undefined }),
+      )
+      .catch(() => {
+        /* 못 받으면 3단계에서 직접 찾는다 */
+      });
+    return () => ac.abort();
+  }, [initialFactoryId, resumeId]);
+
   // 새로고침: ?d=<id>의 저장된 진행 상태와 토큰이 둘 다 있을 때만 되살린다
   useEffect(() => {
     if (!resumeId) return;
@@ -108,7 +124,7 @@ export function DiagnoseFlow({ chips: initialChips, initialFactory, initialStep,
       setWeightSource(d.weightSource);
       setMethod(d.method);
       setProcessorName(d.processorName);
-      setFactory(d.factory ?? initialFactory);
+      setFactory(d.factory ?? null);
       setDoc(d.doc);
       setFromPhoto(!!d.doc);
       setStep(d.step);
@@ -116,7 +132,7 @@ export function DiagnoseFlow({ chips: initialChips, initialFactory, initialStep,
       router.replace('/diagnose', { scroll: false });
     }
     setReady(true);
-  }, [resumeId, initialFactory, router]);
+  }, [resumeId, router]);
 
   // 진행 상태 저장(진단이 생긴 뒤부터)
   useEffect(() => {
@@ -251,10 +267,15 @@ export function DiagnoseFlow({ chips: initialChips, initialFactory, initialStep,
     }
     setBusy(true);
     try {
+      // 지금 맡기는 처리업체: 서류에서 목록 업체로 맞춰진 이름 그대로면 id, 고쳤거나 목록에 없으면 이름 원문만
+      const procName = processorName.trim().slice(0, 100);
+      const procId = doc?.processor_id && doc.processor_name && procName === doc.processor_name ? doc.processor_id : null;
       await patchDiagnosis(diagnosisId, {
         weight_kg_per_month: parseWeight(weight)!,
         current_method: method!,
         ...(weightSource ? { weight_source: weightSource } : {}),
+        current_processor_id: procId,
+        current_processor_name_raw: procId ? null : procName || null,
       });
       go(3);
     } catch (e) {
@@ -499,7 +520,7 @@ export function DiagnoseFlow({ chips: initialChips, initialFactory, initialStep,
                       maxLength={100}
                       value={processorName}
                       onChange={(e) => setProcessorName(e.target.value)}
-                      helper="서류에 적힌 이름이에요. 다르면 고쳐 주세요. 이 이름은 이 브라우저에만 남고 결과 계산에는 쓰지 않아요."
+                      helper="서류에 적힌 이름이에요. 다르면 고쳐 주세요. 추천 순위에는 쓰지 않고, 결과 요약에 지금 업체 지역을 적을 때만 써요."
                     />
                   </div>
                 )}
@@ -593,7 +614,7 @@ function FactoryCard({ factory, onClear, focus }: { factory: PickedFactory; onCl
     <div className={styles.factoryCard}>
       <p className={styles.factoryCaption}>선택한 사업장</p>
       <p ref={ref} tabIndex={-1} className={styles.factoryName}>{factory.name}</p>
-      <p className={styles.factoryAddr}>{factory.address}</p>
+      {factory.address && <p className={styles.factoryAddr}>{factory.address}</p>}
       <div className={styles.factoryPlace}>
         {!located && factory.dong && <span className={styles.dongBadge}>{factory.dong}</span>}
         <p className={styles.factoryNote}>

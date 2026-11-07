@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { EmptyState, Skeleton } from '@/components/ui/States';
 import { ApiError, cancelRequest } from '@/lib/api-client';
 import { requestStore, type RequestSummary } from '@/lib/request-store';
-import { num } from '@/lib/result-copy';
+import { circularBadge, num } from '@/lib/result-copy';
 import type { RequestStatus } from '@/lib/types';
 import styles from './request.module.css';
 
@@ -61,6 +61,8 @@ export function RequestDone({ id }: { id: string }) {
   }
 
   const step = status ? (STEP_OF[status] ?? -1) : 0;
+  // 진단에 고른 공장의 실제 동이 있을 때만 배지(없으면 기본 문구 그대로)
+  const badge = !cancelled ? circularBadge(data?.factory_dong) : null;
   const steps = [
     { title: '요청 보냄', when: '방금', body: data ? `${data.processor.name}에 연결 요청을 보냈어요.` : '연결 요청을 보냈어요.' },
     {
@@ -80,6 +82,7 @@ export function RequestDone({ id }: { id: string }) {
             <LogoSymbol decorative size="lg" className={styles.symbol} />
           </span>
           <div className={styles.bandText}>
+            {badge && <p className={styles.badge}>{badge}</p>}
             <h1 id="done-title" className={styles.headline}>
               {cancelled ? (
                 <span className={styles.line}>요청을 취소했어요.</span>

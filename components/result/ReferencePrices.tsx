@@ -10,11 +10,10 @@ import { mergeNoticeYears, num } from '@/lib/result-copy';
 import type { ReferencePrice } from '@/lib/types';
 import styles from './result.module.css';
 
-type Row = ReferencePrice & { year_label?: string; source?: string };
 
 const MAX_PRICE = 1_000_000_000;
 
-export function ReferencePrices({ rows, userPrice }: { rows: Row[]; userPrice: number | null | undefined }) {
+export function ReferencePrices({ rows, userPrice }: { rows: ReferencePrice[]; userPrice: number | null | undefined }) {
   const [open, setOpen] = useState(false);
   const [draft, setDraft] = useState('');
   const inputId = useId();
@@ -40,7 +39,8 @@ export function ReferencePrices({ rows, userPrice }: { rows: Row[]; userPrice: n
       {rows.length === 0 ? (
         <p className={styles.panelBody}>이 폐기물에 맞는 고시 단가 행이 없어요.</p>
       ) : (
-        <div className={styles.tableWrap}>
+        // 좁은 화면에서 옆으로 밀리는 표: 키보드로도 스크롤할 수 있게 초점을 받는다
+        <div className={styles.tableWrap} tabIndex={0} role="region" aria-label="공개 단가 표">
           <table className={styles.table}>
             <caption className="sr-only">공개 처리 단가. 실제 계약가가 아니며 무게와 곱하지 않아요</caption>
             <thead>

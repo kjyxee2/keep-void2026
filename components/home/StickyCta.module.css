@@ -28,3 +28,10 @@
   align-items: center;
   gap: var(--space-10);
 }
+
+/* 숨김, 보임 전환도 모션 줄이기에서는 즉시 */
+@media (prefers-reduced-motion: reduce) {
+  .bar {
+    transition: none;
+  }
+}

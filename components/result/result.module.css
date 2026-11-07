@@ -137,21 +137,16 @@
   flex-direction: column;
   gap: var(--space-14);
 }
-.reasonLabel {
-  font-size: var(--font-size-p4);
-  font-weight: var(--font-weight-bold);
-  color: var(--color-text-tertiary);
-}
-.reasonList {
+.ansan {
   display: flex;
   flex-direction: column;
-  gap: var(--space-7);
-  padding-left: var(--space-21);
-  list-style: disc;
+  gap: var(--space-10);
+  margin-top: var(--space-21);
 }
-.noteText {
-  display: inline-flex;
-  min-width: 0;
+.subTitle {
+  font-size: var(--font-size-h7);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
 }
 .sharedNote {
   display: flex;
@@ -199,6 +194,10 @@
 /* 단가 표 */
 .tableWrap {
   overflow-x: auto;
+}
+.tableWrap:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
 }
 .table {
   width: 100%;

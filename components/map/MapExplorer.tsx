@@ -14,7 +14,7 @@ import { MAP_CHIPS, type MapChip } from '@/lib/map-chips';
 import { inBounds, mainClusterBounds, type Bounds } from '@/lib/map-geo';
 import type { MapFactoriesResponse, MapFlowsResponse, MapProcessorsResponse, UnlocatedGroup } from '@/lib/types';
 import { MapLegend } from './MapLegend';
-import type { FactoryFeature, ProcessorFeature } from './markers';
+import type { FactoryFeature } from './markers';
 import { RegionBars, type RegionRow } from './RegionBars';
 import styles from './Map.module.css';
 
@@ -80,7 +80,7 @@ export function MapExplorer() {
       getMap('factories', g) as Promise<MapFactoriesResponse>,
       (getMap('flows', g) as Promise<MapFlowsResponse>).then((r) => r.coverage).catch(() => null),
     ]).then(([f, coverage]) => ({
-      factories: f.features as FactoryFeature[],
+      factories: f.features,
       coverage,
     }));
     inflight.current.set(c.key, p);
@@ -173,7 +173,7 @@ export function MapExplorer() {
                   bounds={view.bounds}
                   factories={(shown ?? all).factories}
                   dataKey={shown ? shownKey : MAP_CHIPS[0].key}
-                  processors={processors.features as ProcessorFeature[]}
+                  processors={processors.features}
                   onReady={onReady}
                   onTileFailure={onTileFailure}
                 />

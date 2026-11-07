@@ -2,28 +2,12 @@
 // 처리 방식은 모양과 색을 같이 쓴다(원 재활용, 사각 소각, 삼각 매립, 빈 원 미확인). 흑백에서도 모양으로 구분된다.
 import { methodBucket, type MapMethod } from '@/lib/map';
 import { clusterSize, type Cluster, type LngLat } from '@/lib/map-geo';
+import type { FactoryPointProps, PointFeature, ProcessorPointProps } from '@/lib/types';
 import type { MarkerSpec } from './provider';
 import styles from './Map.module.css';
 
-export type FactoryFeature = {
-  geometry: { coordinates: [number, number] };
-  properties: {
-    id: string;
-    name: string;
-    dong: string | null;
-    method?: string;
-  };
-};
-export type ProcessorFeature = {
-  geometry: { coordinates: [number, number] };
-  properties: {
-    id: string;
-    name: string;
-    sigungu?: unknown;
-    sido?: unknown;
-    method?: unknown;
-  };
-};
+export type FactoryFeature = PointFeature<FactoryPointProps>;
+export type ProcessorFeature = PointFeature<ProcessorPointProps>;
 
 export const METHOD_KIND: Record<MapMethod, 'recycle' | 'burn' | 'landfill' | 'unknown'> = {
   재활용: 'recycle',
@@ -45,7 +29,7 @@ export const METHOD_SHAPE: Record<MapMethod, string> = {
 };
 
 /** 공장 점 방식: 서버가 준 method(재활용, 소각, 매립, 미확인). 모르는 값은 미확인 */
-export const factoryMethod = (m: string | undefined): MapMethod => (m === '재활용' || m === '소각' || m === '매립' ? m : '미확인');
+export const factoryMethod = (m: string | null | undefined): MapMethod => (m === '재활용' || m === '소각' || m === '매립' ? m : '미확인');
 
 const esc = (s: string) => s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
 
@@ -116,9 +100,9 @@ export function clusterSpec(c: Cluster<FactoryFeature>, onZoom: (() => void) | u
 
 /** methodIcons: MethodIcon 마크업(재활용, 소각, 매립). MapView가 React 아이콘을 한 번 그려 넘긴다 */
 export function processorSpec(p: ProcessorFeature, methodIcons: Partial<Record<MapMethod, string>>): MarkerSpec {
-  const m = methodBucket(typeof p.properties.method === 'string' ? p.properties.method : null);
+  const m = methodBucket(p.properties.method);
   const icon = methodIcons[m] ?? '';
-  const where = [p.properties.sido, p.properties.sigungu].filter((x): x is string => typeof x === 'string').join(' ');
+  const where = [p.properties.sido, p.properties.sigungu].filter(Boolean).join(' ');
   return {
     id: p.properties.id,
     at: p.geometry.coordinates,

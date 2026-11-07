@@ -19,6 +19,7 @@ export type DocValues = {
 export type PickedFactory = {
   id: string;
   name: string;
+  /** 검색에서 고르면 주소가 있다. ?factory= 로 받은 공장(GET /api/factories/:id)은 주소 없이 '' */
   address: string;
   dong: string | null;
   coord_verified: boolean | null;
