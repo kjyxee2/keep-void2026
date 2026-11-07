@@ -1,0 +1,76 @@
+/* Hallmark · component: now route · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma 홈 v2 Section / 지금 가는 길 279:3945 PC, 279:4078 mobile (photo opener, one sentence, live map strip, five chips, three numbers) · states: chip checked, unknown · motion: Reveal in order (sentence, strip, chips, numbers), CountUp from zero once in view */
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--block-title-content);
+  padding-top: var(--editorial-section-gap);
+  background: var(--color-bg-page);
+}
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--block-title-content);
+}
+/* 섹션당 문장 하나: P2, text/secondary, 폭 680 */
+.sentence {
+  max-width: calc(var(--editorial-container) * 0.567);
+  font-size: var(--font-size-p2);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+.data {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-42);
+}
+.numbers {
+  width: 100%;
+}
+/* 숫자 3개: 균등 3열, 간격 48 */
+.numberGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: calc(var(--editorial-gap-24) * 2);
+}
+.numberGrid[hidden],
+.numbers:has(> [hidden]) {
+  display: none;
+}
+
+.unknown {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-21);
+  padding-top: var(--space-21);
+  border-top: var(--border-width-1) solid var(--color-border-default);
+}
+.unknownText {
+  flex: 1 1 0;
+  min-width: 0;
+  font-size: var(--font-size-p2);
+}
+
+@media (max-width: 767px) {
+  .section,
+  .content {
+    gap: var(--block-content);
+  }
+  .sentence {
+    max-width: none;
+  }
+  .data {
+    gap: var(--space-28);
+  }
+  .numberGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0;
+  }
+  .numberGrid > * {
+    padding-bottom: var(--space-21);
+  }
+  .unknown {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

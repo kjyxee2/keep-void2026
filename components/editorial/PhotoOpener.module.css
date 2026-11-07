@@ -1,0 +1,86 @@
+/* Hallmark · component: photo opener · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma Editorial/Photo Opener 278:3640 (full-width photo 560/420, label + two-line headline bottom left, bg/brand gradient 0 to 55 behind the copy) · states: none · motion: none · contrast: pass (gradient reaches 80% ink under the headline) */
+.opener {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  width: 100%;
+  height: var(--editorial-opener-h);
+  padding-bottom: var(--editorial-opener-pad);
+  overflow: hidden;
+  background: var(--color-bg-brand);
+  color: var(--color-text-inverse);
+}
+.photo {
+  object-fit: cover;
+  z-index: -2;
+}
+/* 아래쪽 그라데이션: 투명에서 bg/brand 55%(Figma), 맨 아래는 80%로 올려 흰 글자 대비 4.5:1 */
+.shade {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--editorial-shade-h);
+  z-index: -1;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    color-mix(in srgb, var(--color-bg-brand) 55%, transparent) 45%,
+    color-mix(in srgb, var(--color-bg-brand) 80%, transparent) 100%
+  );
+}
+.copy {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+  min-width: 0;
+}
+.label {
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.7;
+}
+.number {
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+}
+.headline {
+  max-width: calc(var(--editorial-container) * 0.64);
+  color: var(--color-text-inverse);
+  overflow-wrap: break-word;
+  min-width: 0;
+  text-wrap: balance;
+}
+.editorial {
+  font-size: var(--font-size-editorial-headline);
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+}
+.h2 {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+}
+
+@media (max-width: 767px) {
+  .copy {
+    gap: var(--editorial-gap-12);
+  }
+  .label {
+    font-size: var(--font-size-p4);
+  }
+  .number {
+    font-size: var(--font-size-h4);
+  }
+  .headline {
+    max-width: none;
+  }
+  .h2 {
+    font-size: var(--font-size-h5);
+    line-height: 1.4;
+  }
+}

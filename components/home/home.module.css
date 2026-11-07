@@ -1,8 +1,7 @@
-/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · route: / · hero: Figma 75:150 photo-first, headline + one sentence + 서류 사진으로 시작 + 사업장 검색 · signature: 신고 자료 칩 지표와 공개 단가 막대 · motion: hero word-by-word rise and photo scale-in, each section reveals in order on entry (Reveal stagger, CountUp and price bars when in view), html scroll-snap y proximity · surface: absolute */
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · route: / · hero: Figma 75:150 photo-first, headline + one sentence + 서류 사진으로 시작 + 사업장 검색 · sections: Figma 홈 v2 279:3918 editorial (photo opener, one sentence, live map strip, chips, numbers; opener, input and price table, accordion; dark capture grid) · signature: 신고 자료 칩 지표와 공개 단가 막대 · motion: hero word-by-word rise and photo scale-in, each section reveals in order on entry (Reveal stagger, CountUp and price bars when in view), html scroll-snap y proximity · surface: absolute */
 /* Hallmark · pre-emit critique: every number is a home_waste_stats or unit_prices raw value, no arithmetic on money · weakest: result preview is a static copy of the documented F0001 response */
 /* Hallmark · waive 39b · hero 서류 사진으로 시작 button at 56px · Figma hero 75:150 draws the button and the search field at one height (60px); the token --control-input-h (56px) keeps both actions level */
-/* Hallmark · waive 77 · 진단하면 이렇게 나와요 card at about half width · Figma 121:706 shows the candidate card at the width the result page uses, so the preview reads as the real card, not a widened mock */
-/* Hallmark · waive 78 · section heads at --font-size-h3/h4 under the 84px hero head · Figma RE:FIT v3 type ramp sets home section heads at 32 to 36px; the hero head is the only display size */
+/* Hallmark · waive 78 · section heads at --font-size-h2 on photo openers · Figma 홈 v2 279:3951 sets section heads at H2 40 (mobile H5 26) in white on the opener photo */
 /* Hallmark · dismissed F19 · four weights · Figma RE:FIT v3 text styles use Regular, Medium, SemiBold and Bold (same note as globals.css) */
 
 .main {

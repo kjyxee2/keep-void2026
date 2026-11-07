@@ -1,0 +1,28 @@
+/* Hallmark · component: media band · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma Editorial/Media Band 265:5491 (wide 1200x400, intro 1200x420, tall 588x368; bg/subtle placeholder, 1px border/default, radius/md) · states: none · motion: none */
+.band {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: var(--border-width-1) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-subtle);
+}
+.wide {
+  aspect-ratio: var(--editorial-ratio-wide);
+}
+.intro {
+  aspect-ratio: var(--editorial-ratio-intro);
+}
+.tall {
+  aspect-ratio: var(--editorial-ratio-tall);
+}
+.image {
+  object-fit: cover;
+}
+.top {
+  object-position: top;
+}
+.center {
+  object-position: center;
+}

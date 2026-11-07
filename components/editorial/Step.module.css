@@ -1,0 +1,79 @@
+/* Hallmark · component: editorial step · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma Editorial/Step 265:5547 and 08 기능 설명 v2 steps 278:3662, 278:3737 (number, name, one sentence, image 588x368 beside one verified number, accordion) · states: accordion closed, open · motion: accordion only */
+.step {
+  display: flex;
+  flex-direction: column;
+  gap: var(--block-title-content);
+  width: 100%;
+  min-width: 0;
+}
+/* 라벨 열의 단계 번호: Display 42 Bold, text/brand */
+.number {
+  display: block;
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+  color: var(--color-text-brand);
+}
+.name {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+  color: var(--color-text-primary);
+}
+.sentence {
+  font-size: var(--font-size-p1);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+}
+/* 이미지 열 588 : 글 열 588, 간격 24. 글은 세로 가운데 */
+.media {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--editorial-gap-24);
+  align-items: center;
+  width: 100%;
+}
+.image {
+  grid-column: 1;
+  grid-row: 1;
+}
+.stat {
+  grid-column: 2;
+  grid-row: 1;
+}
+.right .image {
+  grid-column: 2;
+}
+.right .stat {
+  grid-column: 1;
+}
+
+@media (max-width: 767px) {
+  .step {
+    gap: var(--editorial-gap-24);
+  }
+  .number {
+    font-size: var(--font-size-h4);
+  }
+  .name {
+    font-size: var(--font-size-h5);
+    line-height: 1.4;
+  }
+  .sentence {
+    font-size: var(--font-size-p2);
+  }
+  .media {
+    grid-template-columns: minmax(0, 1fr);
+    gap: var(--editorial-gap-16);
+  }
+  .image,
+  .right .image {
+    grid-column: 1;
+    grid-row: 1;
+  }
+  .stat,
+  .right .stat {
+    grid-column: 1;
+    grid-row: 2;
+  }
+}

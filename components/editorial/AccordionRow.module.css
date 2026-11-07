@@ -1,0 +1,94 @@
+/* Hallmark · component: accordion row · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma Editorial/Accordion Row 265:5590 (title + 2px chevron, 1px rules above and below, min height 56) · states: closed, open, hover, focus-visible · motion: body opacity and translateY 250ms on open, chevron rotate 250ms, reduced motion 0ms */
+.row {
+  width: 100%;
+  min-width: 0;
+  border-top: var(--border-width-1) solid var(--color-border-default);
+  border-bottom: var(--border-width-1) solid var(--color-border-default);
+}
+/* 여러 행을 쌓을 때 선을 겹친다 */
+.row + .row {
+  border-top: 0;
+}
+.summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--editorial-gap-16);
+  min-height: var(--control-input-h);
+  padding-block: var(--space-14);
+  list-style: none;
+  cursor: pointer;
+  color: var(--color-text-primary);
+}
+.summary::-webkit-details-marker {
+  display: none;
+}
+.summary:hover .title {
+  color: var(--color-text-brand);
+}
+.summary:focus-visible {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+.title {
+  font-weight: var(--font-weight-semibold);
+  line-height: 1.7;
+  min-width: 0;
+}
+.p1 .title {
+  font-size: var(--font-size-p1);
+}
+.p2 .title {
+  font-size: var(--font-size-p2);
+}
+.p3 .title {
+  font-size: var(--font-size-p3);
+}
+.chevron {
+  flex: none;
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+  color: var(--color-border-strong);
+  transform: rotate(0);
+  transition: transform var(--motion-base) var(--motion-ease);
+}
+.row[open] .chevron {
+  transform: rotate(180deg);
+}
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--editorial-gap-16);
+  padding-bottom: var(--space-21);
+  padding-right: var(--space-42);
+  font-size: var(--font-size-p3);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
+  opacity: 1;
+  transform: translateY(0);
+}
+.row[open] .body {
+  animation: accordion-in var(--motion-base) var(--motion-ease) both;
+}
+@keyframes accordion-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-shift-expand));
+  }
+}
+
+@media (max-width: 767px) {
+  .body {
+    padding-right: var(--editorial-gap-12);
+    padding-bottom: var(--space-21);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chevron {
+    transition: none;
+  }
+  .row[open] .body {
+    animation: none;
+  }
+}

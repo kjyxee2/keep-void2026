@@ -1,5 +1,5 @@
 // 홈 폐기물 칩 통계. 값은 GET /api/home-stats와 같은 home_waste_stats 원값(신고 건수 집계), 화면에서 계산하지 않는다.
-// 칩마다 보여 줄 지표 3개는 Figma 칩 프레임대로: 폐합성수지 75:190, 폐수처리오니 121:562, 폐활성탄 121:610, 폐유 121:658
+// 칩마다 보여 줄 지표 3개는 Figma 칩 프레임대로: 폐합성수지 홈 v2 279:3963(명사구), 폐수처리오니 121:562, 폐활성탄 121:610, 폐유 121:658
 // 순수 함수와 타입만(서버 읽기는 lib/home-data.ts)
 
 export type HomeChipName = '폐합성수지' | '폐수처리오니' | '폐활성탄' | '폐유';
@@ -31,9 +31,9 @@ const LAYOUT: Record<HomeChipName, { source: string; stats: { key: StatKey; labe
   폐합성수지: {
     source: SOURCE_BASE,
     stats: [
-      { key: 'burn_factories', label: '폐합성수지를 소각, 에너지회수 업체에 맡기는 안산 공장' },
-      { key: 'recycle_factories', label: '같은 폐합성수지를 원료 재활용 업체에 맡기는 안산 공장' },
-      { key: 'both_factories', label: '같은 폐합성수지를 재활용과 소각 양쪽에 신고한 공장. 바꿔 맡기는 공장이 이미 있어요' },
+      { key: 'burn_factories', label: '소각, 에너지회수 업체로' },
+      { key: 'recycle_factories', label: '원료 재활용 업체로' },
+      { key: 'both_factories', label: '양쪽 모두 신고' },
     ],
   },
   폐수처리오니: {
