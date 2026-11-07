@@ -182,6 +182,30 @@ status: `requested`, `contacted`, `sample`, `contracted`, `first_pickup`, `cance
 - 집계 기준은 결과 화면과 같다(칩 신고 원 표기, 폐유는 묶음 전체). `reports`는 신고 수, `*_factories`는 그 방식 신고가 하나라도 있는 고유 공장 수, `*_pct`는 1/k 가중 합을 그 칩 전체 신고 수(지역 미확인 포함)로 나눈 값
 - `chip_id`로 진단 시작(`POST /api/diagnoses { chip_id }`)에 그대로 쓴다
 
+## 같이 맡기기 묶음: GET /api/groups
+
+| 요청 | 인증 | 뜻 |
+|---|---|---|
+| `?factory_id=F0036&group=폐합성수지류` | 공개 | 그 공장이 든 묶음. `group`(폐기물군)을 빼면 그 공장의 모든 폐기물군 묶음 |
+| `?diagnosis_id=uuid` | `x-anon-token`(본인 진단만, 아니면 403) | 진단의 `factory_id`와 `waste_group`으로 찾음. 진단에 공장이 없으면 `groups: []` |
+
+```json
+{
+  "groups": [{
+    "group_id": "G0158", "waste_group": "폐합성수지류", "match": "member",
+    "center": [126.756603, 37.314273], "radius_km": 0.2, "n_factories": 10, "n_processors": 20,
+    "points": [{ "coordinates": [126.754407, 37.313889], "self": false }, "…"],
+    "label": "이 공장이 들어 있는 묶음"
+  }],
+  "labels": { "groups": "…", "radius": "…", "points": "…" }
+}
+```
+- 값은 `group_fit` 원값: `center` = 중심(`centroid_lng, centroid_lat`), `radius_km` = `max_dist_km`(중심에서 가장 먼 공장까지), `n_factories` = `n`, `n_processors` = `n_distinct_processors`
+- `points`: 묶음 공장 중 좌표 확인된 곳만 `[lng, lat]`. **공장 이름과 id는 넣지 않는다.** `self: true`는 요청한 공장
+- `match: "dong"`: 공장 좌표가 확인되지 않아 묶음에 들 수 없는 경우, 같은 폐기물군에서 같은 동(`dongs`)을 가진 묶음 중 공장 수가 가장 많은 것(같으면 group_id 앞). `label`에 "동 기준"과 동 이름이 들어가므로 그대로 보여 준다. 이때 `self` 점은 없다
+- 좌표가 확인됐지만 어느 묶음에도 없는 공장, 진단에 공장이 없는 경우는 `groups: []`
+- 사용자 위치로 반경 안 묶음 찾기(`/api/groups/nearby`)와 참여(`/join`)는 아직 없음
+
 ## 지도: GET /api/map
 
 | 요청 | 응답 |

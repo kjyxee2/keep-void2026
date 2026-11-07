@@ -3,6 +3,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
+import { findGroups, type GroupRow } from './groups.ts';
 import { chipFlows, neighborCounts, pickStored, referencePriceIds, routeShare, type Flow, type Proc } from './fit.ts';
 
 const root = new URL('../', import.meta.url);
@@ -91,4 +92,17 @@ test('저장 후보에서 에너지회수 업체 0곳(P0235 포함 3행 제외)'
     for (const c of out) assert.ok(!['에너지회수', '소각', '매립'].includes(procs.get(c.processor_id)?.method ?? ''), c.processor_id);
   }
   assert.ok(picked > 0);
+});
+
+test('묶음: F0036은 G0158(성곡동 10곳), 좌표 없는 F0001은 성곡동 동 기준 묶음', () => {
+  const groups: GroupRow[] = demoCsv('group_fit').map(r => ({ group_id: r.group_id, waste_group: r.waste_group,
+    factory_ids: JSON.parse(r.factory_ids), n: Number(r.n), centroid_lat: Number(r.centroid_lat), centroid_lng: Number(r.centroid_lng),
+    max_dist_km: Number(r.max_dist_km), dongs: JSON.parse(r.dongs), n_distinct_processors: Number(r.n_distinct_processors) }));
+  const fac = Object.fromEntries(demoCsv('factories').map(r => [r.id, { id: r.id, dong: r.dong || null,
+    coord_verified: r.coord_verified === 'True' ? true : null, waste_groups: JSON.parse(r.waste_groups || '[]') }]));
+  assert.deepEqual(findGroups(fac.F0036, groups, '폐합성수지류').map(x => [x.group.group_id, x.match, x.group.n]), [['G0158', 'member', 10]]);
+  const f1 = findGroups(fac.F0001, groups, '폐합성수지류');
+  assert.equal(f1.length, 1);
+  assert.equal(f1[0].match, 'dong');
+  assert.ok(f1[0].group.dongs.includes('성곡동'));
 });
