@@ -13,3 +13,14 @@ test('PATCH still rejects server columns and unpaired lat/lng', () => {
   assert.match(validateDiagnosisPatch({ lat: 37.3 })[1] ?? '', /lat, lng/);
   assert.equal(validateDiagnosisPatch({ weight_kg_per_month: 2000, current_method: '소각' })[1], null);
 });
+
+test('PATCH accepts current_processor_id (processors.id 모양) and current_processor_name_raw (100자 이하)', () => {
+  assert.deepEqual(validateDiagnosisPatch({ current_processor_id: 'P0065' }), [{ current_processor_id: 'P0065' }, null]);
+  assert.deepEqual(validateDiagnosisPatch({ current_processor_id: null }), [{ current_processor_id: null }, null]);
+  for (const v of [1, '', 'P 0065', 'x'.repeat(21)]) assert.notEqual(validateDiagnosisPatch({ current_processor_id: v })[1], null, String(v));
+  assert.deepEqual(validateDiagnosisPatch({ current_processor_name_raw: '  (주)동우  ' }), [{ current_processor_name_raw: '(주)동우' }, null]);
+  assert.deepEqual(validateDiagnosisPatch({ current_processor_name_raw: '   ' }), [{ current_processor_name_raw: null }, null]);
+  assert.deepEqual(validateDiagnosisPatch({ current_processor_name_raw: '가'.repeat(100) })[1], null);
+  assert.notEqual(validateDiagnosisPatch({ current_processor_name_raw: '가'.repeat(101) })[1], null);
+  assert.notEqual(validateDiagnosisPatch({ current_processor_name_raw: 3 })[1], null);
+});

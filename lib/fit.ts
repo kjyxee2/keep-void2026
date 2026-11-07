@@ -19,6 +19,8 @@ export type Proc = {
   lat: number | null;
   lng: number | null;
   coord_verified: boolean | null;
+  /** 안산 안 후보 판정용(processors.sigungu) */
+  sigungu?: string | null;
 };
 
 export type Ranked = {
@@ -88,13 +90,13 @@ export function resolveCurrentMethod(current: string, flows: Flow[]) {
 }
 
 // fit_candidates 행: 같은 공장, 폐기물군에 현재 처리업체별로 여러 세트가 있을 수 있어 업체 중복을 없애고 상위 3곳
-export function pickStored(rows: Array<Omit<Ranked, 'rank' | 'source'>>, procs: Map<string, Proc>): Ranked[] {
+export function pickStored(rows: Array<Omit<Ranked, 'rank' | 'source'>>, procs: Map<string, Proc>, limit = 3): Ranked[] {
   const seen = new Set<string>();
   return rows
     .filter(r => !EXCLUDED_METHODS.includes(procs.get(r.processor_id)?.method ?? '미확인'))
     .sort((a, b) => b.fit_score - a.fit_score || b.evidence_rows - a.evidence_rows)
     .filter(r => !seen.has(r.processor_id) && seen.add(r.processor_id))
-    .slice(0, 3)
+    .slice(0, limit)
     .map((r, i) => ({ ...r, rank: i + 1, source: 'fit_candidates' as const }));
 }
 
@@ -105,8 +107,10 @@ export function rankComputed(opts: {
   currentMethod: string;
   origin: { lat: number; lng: number } | null;
   selfFactoryId: string | null;
+  /** 기본 3곳. 안산 안 후보를 고를 때는 Infinity(자격을 갖춘 업체 전부) */
+  limit?: number;
 }): Ranked[] {
-  const { flows, procs, currentMethod, origin, selfFactoryId } = opts;
+  const { flows, procs, currentMethod, origin, selfFactoryId, limit = 3 } = opts;
   const evidence = new Map<string, Set<string>>();
   for (const f of flows) {
     if (f.method !== RECYCLE || f.method_by_other_group_permit || !f.processor_id) continue;
@@ -136,8 +140,39 @@ export function rankComputed(opts: {
     })
     .sort((a, b) => b.fit_score - a.fit_score || b.evidence_rows - a.evidence_rows
       || (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity))
-    .slice(0, 3)
+    .slice(0, limit)
     .map((r, i) => ({ ...r, rank: i + 1, source: 'computed' as const }));
+}
+
+// ---------- 안산 안 후보(추천 순위는 그대로, 결과에 한 칸 더) ----------
+// 자격은 추천 후보와 같다(그 폐기물군 재활용 허가, 복수 허가, 미확인, 에너지회수, 소각, 매립 제외, 이미 쓰는 업체 제외,
+// 같은 폐기물군을 재활용으로 보내는 다른 안산 공장 근거 1곳 이상) + 처리업체 시군이 안산. 그중 fit_score가 가장 높은 1곳.
+export const isAnsan = (sigungu: string | null | undefined) => !!sigungu?.includes('안산');
+
+const byScore = (a: Ranked, b: Ranked) => b.fit_score - a.fit_score || b.evidence_rows - a.evidence_rows
+  || (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity) || a.processor_id.localeCompare(b.processor_id);
+
+/**
+ * 저장 단계: 상위 3곳에 안산 업체가 이미 있으면 null(따로 저장하지 않음, 읽을 때 already_in_top).
+ * pool은 자격을 갖춘 업체 전부(pickStored, rankComputed를 limit 없이). 같은 업체가 두 번 있으면 먼저 온 행(저장 후보)을 쓴다.
+ */
+export function pickAnsan(top: Ranked[], pool: Ranked[], procs: Map<string, Proc>, alreadyUsed: Set<string | null>): Ranked | null {
+  if (top.some(r => isAnsan(procs.get(r.processor_id)?.sigungu))) return null;
+  const seen = new Set(top.map(r => r.processor_id));
+  const best = pool
+    .filter(r => !seen.has(r.processor_id) && seen.add(r.processor_id))
+    .filter(r => r.evidence_rows > 0 && !alreadyUsed.has(r.processor_id) && isAnsan(procs.get(r.processor_id)?.sigungu))
+    .sort(byScore)[0];
+  return best ? { ...best, rank: 0 } : null;
+}
+
+/** 읽기 단계: 저장된 후보 카드(rank 0~3)에서 상위 3곳과 안산 안 후보를 나눈다 */
+export function splitAnsan<C extends { rank: number; sigungu: string | null }>(cards: C[]) {
+  const top = cards.filter(c => c.rank >= 1).sort((a, b) => a.rank - b.rank);
+  const zero = cards.find(c => c.rank === 0);
+  const inTop = top.find(c => isAnsan(c.sigungu));
+  const ansan = zero ? { ...zero, already_in_top: false } : inTop ? { ...inTop, already_in_top: true } : null;
+  return { top, ansan };
 }
 
 // 추천 이유(화면 설명 전용). 순위와 fit_score는 바꾸지 않는다(research/ai/recommender v2 권고: 운반 연결, 같은 동 이웃은 이유로만)

@@ -2,7 +2,7 @@ import { buildResult, computeCandidates, diagnosisFlows, loadDiagnosis, referenc
 import { neighborCounts, resolveCurrentMethod } from '@/lib/fit';
 import { DATA_VERSION, db, dbFail, fail, isOwner, isUuid, json } from '@/lib/server';
 
-// 진단 완료: 신고 경로 분포, 이웃 공장 수, 추천 3곳, 원문 단가를 모아 저장하고 반환. 금액은 만들지 않는다
+// 진단 완료: 신고 경로 분포, 이웃 공장 수, 추천 3곳(+ 안산 안 후보 1곳), 원문 단가를 모아 저장하고 반환. 금액은 만들지 않는다
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
   if (!isUuid(id)) return fail(404, 'not found');
@@ -24,8 +24,9 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     // draft 진단이라 연결 요청(후보 FK)은 아직 없다
     const del = await db().from('diagnosis_candidates').delete().eq('diagnosis_id', id);
     if (del.error) return dbFail(del.error);
-    if (ranked.length) {
-      const c = await db().from('diagnosis_candidates').insert(ranked.map(r => ({ diagnosis_id: id, ...r })));
+    const rows = [...ranked.top, ...(ranked.ansan ? [ranked.ansan] : [])];   // rank 1~3 추천, rank 0 안산 안 후보
+    if (rows.length) {
+      const c = await db().from('diagnosis_candidates').insert(rows.map(r => ({ diagnosis_id: id, ...r })));
       if (c.error) return dbFail(c.error);
     }
     const r = await db().from('diagnosis_results').upsert({

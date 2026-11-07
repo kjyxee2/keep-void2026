@@ -1,7 +1,7 @@
 // 실행: npm run test:web (Node 22 타입 제거로 바로 실행)
 import { test, beforeEach } from 'node:test';
 import assert from 'node:assert/strict';
-import { ApiError, createDiagnosis, getChips, getDiagnosis, patchDiagnosis, tokenStore } from '../lib/api-client.ts';
+import { ApiError, createDiagnosis, getChips, getDiagnosis, getFactory, patchDiagnosis, tokenStore } from '../lib/api-client.ts';
 
 class MemStorage {
   data = new Map<string, string>();
@@ -110,4 +110,21 @@ test('네트워크 실패는 status 0 ApiError', async () => {
     throw new TypeError('fetch failed');
   };
   await assert.rejects(getChips(), (e: unknown) => e instanceof ApiError && e.isNetwork && e.message.includes('연결이 끊겼어요'));
+});
+
+test('getFactory는 GET /api/factories/:id(토큰 없이), 없는 공장은 404 ApiError', async () => {
+  mockFetch(200, { id: 'F0001', name: 'x', dong: '성곡동', waste_groups: [], coord_verified: false, n_waste_types: 3 });
+  const f = await getFactory('F0001');
+  assert.equal(calls[0].url, '/api/factories/F0001');
+  assert.equal(new Headers(calls[0].init.headers).get('x-anon-token'), null);
+  assert.equal(f.dong, '성곡동');
+  mockFetch(404, { error: 'not found' });
+  await assert.rejects(getFactory('F9999'), (e: unknown) => e instanceof ApiError && e.status === 404);
+});
+
+test('PATCH 본문에 current_processor_id, current_processor_name_raw를 그대로 보낸다', async () => {
+  tokenStore.set('d1', 't1');
+  mockFetch(200, { id: 'd1' });
+  await patchDiagnosis('d1', { current_processor_id: 'P0065', current_processor_name_raw: null });
+  assert.deepEqual(JSON.parse(String(calls[0].init.body)), { current_processor_id: 'P0065', current_processor_name_raw: null });
 });

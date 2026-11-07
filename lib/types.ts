@@ -47,6 +47,16 @@ export type FactorySearchItem = {
 };
 export type FactorySearchResponse = { factories: FactorySearchItem[] };
 
+// GET /api/factories/:id (공개 열만, 주소와 좌표 없음)
+export type FactoryPublic = {
+  id: string;
+  name: string;
+  dong: string | null;
+  waste_groups: string[];
+  coord_verified: boolean;
+  n_waste_types: number | null;
+};
+
 // POST /api/diagnoses
 export type CreateDiagnosisResponse = { id: string; anon_token: string };
 
@@ -59,6 +69,10 @@ export type DiagnosisPatch = Partial<{
   /** 톤당 단가(원). 비교 표시용, 계산에 쓰지 않음. 백엔드 P0 브랜치에서 추가 */
   current_price_won_per_ton: number | null;
   factory_id: string;
+  /** 지금 맡기는 처리업체(processors.id). 없는 id는 400 */
+  current_processor_id: string | null;
+  /** 지금 맡기는 처리업체 이름 원문(100자 이하). 목록과 맞춰지지 않은 값 */
+  current_processor_name_raw: string | null;
   lat: number;
   lng: number;
   location_source: LocationSource;
@@ -103,9 +117,12 @@ export type Candidate = {
   source: 'fit_candidates' | 'computed';
   /** 화면에 반드시 보여 줄 문구 */
   note: string;
-  /** 추천 이유. 백엔드 reasons 브랜치에서 추가 */
+  /** 추천 이유(순위에 쓰지 않음). 오래된 응답에는 없을 수 있다 */
   reasons?: CandidateReason[];
 };
+
+/** 안산 안 후보. rank 0이면 추천 3곳 밖(already_in_top false), 아니면 상위 후보 그 자체(already_in_top true) */
+export type AnsanCandidate = Candidate & { already_in_top: boolean };
 
 /** unit_prices 원문 열 전부 */
 export type ReferencePrice = {
@@ -117,6 +134,10 @@ export type ReferencePrice = {
   unit: string;
   year: number;
   note: string | null;
+  /** 서버가 붙이는 연도 표시(고시 "2022 적용", "2027 시행", 나머지 "2024년") */
+  year_label?: string | null;
+  /** 원문 출처 */
+  source?: string | null;
 } & Record<string, unknown>;
 
 export type DiagnosisUserInput = {
@@ -133,6 +154,12 @@ export type DiagnosisUserInput = {
   lat?: number | null;
   lng?: number | null;
   location_source?: LocationSource | null;
+  /** 본인 보기만. 고른 신고 공장(없으면 null) */
+  factory?: { id: string; name: string; dong: string | null } | null;
+  /** 본인 보기만. 지금 맡기는 처리업체(목록에서 맞춰진 경우만) */
+  current_processor?: { id: string; name: string; sido: string | null; sigungu: string | null; method: string | null } | null;
+  /** 본인 보기만. 목록과 맞춰지지 않은 이름 원문 */
+  current_processor_name_raw?: string | null;
 };
 
 // POST /api/diagnoses/:id/complete, GET /api/diagnoses/:id
@@ -151,6 +178,8 @@ export type DiagnosisResult = {
   };
   neighbors: { recycling: number; burning: number; burning_methods: string[]; basis: string };
   candidates: Candidate[];
+  /** 안산 안 후보(없으면 null) */
+  ansan_candidate: AnsanCandidate | null;
   ranking: { current_method_used: string; inferred_from_reports: boolean; rule: string };
   reference_prices: ReferencePrice[];
   labels: Labels;
@@ -193,12 +222,21 @@ export type FactoryPointProps = {
   name: string;
   dong: string | null;
   waste_groups: string[];
-  /** 공장별 신고가 가장 많은 처리 방식. 백엔드 P0 브랜치에서 추가 */
-  method?: string;
+  coord_verified?: boolean | null;
+  /** 공장별 신고가 가장 많은 처리 방식(재활용, 소각, 매립, 미확인) */
+  method: string;
 };
-export type ProcessorPointProps = { id: string; name: string } & Record<string, unknown>;
+export type ProcessorPointProps = {
+  id: string;
+  name: string;
+  sido: string | null;
+  sigungu: string | null;
+  method: string | null;
+  confirmed?: boolean | null;
+  coord_verified?: boolean | null;
+};
 export type FlowProps = { factory_id: string; processor_id: string; method: string; reports: number };
-export type UnlocatedGroup = { sido: string; sigungu: string; count: number; processors: Record<string, unknown>[] };
+export type UnlocatedGroup = { sido: string; sigungu: string | null; count: number; processors: ProcessorPointProps[] };
 
 export type MapFactoriesResponse = { type: 'FeatureCollection'; features: PointFeature<FactoryPointProps>[] } & Record<string, unknown>;
 export type MapProcessorsResponse = {
@@ -224,28 +262,35 @@ export type DashboardResponse = {
   labels: Labels;
 };
 
-// GET /api/home-stats. 백엔드 P0 브랜치에서 추가(research/waste/demo/home_waste_stats.json과 같은 값)
+// GET /api/home-stats: home_waste_stats 행 배열 그대로(lib/home-stats.ts HomeStatRow와 같은 열)
 export type HomeWasteStat = {
+  chip_id: string;
+  name: string;
   reports: number;
   burn_factories: number;
   recycle_factories: number;
   both_factories: number;
+  in_ansan_pct: number | null;
+  outside_gyeonggi_pct: number | null;
+  region_unknown_pct: number | null;
+  recycle_pct: number | null;
+  burn_pct: number | null;
 } & Record<string, unknown>;
-export type HomeStatsResponse = {
-  chips: Record<string, HomeWasteStat>;
-  region_pct?: Record<string, number>;
-  basis: string;
-} & Record<string, unknown>;
+export type HomeStatsResponse = { chips: HomeWasteStat[]; labels: Labels };
 
-// GET /api/groups?factory_id= | ?diagnosis_id=. 백엔드 P0 브랜치에서 추가
-export type GroupResponse = {
-  waste_group: string;
+// GET /api/groups?factory_id= | ?diagnosis_id= (lib/groups.ts groupView)
+export type GroupPoint = { coordinates: [number, number]; self: boolean };
+export type GroupItem = {
+  group_id: string;
+  waste_group: string | null;
+  match: 'member' | 'dong';
+  /** [lng, lat] */
   center: [number, number];
   radius_km: number;
   n_factories: number;
   n_processors: number;
-  /** 같은 묶음 공장 좌표 [lng, lat]. 이름 없음 */
-  points: [number, number][];
-  /** 좌표 없는 공장이면 동 기준임을 알리는 문구 */
-  label?: string;
-} & Record<string, unknown>;
+  /** 좌표가 확인된 같은 묶음 공장. 이름 없음, self는 진단 공장 */
+  points: GroupPoint[];
+  label: string;
+};
+export type GroupResponse = { groups: GroupItem[]; labels: Labels };

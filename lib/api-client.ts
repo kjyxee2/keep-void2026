@@ -11,6 +11,7 @@ import type {
   DiagnosisPatch,
   DiagnosisResult,
   DiagnosisRow,
+  FactoryPublic,
   FactorySearchResponse,
   GroupResponse,
   HomeStatsResponse,
@@ -152,6 +153,9 @@ export async function createDiagnosis(chipId: string) {
   return res;
 }
 
+/** 신고 공장 한 곳(공개 열만). 진단 ?factory= 미리 채우기 */
+export const getFactory = (id: string, signal?: AbortSignal) => request<FactoryPublic>(`/api/factories/${enc(id)}`, { signal });
+
 export const patchDiagnosis = (id: string, patch: DiagnosisPatch) =>
   request<DiagnosisRow>(`/api/diagnoses/${enc(id)}`, { method: 'PATCH', body: patch, diagnosisId: id });
 
@@ -176,10 +180,10 @@ export function getMap<L extends MapLayer>(layer: L, group?: string, signal?: Ab
 
 export const getDashboard = (signal?: AbortSignal) => request<DashboardResponse>('/api/dashboard', { signal });
 
-/** 백엔드 P0 브랜치에서 추가: GET /api/home-stats */
+/** GET /api/home-stats */
 export const getHomeStats = (signal?: AbortSignal) => request<HomeStatsResponse>('/api/home-stats', { signal });
 
-/** 백엔드 P0 브랜치에서 추가: GET /api/groups?factory_id= 또는 ?diagnosis_id= */
+/** GET /api/groups?factory_id= 또는 ?diagnosis_id= */
 export function getGroup(by: { factory_id: string } | { diagnosis_id: string }, signal?: AbortSignal) {
   const q = 'factory_id' in by ? `factory_id=${enc(by.factory_id)}` : `diagnosis_id=${enc(by.diagnosis_id)}`;
   return request<GroupResponse>(`/api/groups?${q}`, { signal, diagnosisId: 'diagnosis_id' in by ? by.diagnosis_id : undefined });

@@ -56,6 +56,10 @@ for (const col of ["completed_at=now()", "status='completed'", "anon_token='x'",
   ok(await fails('authenticated',A,`update diagnoses set ${col} where id='10000000-0000-0000-0000-000000000001'`), `A cannot set diagnoses.${col.split('=')[0]}`);
 ok((await as('authenticated',A,`update diagnoses set current_price_won_per_ton=260000 where id='10000000-0000-0000-0000-000000000001' returning id`)).length===1, 'A sets current_price_won_per_ton on draft');
 ok(await fails('authenticated',A,`update diagnoses set current_price_won_per_ton=-1 where id='10000000-0000-0000-0000-000000000001'`), 'current_price_won_per_ton must be >= 0');
+ok((await as('authenticated',A,`update diagnoses set current_processor_id='P0001', current_processor_name_raw='p1' where id='10000000-0000-0000-0000-000000000001' returning id`)).length===1, 'A sets current processor on draft');
+ok(await fails('authenticated',A,`update diagnoses set current_processor_id='P9999' where id='10000000-0000-0000-0000-000000000001'`), 'current_processor_id must exist in processors');
+ok(await fails('authenticated',A,`update diagnoses set current_processor_name_raw=repeat('가',101) where id='10000000-0000-0000-0000-000000000001'`), 'current_processor_name_raw <= 100 chars');
+ok((await as('authenticated',A,`update diagnoses set current_processor_id='P0001' where id='10000000-0000-0000-0000-000000000002' returning id`)).length===0, 'A cannot set current processor on B diagnosis');
 await db.exec(`update diagnoses set status='completed', completed_at=now() where id='10000000-0000-0000-0000-000000000001'`);
 ok((await as('authenticated',A,`update diagnoses set current_method='매립' where id='10000000-0000-0000-0000-000000000001' returning id`)).length===0, 'A cannot edit own completed diagnosis');
 ok((await as('authenticated',A,`select id from diagnoses where id='10000000-0000-0000-0000-000000000001'`)).length===1, 'A still reads own completed diagnosis');
@@ -65,6 +69,12 @@ ok(await fails('authenticated',A,`insert into group_memberships (group_id,diagno
 ok(await fails('authenticated',A,`update group_memberships set diagnosis_id='10000000-0000-0000-0000-000000000002' where user_id='${A}'`), 'A cannot repoint membership to B diagnosis');
 await db.exec(`insert into diagnosis_candidates (diagnosis_id,rank,processor_id,fit_score) values ('10000000-0000-0000-0000-000000000002',1,'P0002',50)`);
 const cand = (await db.query(`select id from diagnosis_candidates limit 1`)).rows[0].id;
+await db.exec(`insert into diagnosis_candidates (diagnosis_id,rank,processor_id,fit_score) values ('10000000-0000-0000-0000-000000000002',0,'P0001',40)`);
+ok(true, 'rank 0 (안산 안 후보) row is allowed');
+ok(await (async () => { try { await db.exec(`insert into diagnosis_candidates (diagnosis_id,rank,processor_id,fit_score) values ('10000000-0000-0000-0000-000000000002',0,'P0002',30)`); return false; } catch (e) { return e.code === '23505'; } })(), 'only one rank 0 per diagnosis');
+ok((await as('authenticated',A,`select * from diagnosis_candidates`)).length===0, 'A sees no candidates of B diagnosis');
+ok(await (async () => { try { await db.exec(`insert into diagnosis_candidates (diagnosis_id,rank,processor_id,fit_score) values ('10000000-0000-0000-0000-000000000002',4,'P0002',30)`); return false; } catch (e) { return e.code === '23514'; } })(), 'rank above 3 is rejected');
+
 const req = st => `insert into connection_requests (diagnosis_id,candidate_id,processor_id,status) values ('10000000-0000-0000-0000-000000000002',${cand},'P0002','${st}')`;
 await db.exec(req('requested'));
 ok(await (async () => { try { await db.exec(req('contacted')); return false; } catch (e) { return e.code === '23505'; } })(), 'second active request for same candidate is 23505');

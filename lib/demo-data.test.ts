@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { execFileSync } from 'node:child_process';
 import { readFileSync } from 'node:fs';
 import { findGroups, type GroupRow } from './groups.ts';
-import { candidateReasons, chipFlows, neighborCounts, pickStored, referencePriceIds, routeShare, NOTICE_ITEMS, type Flow, type Proc } from './fit.ts';
+import { candidateReasons, chipFlows, neighborCounts, pickAnsan, pickStored, rankComputed, referencePriceIds, splitAnsan, routeShare, NOTICE_ITEMS, type Flow, type Proc } from './fit.ts';
 
 const root = new URL('../', import.meta.url);
 const zip = new URL('data/refit_demo_data.zip', root).pathname;
@@ -144,4 +144,54 @@ test('추천 이유 F0001 폐합성수지: 이웃 28/14/10, 같은 동(성곡동
   // (주)동우가 운반하는 재활용 업체(P0101)라면 연결 이유가 붙는다(실제 신고 기준)
   const p101 = candidateReasons([{ processor_id: 'P0101', neighbors: 1, sigungu: procRows.P0101.sigungu || null }], ctx)[0];
   assert.equal(p101.find(x => x.type === 'transporter_link')?.text, '지금 운반업체 (주)동우가 이 업체로도 운반해요');
+});
+
+// 안산 안 후보: computeCandidates(lib/diagnosis.ts)와 같은 순서로 저장 후보, 계산 후보를 모아 고른다
+const ansanProcs = new Map<string, Proc>(demoCsv('processors').map(r => [r.id, { id: r.id, method: r.method || null,
+  confirmed: r.confirmed === 'True', lat: r.lat ? Number(r.lat) : null, lng: r.lng ? Number(r.lng) : null,
+  coord_verified: r.coord_verified === 'True', sigungu: r.sigungu || null }]));
+const fitRows = demoCsv('fit_candidates');
+function ansanFor(group: string, factoryId: string | null) {
+  const g = flows.filter(f => f.waste_group === group);
+  const stored = factoryId ? fitRows.filter(r => r.factory_id === factoryId && r.waste_group === group).map(r => ({
+    processor_id: r.candidate_processor_id, fit_score: Number(r.fit_score), evidence_rows: Number(r.evidence_rows),
+    distance_km: null, distance_quality: null, candidate_confirmed: r.candidate_confirmed === 'True' })) : [];
+  const opts = { flows: g, procs: ansanProcs, origin: null, selfFactoryId: factoryId, currentMethod: '소각' };
+  const st = pickStored(stored, ansanProcs);
+  const top = st.length ? st : rankComputed(opts);
+  const pool = [...pickStored(stored, ansanProcs, Infinity), ...rankComputed({ ...opts, limit: Infinity })];
+  const used = new Set(g.filter(f => factoryId && f.factory_id === factoryId).map(f => f.processor_id));
+  const zero = pickAnsan(top, pool, ansanProcs, used);
+  const cards = [...top, ...(zero ? [zero] : [])].map(r => ({ ...r, sigungu: ansanProcs.get(r.processor_id)?.sigungu ?? null }));
+  return { top, zero, ansan: splitAnsan(cards).ansan };
+}
+
+test('안산 안 후보 F0001 폐합성수지: 상위 3곳에 이미 안산 업체(P0065 2위)가 있어 따로 저장하지 않고 already_in_top', () => {
+  const r = ansanFor('폐합성수지류', 'F0001');
+  assert.deepEqual(r.top.map(c => c.processor_id), ['P0025', 'P0065', 'P0040']);
+  assert.equal(r.zero, null);
+  assert.equal(r.ansan?.processor_id, 'P0065');
+  assert.equal(r.ansan?.rank, 2);
+  assert.equal(r.ansan?.already_in_top, true);
+  assert.equal(r.ansan?.evidence_rows, 14);
+});
+
+test('안산 안 후보 폐흡착제(폐활성탄): 상위 3곳(화성, 양산, 화성) 밖의 P0093 한국수자원공사 환경에너지센터, 근거 11곳', () => {
+  const r = ansanFor('폐흡착제(활성탄 등)', 'F0001');
+  assert.deepEqual(r.top.map(c => c.processor_id), ['P0012', 'P0030', 'P0033']);
+  assert.equal(r.zero?.processor_id, 'P0093');
+  assert.equal(r.zero?.rank, 0);
+  assert.equal(r.zero?.evidence_rows, 11);
+  assert.equal(r.ansan?.already_in_top, false);
+});
+
+test('안산 안 후보 오니류: 재활용으로 받는 안산 업체가 없어 null', () => {
+  assert.equal(ansanFor('오니류', 'F0001').ansan, null);
+  assert.equal(ansanFor('오니류', null).ansan, null);
+});
+
+test('안산 안 후보 폐유: 1위 P0040(안산)이 이미 상위', () => {
+  const r = ansanFor('폐유', null);
+  assert.equal(r.ansan?.processor_id, 'P0040');
+  assert.equal(r.ansan?.already_in_top, true);
 });

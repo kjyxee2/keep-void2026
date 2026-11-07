@@ -4,6 +4,7 @@ const ONE_OF = {
   weight_source: ['계량표', '올바로 인계서', '기타'],
   location_source: ['주소', '현재위치', '신고공장'],
 } as const;
+const ID = /^[A-Za-z0-9_-]{1,20}$/;
 const num = (v: unknown, min: number, max: number) => typeof v === 'number' && Number.isFinite(v) && v >= min && v <= max;
 const int = (v: unknown, max: number) => Number.isInteger(v) && num(v, 0, max);
 
@@ -23,6 +24,15 @@ export function validateDiagnosisPatch(b: Record<string, unknown>): [Record<stri
       if (v !== null && !num(v, k === 'lat' ? -90 : -180, k === 'lat' ? 90 : 180)) return [out, `${k} 범위 오류`];
     } else if (k === 'factory_id' || k === 'volume_option_id') {
       if (v !== null && typeof v !== 'string') return [out, `${k}는 문자열`];
+    } else if (k === 'current_processor_id') {
+      // 있는지는 FK(processors.id)로 확인(라우트에서 23503 → 400)
+      if (v !== null && (typeof v !== 'string' || !ID.test(v))) return [out, 'current_processor_id는 처리업체 id(예: P0065)'];
+    } else if (k === 'current_processor_name_raw') {
+      if (v !== null && typeof v !== 'string') return [out, 'current_processor_name_raw는 문자열'];
+      const s = typeof v === 'string' ? v.trim() : null;
+      if (s && s.length > 100) return [out, 'current_processor_name_raw는 100자 이하'];
+      out[k] = s || null;
+      continue;
     } else return [out, `수정할 수 없는 열: ${k}`];
     out[k] = v;
   }

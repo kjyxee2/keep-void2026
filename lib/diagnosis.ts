@@ -1,7 +1,7 @@
 // 진단 결과 조립(complete, GET 공용). 금액 계산 없음.
 import { db, fetchAll, LABELS } from './server';
 import {
-  BURN_METHODS, EXCLUDED_GROUPS, candidateReasons, chipFlows, splitTransporters, pickStored, rankComputed, priceYearLabel, referencePriceIds, resolveCurrentMethod, routeShare,
+  BURN_METHODS, EXCLUDED_GROUPS, candidateReasons, chipFlows, splitTransporters, pickAnsan, pickStored, rankComputed, splitAnsan, priceYearLabel, referencePriceIds, resolveCurrentMethod, routeShare,
   type Flow, type Proc, type Ranked, type Reason,
 } from './fit';
 
@@ -10,6 +10,7 @@ export type Diagnosis = {
   chip_id: string | null; waste_group: string | null; volume_option_id: string | null;
   weight_kg_per_month: number | null; weight_source: string | null; current_cost_won_per_month: number | null;
   current_price_won_per_ton: number | null;
+  current_processor_id?: string | null; current_processor_name_raw?: string | null;
   current_method: string | null; lat: number | null; lng: number | null; location_source: string | null;
   status: 'draft' | 'completed'; created_at: string; completed_at: string | null;
 };
@@ -53,10 +54,11 @@ async function origin(diag: Diagnosis) {
   return data?.coord_verified ? { lat: data.lat, lng: data.lng } : null;
 }
 
-// 추천은 README fit_score 규칙대로 폐기물군 신고 경로(fit_candidates와 같은 기준)로 계산
-export async function computeCandidates(diag: Diagnosis, flows: Flow[], currentMethod: string): Promise<Ranked[]> {
+// 추천은 README fit_score 규칙대로 폐기물군 신고 경로(fit_candidates와 같은 기준)로 계산.
+// ansan: 추천 3곳에 안산 업체가 없을 때만 같은 자격의 안산 업체 1곳(rank 0으로 저장). 순위는 바꾸지 않는다
+export async function computeCandidates(diag: Diagnosis, flows: Flow[], currentMethod: string): Promise<{ top: Ranked[]; ansan: Ranked | null }> {
   const group = diag.waste_group!;
-  if (EXCLUDED_GROUPS.includes(group)) return [];
+  if (EXCLUDED_GROUPS.includes(group)) return { top: [], ansan: null };
 
   let stored: Array<Omit<Ranked, 'rank' | 'source'>> = [];
   if (diag.factory_id) {
@@ -69,16 +71,17 @@ export async function computeCandidates(diag: Diagnosis, flows: Flow[], currentM
   const ids = [...new Set([...stored.map(r => r.processor_id),
     ...flows.filter(f => f.method === '물질재활용' && f.processor_id).map(f => f.processor_id!)])];
   const { data: procRows, error } = ids.length
-    ? await db().from('processors').select('id,method,confirmed,lat,lng,coord_verified').in('id', ids)
+    ? await db().from('processors').select('id,method,confirmed,lat,lng,coord_verified,sigungu').in('id', ids)
     : { data: [], error: null };
   if (error) throw error;
   const procs = new Map((procRows as Proc[]).map(p => [p.id, p]));
 
+  const opts = { flows, procs, origin: await origin(diag), selfFactoryId: diag.factory_id, currentMethod };
   const picked = pickStored(stored, procs);
-  if (picked.length) return picked;
-  return rankComputed({
-    flows, procs, origin: await origin(diag), selfFactoryId: diag.factory_id, currentMethod,
-  });
+  const top = picked.length ? picked : rankComputed(opts);
+  const pool = [...pickStored(stored, procs, Infinity), ...rankComputed({ ...opts, limit: Infinity })];
+  const used = new Set(flows.filter(f => diag.factory_id && f.factory_id === diag.factory_id).map(f => f.processor_id));
+  return { top, ansan: pickAnsan(top, pool, procs, used) };
 }
 
 async function candidateCards(diagnosisId: string) {
@@ -127,19 +130,39 @@ async function reasonsFor(
   });
 }
 
+// 본인 보기 전용: 고른 신고 공장(공개 열 id, name, dong)과 지금 맡기는 처리업체(processors의 이름, 시군, 처리 방식)
+async function ownerContext(diag: Diagnosis) {
+  const [{ data: factory, error: fErr }, { data: processor, error: pErr }] = await Promise.all([
+    diag.factory_id
+      ? db().from('factories').select('id,name,dong').eq('id', diag.factory_id).maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+    diag.current_processor_id
+      ? db().from('processors').select('id,name,sido,sigungu,method').eq('id', diag.current_processor_id).maybeSingle()
+      : Promise.resolve({ data: null, error: null }),
+  ]);
+  if (fErr || pErr) throw fErr ?? pErr;
+  return {
+    factory: factory as { id: string; name: string; dong: string | null } | null,
+    processor: processor as { id: string; name: string; sido: string | null; sigungu: string | null; method: string | null } | null,
+  };
+}
+
 // full=false: 공유 링크용. 공장, 위치, 처리비, 톤당 단가, 연락처는 넣지 않는다
 export async function buildResult(diag: Diagnosis, full: boolean, flows?: DiagFlows) {
   const group = diag.waste_group!;
   flows ??= await diagnosisFlows(diag);
-  const [{ data: result }, cards, prices, { data: chip }, { data: volume }] = await Promise.all([
+  const [{ data: result }, cards, prices, { data: chip }, { data: volume }, mine] = await Promise.all([
     db().from('diagnosis_results').select('*').eq('diagnosis_id', diag.id).maybeSingle(),
     candidateCards(diag.id),
     referencePrices(diag),
     db().from('waste_chips').select('id,label,display_text').eq('id', diag.chip_id ?? '').maybeSingle(),
     db().from('volume_options').select('id,label').eq('id', diag.volume_option_id ?? '').maybeSingle(),
+    full ? ownerContext(diag) : Promise.resolve(null),
   ]);
   const method = resolveCurrentMethod(diag.current_method ?? '모름', flows.chip);
   const reasons = await reasonsFor(diag, full, flows.group, cards);
+  const withReasons = cards.map((c, i) => ({ ...c, reasons: reasons[i] }));
+  const { top, ansan } = splitAnsan(withReasons);
 
   return {
     diagnosis_id: diag.id,
@@ -155,6 +178,9 @@ export async function buildResult(diag: Diagnosis, full: boolean, flows?: DiagFl
         current_cost_won_per_month: diag.current_cost_won_per_month,
         current_price_won_per_ton: diag.current_price_won_per_ton,
         factory_id: diag.factory_id, lat: diag.lat, lng: diag.lng, location_source: diag.location_source,
+        factory: mine?.factory ?? null,
+        current_processor: mine?.processor ?? null,
+        current_processor_name_raw: diag.current_processor_name_raw ?? null,
       }),
     },
     current_route: { ...routeShare(flows.chip), basis: LABELS.route },
@@ -162,7 +188,8 @@ export async function buildResult(diag: Diagnosis, full: boolean, flows?: DiagFl
       recycling: result?.neighbors_recycling ?? null, burning: result?.neighbors_burning ?? null,
       burning_methods: BURN_METHODS, basis: LABELS.neighbors,
     },
-    candidates: cards.map((c, i) => ({ ...c, reasons: reasons[i] })),
+    candidates: top,
+    ansan_candidate: ansan,
     ranking: { current_method_used: method.method, inferred_from_reports: method.inferred, rule: 'data/demo/README.md fit_score' },
     reference_prices: prices,
     labels: LABELS,

@@ -23,6 +23,7 @@ GET  /api/chips                       품목 칩, 선택지
 POST /api/diagnoses                   { chip_id } → { id, anon_token }
 GET  /api/home-stats                  홈 칩 4개 통계
 GET  /api/factories/search?q=         (선택) 우리 공장 찾기
+GET  /api/factories/:id               신고 공장 한 곳(공개 열만, ?factory= 미리 채우기)
 GET  /api/groups?factory_id=|diagnosis_id=   같이 맡기기 묶음
 PATCH /api/diagnoses/:id              단계마다 입력 저장
 POST /api/diagnoses/:id/complete      결과 계산, 저장, 반환
@@ -56,6 +57,15 @@ POST /api/requests/:id/cancel         요청 취소
 ```
 `n_waste_types`는 그 공장이 신고한 폐기물 종류(원 표기) 수. 화면은 "신고 종류 N개"로 그대로 쓴다.
 
+### GET /api/factories/:id
+
+`id`는 `F` + 숫자 1~6자리(아니면 404). 없는 공장 404. 공개 신고현황 열 중 **id, name, dong, waste_groups, coord_verified, n_waste_types만**(주소, 좌표 없음). 공개 참고 데이터라 CDN 1시간 캐시.
+```json
+{ "id": "F0001", "name": "주식회사 디와이코스메틱", "dong": "성곡동", "waste_groups": ["폐합성수지류"],
+  "coord_verified": false, "n_waste_types": 1 }
+```
+`coord_verified`는 건물 위치가 확인되지 않았으면 false(원본 null 포함). 진단 화면 `/diagnose?factory=F0001`이 브라우저에서 이 주소로 3단계 사업장을 미리 채운다.
+
 ### POST /api/diagnoses → 201
 
 요청 `{ "chip_id": "C01" }` → 응답 `{ "id": "uuid", "anon_token": "…" }`
@@ -72,11 +82,13 @@ POST /api/requests/:id/cancel         요청 취소
 | `current_cost_won_per_month` | 청구서 처리비(원, 0 이상 정수). 선택 |
 | `current_price_won_per_ton` | 지금 내는 톤당 처리 단가(원/톤, 0 이상 10억 이하 정수). 선택. 공개 단가 옆에 그대로 보여 주기만 하고 계산에 쓰지 않음 |
 | `factory_id` | 공장 찾기에서 고른 id. 선택 |
+| `current_processor_id` | 지금 맡기는 처리업체 `processors.id`(예: `P0065`). 선택, null 가능. 없는 id는 400(FK). 서류 사진에서 목록 업체로 맞춰졌을 때만 보낸다 |
+| `current_processor_name_raw` | 지금 맡기는 처리업체 이름 원문(서류 글자나 직접 입력). 앞뒤 공백을 지우고 100자 이하, 빈 문자열은 null. 선택 |
 | `lat`, `lng` | 함께 보내야 함. 선택 |
 | `location_source` | `주소`, `현재위치`, `신고공장` |
 | `volume_option_id` | 용기 개수 선택(참고 정보). 선택 |
 
-응답은 저장된 진단 행.
+응답은 저장된 진단 행. 지금 처리업체 두 열은 **추천 순위와 점수에 쓰지 않는다**(결과 요약 문구에만). 열 추가 마이그레이션: `supabase/migrations/20261107154415_diagnosis_current_processor.sql`(둘 다 nullable, RLS 정책 그대로, 다른 입력 열처럼 열 단위 update grant).
 
 ### POST /api/diagnoses/:id/complete (x-anon-token)
 
@@ -90,7 +102,10 @@ POST /api/requests/:id/cancel         요청 취소
     "chip": { "id": "C01", "label": "폐합성수지", "display_text": "…" },
     "volume_option": { "id": "V2", "label": "2~4개" },
     "weight_kg_per_month": 2000, "weight_source": "계량표", "current_method": "소각",
-    "current_cost_won_per_month": 550000, "current_price_won_per_ton": 260000, "factory_id": "F0001", "lat": null, "lng": null, "location_source": "신고공장"
+    "current_cost_won_per_month": 550000, "current_price_won_per_ton": 260000, "factory_id": "F0001", "lat": null, "lng": null, "location_source": "신고공장",
+    "factory": { "id": "F0001", "name": "주식회사 디와이코스메틱", "dong": "성곡동" },
+    "current_processor": { "id": "P0001", "name": "코어엔텍 주식회사", "sido": "경기", "sigungu": "시흥시", "method": "소각" },
+    "current_processor_name_raw": null
   },
   "current_route": {
     "total_reports": 1209,
@@ -113,6 +128,8 @@ POST /api/requests/:id/cancel         요청 취소
         { "type": "same_dong", "count": 6, "text": "같은 동(성곡동) 공장 6곳이 이 업체에 보내요", "basis": "신고 건수 집계 2026-07" }
       ] }
   ],
+  "ansan_candidate": { "candidate_id": 2, "rank": 2, "processor_id": "P0065", "sigungu": "안산시", "neighbors": 14,
+                       "note": "업체 확인 필요", "reasons": ["…"], "already_in_top": true, "…": "candidates[]와 같은 열" },
   "ranking": { "current_method_used": "소각", "inferred_from_reports": false, "rule": "data/demo/README.md fit_score" },
   "reference_prices": [
     { "id": "U035", "category": "고시 처리단가", "item": "폐합성수지", "method": "재활용업자",
@@ -143,6 +160,15 @@ POST /api/requests/:id/cancel         요청 취소
   | `in_ansan` | 없음 | 안산 안의 업체예요 | 업체 `sigungu`가 안산시 |
   - `factory_id`가 없는 진단과 공유 보기(본인 아님)는 공장 정보(동, 운반업체)를 쓰지 않아 `neighbors_same_group`, `in_ansan`만 나온다
   - 예: F0001 폐합성수지 상위 3곳(P0025, P0065, P0040)은 같은 동(성곡동) 6, 4, 4곳. 지금 운반업체 (주)동우는 세 업체 어디로도 운반 신고가 없어 `transporter_link`가 없다
+- `ansan_candidate`: **안산 안 후보**(결정 A). 추천 순위(`candidates`)는 그대로 두고 결과에 한 칸 더 보여 준다. 없으면 `null`
+  - 자격은 `candidates`와 같다: 그 폐기물군 재활용 허가(다른 폐기물군 허가 제외), 업체 처리 방식이 `복수 허가`, `미확인`, `에너지회수`, `소각`, `매립`이면 제외, 진단 공장이 이미 쓰는 업체 제외, 같은 폐기물군을 이 업체에 재활용으로 보내는 다른 안산 공장 근거 1곳 이상. 여기에 업체 `sigungu`가 안산(`안산` 포함)
+  - 상위 3곳에 안산 업체가 **없으면** 자격을 갖춘 안산 업체 중 `fit_score`가 가장 높은 1곳(저장 후보 행이 있으면 그 점수, 없으면 같은 규칙의 계산 점수). `diagnosis_candidates`에 `rank = 0`으로 저장하므로 `candidate_id`로 연결 요청을 보낼 수 있다. `already_in_top: false`
+  - 상위 3곳에 안산 업체가 **있으면** 따로 저장하지 않고 그중 가장 높은 순위 후보를 그대로 가리킨다. `already_in_top: true`(화면은 별도 카드 없이 그 후보에 "안산 안 업체" Tag만)
+  - 숫자(`neighbors`)는 신고 집계만. `reasons`는 같은 규칙(`candidateReasons`), `note` "업체 확인 필요" 포함
+  - 실제 데이터(2026-07 신고, `lib/demo-data.test.ts`로 고정): F0001 폐합성수지는 2위 P0065(안산시, 근거 14곳)라 `already_in_top: true`. 폐활성탄(폐흡착제)은 상위 3곳이 화성, 양산, 화성이고 안산 안 후보는 P0093 한국수자원공사 환경에너지센터(근거 11곳, `already_in_top: false`). 폐수처리오니(오니류)는 재활용으로 받는 안산 업체가 없어 `null`. 폐유는 1위 P0040(안산시)이 이미 상위
+  - 이 기능 전에 완료된 진단은 rank 0 행이 없어 상위 3곳에 안산 업체가 없으면 `null`
+- `user_input.factory`(본인만): 고른 신고 공장의 `{ id, name, dong }`. 공장을 고르지 않았으면 `null`. 완료 화면 "RE:FIT 순환 공장 {동}" 배지는 `dong`이 있을 때만
+- `user_input.current_processor`(본인만): `current_processor_id`가 있으면 `processors`의 `{ id, name, sido, sigungu, method }`, 아니면 `null`. 결과 요약 첫 줄은 이 `sigungu`가 있을 때만 "지금은 {sigungu}의 {current_method} 업체로 보내고 있어요."(없으면 지역 없이). `current_processor_name_raw`는 원문 그대로 돌려줄 뿐 지역을 짐작하지 않는다
 - 후보 업체의 처리 방식(`processors.method`)이 `에너지회수`, `소각`, `매립`, `복수 허가`, `미확인`이면 넣지 않는다(원료 재활용 업체만 추천)
 - `source`: `fit_candidates`(신고 공장을 골랐고 근거 목록이 있음) 또는 `computed`(같은 규칙으로 서버 계산)
 - `ranking.inferred_from_reports = true`면 사용자가 "모름"을 골라서 신고 경로에서 가장 많은 방식으로 순위를 매긴 것
@@ -178,7 +204,7 @@ POST /api/requests/:id/cancel         요청 취소
 
 ### GET /api/diagnoses/:id
 
-완료된 진단만(아니면 404). `x-anon-token`이 맞으면 위와 같은 전체 응답, 없거나 틀리면 **공유 링크용**: `user_input`에서 `factory_id`, `lat`, `lng`, `location_source`, `current_cost_won_per_month`, `current_price_won_per_ton`을 뺀다. 카톡 공유 링크는 토큰 없이 이 주소를 연다.
+완료된 진단만(아니면 404). `x-anon-token`이 맞으면 위와 같은 전체 응답, 없거나 틀리면 **공유 링크용**: `user_input`에서 `factory_id`, `factory`, `lat`, `lng`, `location_source`, `current_cost_won_per_month`, `current_price_won_per_ton`, `current_processor`, `current_processor_name_raw`를 뺀다. `ansan_candidate`는 공유 보기에도 있다(이유는 이웃 수와 안산 여부만). 카톡 공유 링크는 토큰 없이 이 주소를 연다.
 
 ### POST /api/requests → 201 (x-anon-token)
 
@@ -186,7 +212,7 @@ POST /api/requests/:id/cancel         요청 취소
 { "diagnosis_id": "uuid", "candidate_id": 1, "contact_name": "홍길동", "contact_phone": "010-1234-5678",
   "join_group": true, "kakao_notify": true }
 ```
-`candidate_id`는 complete 응답의 `candidates[].candidate_id`. `join_group`, `kakao_notify` 기본값 true(공동 수거 옵트아웃). 같은 후보에 진행 중 요청이 있으면 409(동시에 보내도 DB 부분 유니크 인덱스가 막아 409).
+`candidate_id`는 complete 응답의 `candidates[].candidate_id` 또는 `ansan_candidate.candidate_id`. `join_group`, `kakao_notify` 기본값 true(공동 수거 옵트아웃). 같은 후보에 진행 중 요청이 있으면 409(동시에 보내도 DB 부분 유니크 인덱스가 막아 409).
 응답: `{ id, diagnosis_id, candidate_id, processor_id, status: "requested", join_group, kakao_notify, sla_due_at, created_at, labels }` (연락처는 응답에 넣지 않음. 운영자와 해당 처리업체만 조회)
 
 ### POST /api/requests/:id/cancel (x-anon-token)

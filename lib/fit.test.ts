@@ -1,7 +1,7 @@
 // 실행: npm run test:api (Node 22 타입 제거로 바로 실행)
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { addBusinessDays, candidateReasons, chipFlows, splitTransporters, neighborCounts, referencePriceIds, priceYearLabel, pickStored, rankComputed, resolveCurrentMethod, routeShare, type Flow, type Proc } from './fit.ts';
+import { addBusinessDays, candidateReasons, chipFlows, splitTransporters, neighborCounts, referencePriceIds, priceYearLabel, pickAnsan, pickStored, rankComputed, splitAnsan, resolveCurrentMethod, routeShare, type Flow, type Proc } from './fit.ts';
 
 const f = (factory_id: string, processor_id: string | null, method: string, weight = 1, other = false): Flow =>
   ({ factory_id, processor_id, method, method_by_other_group_permit: other, region: '안산', weight });
@@ -157,4 +157,29 @@ test('reasons without factory: only neighbors and in Ansan', () => {
   const r = candidateReasons(cands, { flows: reasonFlows, self: null, factoryDong: dongs, transportRows });
   assert.deepEqual(r[0].map(x => x.type), ['neighbors_same_group', 'in_ansan']);
   assert.deepEqual(r[1].map(x => x.type), ['neighbors_same_group']);
+});
+
+test('pickAnsan: 상위에 안산 업체가 있으면 null, 없으면 자격 있는 안산 업체 중 점수 1위를 rank 0으로', () => {
+  const procs = new Map<string, Proc>([
+    ['A1', { ...p('A1', '물질재활용'), sigungu: '안산시' }],
+    ['A2', { ...p('A2', '물질재활용'), sigungu: '안산시 단원구' }],
+    ['A3', { ...p('A3', '물질재활용'), sigungu: '안산시' }],
+    ['X1', { ...p('X1', '물질재활용'), sigungu: '평택시' }],
+  ]);
+  const r = (id: string, fit_score: number, evidence_rows = 3) => ({ rank: 1, processor_id: id, fit_score, evidence_rows,
+    distance_km: null, distance_quality: null, candidate_confirmed: true, source: 'computed' as const });
+  const top = [r('X1', 90)];
+  assert.equal(pickAnsan([r('A1', 90)], [r('A2', 80)], procs, new Set())?.processor_id ?? null, null);
+  assert.deepEqual(pickAnsan(top, [r('A1', 50), r('A2', 70), r('A3', 99, 0)], procs, new Set()), { ...r('A2', 70), rank: 0 });
+  assert.equal(pickAnsan(top, [r('A2', 70), r('A1', 50)], procs, new Set(['A2']))?.processor_id, 'A1');   // 이미 쓰는 업체 제외
+  assert.equal(pickAnsan(top, [r('A1', 50), { ...r('A1', 95), source: 'computed' }], procs, new Set())?.fit_score, 50); // 먼저 온 저장 행
+  assert.equal(pickAnsan(top, [], procs, new Set()), null);
+});
+
+test('splitAnsan: rank 0은 already_in_top false, 없으면 상위의 첫 안산 업체를 already_in_top true', () => {
+  const c = (rank: number, sigungu: string | null) => ({ rank, sigungu, processor_id: `P${rank}` });
+  assert.deepEqual(splitAnsan([c(1, '평택시'), c(0, '안산시'), c(2, '화성시')]),
+    { top: [c(1, '평택시'), c(2, '화성시')], ansan: { ...c(0, '안산시'), already_in_top: false } });
+  assert.deepEqual(splitAnsan([c(1, '평택시'), c(2, '안산시'), c(3, '안산시')]).ansan, { ...c(2, '안산시'), already_in_top: true });
+  assert.equal(splitAnsan([c(1, '평택시')]).ansan, null);
 });
