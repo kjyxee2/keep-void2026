@@ -242,7 +242,7 @@
   outline-offset: calc(var(--focus-ring-offset) * -1);
 }
 
-/* ---------- 점 레이어(칩 전환 때 투명도 교차) ---------- */
+/* ---------- 점 레이어(캔버스 하나, 칩 전환 때 투명도 교차) ---------- */
 .overlay {
   transition: opacity var(--duration-emphasis) var(--ease-standard);
 }
@@ -252,27 +252,24 @@
   }
 }
 
-.marker {
-  display: flex;
-  align-items: center;
-  justify-content: center;
+/* 점마다 두는 투명 초점 버튼: 모양은 캔버스가 그리고, 버튼은 초점 고리와 Tab, Enter, 툴팁만 맡는다 */
+.hit {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 0;
   background: none;
   border: 0;
   border-radius: var(--radius-full);
   cursor: pointer;
 }
-.marker:focus-visible {
+.hit:focus-visible {
   outline: var(--focus-ring-width) solid var(--color-border-focus);
   outline-offset: var(--focus-ring-offset);
   transition: none;
 }
-.dot {
-  display: flex;
-}
-.dot .shape {
-  width: var(--space-14);
-  height: var(--space-14);
-}
+
+/* 범례와 툴팁의 처리 방식 그림(지도 점과 같은 모양, 캔버스는 canvas.ts가 같은 치수로 그린다) */
 .shape {
   display: inline-block;
   flex: none;
@@ -297,48 +294,6 @@
   stroke: var(--color-chart-landfill);
   stroke-width: 2;
 }
-
-.cluster {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  height: 100%;
-  border-radius: var(--radius-full);
-  border: var(--border-width-2) solid var(--color-bg-page);
-  background: var(--color-bg-brand);
-  color: var(--color-text-inverse);
-  font-size: var(--font-size-p4);
-  font-weight: var(--font-weight-bold);
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-.cluster_l {
-  font-size: var(--font-size-p3);
-}
-
-.processor {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-}
-.bubble {
-  width: 100%;
-  height: 100%;
-  fill: var(--color-bg-page);
-  stroke: var(--color-border-strong);
-  stroke-width: 1.5;
-}
-.processorIcon {
-  position: absolute;
-  left: 50%;
-  top: 40%;
-  display: flex;
-  color: var(--color-text-primary);
-  transform: translate(-50%, -50%);
-}
-.processorIcon svg,
 .ttIcon svg {
   width: var(--space-14);
   height: var(--space-14);

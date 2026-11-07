@@ -1,13 +1,19 @@
 // 지도 공급자 인터페이스. 화면 코드는 이 인터페이스만 쓰고, 공급자(지금은 OpenStreetMap + Leaflet)는 갈아 끼운다.
 // 다른 공급자가 필요해지면 같은 MapProvider를 구현한 파일을 하나 더 두고 MapView에 넘긴다.
+import type { MapMethod } from '@/lib/map';
 import type { Bounds, LngLat, Pixel } from '@/lib/map-geo';
+
+/** 점 모양(캔버스에 그린다). 원 재활용, 사각 소각, 삼각 매립, 빈 원 미확인, 숫자 원 묶음, 말풍선 처리업체 */
+export type Glyph =
+  | { kind: 'dot'; method: MapMethod }
+  | { kind: 'cluster'; n: number; tier: 's' | 'm' | 'l' }
+  | { kind: 'processor'; method: MapMethod; iconSvg: string | null };
 
 export type MarkerSpec = {
   id: string;
   at: LngLat;
-  /** 표시용 HTML(우리 컴포넌트 마크업). 스크린리더에는 label만 읽힌다 */
-  html: string;
-  className: string;
+  /** 캔버스에 그릴 모양. 스크린리더에는 label만 읽힌다 */
+  glyph: Glyph;
   /** 정사각 아이콘 한 변(px). 기준점은 가운데, anchor가 'bottom'이면 아래 가운데 */
   size: number;
   anchor?: 'center' | 'bottom';
@@ -34,6 +40,8 @@ export type MapOptions = {
   fallback: { url: string; bounds: Bounds };
   /** 오버레이 레이어 클래스(투명도 전환 스타일) */
   overlayClassName: string;
+  /** 점마다 두는 투명 초점 버튼 클래스 */
+  hitClassName: string;
   tooltipClassName: string;
   /** 지도 영역 이름(스크린리더) */
   label: string;

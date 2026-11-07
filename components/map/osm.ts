@@ -1,10 +1,12 @@
 // OpenStreetMap 타일 + Leaflet 1.9.4 구현. 이 파일은 MapView(동적 import, SSR 끔)에서만 불러 지도 화면에만 실린다.
-// 근거(1.9.4 소스, node_modules/leaflet/src): Marker keyboard 옵션은 아이콘에 tabIndex 0과 role=button을 붙이고,
-// Tooltip은 role=tooltip 컨테이너를 만든다. DivIcon은 html, className, iconSize, iconAnchor를 받는다.
+// 근거(1.9.4 소스, node_modules/leaflet/src): Renderer는 확대 연출 동안 컨테이너 하나만 transform하고 zoomend, moveend에
+// _update를 부른다. 점은 canvas.ts의 DotLayer가 캔버스 하나에 그리고, 점마다 투명 버튼을 두어 Tab, Enter, 툴팁을 받는다.
+// Tooltip은 role=tooltip 컨테이너를 만든다.
 // 타일 정책(https://operations.osmfoundation.org/policies/tiles/): https 타일 주소 그대로, 출처 표기를 지도 위에 보이게,
 // 보이는 칸만 받고 미리 받기 금지(Leaflet 기본 동작, keepBuffer 기본값), no-cache 헤더를 붙이지 않음.
 import type * as Leaflet from 'leaflet';
 import type { Bounds, LngLat } from '@/lib/map-geo';
+import { defineDotLayer, readPaint, type DotLayer } from './canvas';
 import type { MapHandle, MapOptions, MapProvider, MarkerSpec, OverlayLayer } from './provider';
 
 const TILE_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
@@ -123,9 +125,11 @@ export const osmProvider: MapProvider = {
       if (map.hasLayer(tooltip)) map.closeTooltip(tooltip);
     };
 
-    // ---------- 오버레이 레이어 ----------
+    // ---------- 오버레이 레이어(캔버스 하나 + 점마다 초점 버튼) ----------
+    const DotLayerClass = defineDotLayer(L);
+    const paint = readPaint(el);
     const overlays = new Set<{
-      group: Leaflet.LayerGroup;
+      layer: DotLayer;
       pane: HTMLElement;
       off: () => void;
     }>();
@@ -134,31 +138,25 @@ export const osmProvider: MapProvider = {
       const pane = map.createPane(name);
       pane.style.zIndex = String(zIndex);
       pane.classList.add(opts.overlayClassName);
-      const group = L.layerGroup().addTo(map);
-      const specs = new WeakMap<Element, MarkerSpec>();
+      const dots = new DotLayerClass({ pane: name, paint, hitClassName: opts.hitClassName }).addTo(map);
 
-      const specOf = (t: EventTarget | null) => {
-        const icon = (t as Element | null)?.closest?.('.leaflet-marker-icon');
-        const spec = icon ? specs.get(icon) : undefined;
-        return spec ? { icon: icon as HTMLElement, spec } : null;
-      };
       const offsetOf = (s: MarkerSpec) => (s.anchor === 'bottom' ? s.size : s.size / 2);
       const open = (s: MarkerSpec) => showTooltip(s.at, s.tooltip, offsetOf(s));
       const activate = (s: MarkerSpec) => (s.onActivate ? s.onActivate() : open(s));
 
-      // 마커마다 리스너를 달지 않고 레이어(pane)에서 한 번에 받는다
+      // 버튼마다 리스너를 달지 않고 레이어(pane)에서 한 번에 받는다
       const onOver = (e: Event) => {
-        const hit = specOf(e.target);
+        const hit = dots.specOf(e.target);
         if (hit) open(hit.spec);
       };
       const onOut = (e: Event) => {
-        const hit = specOf(e.target);
-        if (hit && document.activeElement !== hit.icon) hideTooltip();
+        const hit = dots.specOf(e.target);
+        if (hit && document.activeElement !== hit.el) hideTooltip();
       };
       const onFocus = (e: Event) => onOver(e);
       const onBlur = () => hideTooltip();
       const onKey = (e: KeyboardEvent) => {
-        const hit = specOf(e.target);
+        const hit = dots.specOf(e.target);
         if (!hit) return;
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -168,7 +166,7 @@ export const osmProvider: MapProvider = {
         }
       };
       const onClick = (e: Event) => {
-        const hit = specOf(e.target);
+        const hit = dots.specOf(e.target);
         if (hit) activate(hit.spec);
       };
       pane.addEventListener('mouseover', onOver);
@@ -185,34 +183,14 @@ export const osmProvider: MapProvider = {
         pane.removeEventListener('keydown', onKey);
         pane.removeEventListener('click', onClick);
       };
-      const entry = { group, pane, off };
+      const entry = { layer: dots, pane, off };
       overlays.add(entry);
 
       const layer: OverlayLayer & { _entry: typeof entry } = {
         _entry: entry,
         setMarkers(list) {
           if (pane.contains(document.activeElement)) hideTooltip();
-          group.clearLayers();
-          for (const s of list) {
-            const icon = L.divIcon({
-              html: s.html,
-              className: s.className,
-              iconSize: [s.size, s.size],
-              iconAnchor: s.anchor === 'bottom' ? [s.size / 2, s.size] : [s.size / 2, s.size / 2],
-            });
-            const m = L.marker(toLatLng(s.at), {
-              icon,
-              pane: name,
-              keyboard: true,
-              title: '',
-            });
-            group.addLayer(m);
-            const iconEl = m.getElement();
-            if (iconEl) {
-              iconEl.setAttribute('aria-label', s.label);
-              specs.set(iconEl, s);
-            }
-          }
+          dots.setSpecs(list);
         },
         setVisible(visible, animate = true) {
           if (!animate) pane.style.transition = 'none';
@@ -225,7 +203,7 @@ export const osmProvider: MapProvider = {
           else pane.setAttribute('inert', '');
         },
         clear() {
-          group.clearLayers();
+          dots.clearSpecs();
         },
       };
       return layer;
@@ -252,7 +230,7 @@ export const osmProvider: MapProvider = {
         const entry = (
           layer as OverlayLayer & {
             _entry?: {
-              group: Leaflet.LayerGroup;
+              layer: DotLayer;
               pane: HTMLElement;
               off: () => void;
             };
@@ -260,7 +238,7 @@ export const osmProvider: MapProvider = {
         )._entry;
         if (!entry) return;
         entry.off();
-        entry.group.remove();
+        entry.layer.remove();
         overlays.delete(entry);
       },
       onZoomEnd(cb) {

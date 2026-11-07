@@ -1,4 +1,4 @@
-// Figma Map Overlay(139:1781)의 FactoryDot, Cluster, ProcessorMarker, Tooltip을 DivIcon 마크업으로.
+// Figma Map Overlay(139:1781)의 FactoryDot, Cluster, ProcessorMarker, Tooltip. 점은 캔버스 모양(Glyph), 툴팁은 HTML.
 // 처리 방식은 모양과 색을 같이 쓴다(원 재활용, 사각 소각, 삼각 매립, 빈 원 미확인). 흑백에서도 모양으로 구분된다.
 import { methodBucket, type MapMethod } from '@/lib/map';
 import { clusterSize, type Cluster, type LngLat } from '@/lib/map-geo';
@@ -68,8 +68,7 @@ export function factorySpec(f: FactoryFeature): MarkerSpec {
   return {
     id,
     at: f.geometry.coordinates,
-    html: `<span class="${styles.dot}" data-n="1">${shapeSvg(m)}</span>`,
-    className: styles.marker,
+    glyph: { kind: 'dot', method: m },
     size: DOT_HIT,
     label: `${name}, ${place(dong)}, ${METHOD_LABEL[m]}(${METHOD_SHAPE[m]})`,
     tooltip: tooltipHtml(name, place(dong), shapeSvg(m), METHOD_LABEL[m]),
@@ -85,8 +84,7 @@ export function clusterSpec(c: Cluster<FactoryFeature>, onZoom: (() => void) | u
   return {
     id: `c${c.id}`,
     at: c.at,
-    html: `<span class="${styles.cluster} ${styles[`cluster_${clusterSize(n)}`]}" data-n="${n}">${n}</span>`,
-    className: styles.marker,
+    glyph: { kind: 'cluster', n, tier: clusterSize(n) },
     size,
     label: onZoom ? `공장 ${n}곳 묶음, 누르면 확대` : `같은 건물 공장 ${n}곳`,
     tooltip:
@@ -106,11 +104,7 @@ export function processorSpec(p: ProcessorFeature, methodIcons: Partial<Record<M
   return {
     id: p.properties.id,
     at: p.geometry.coordinates,
-    html:
-      `<span class="${styles.processor}">` +
-      `<svg viewBox="0 0 32 32" class="${styles.bubble}" aria-hidden="true" focusable="false"><path d="M4 1.5h24a2.5 2.5 0 0 1 2.5 2.5v18a2.5 2.5 0 0 1-2.5 2.5h-8L16 30l-4-5.5H4A2.5 2.5 0 0 1 1.5 22V4A2.5 2.5 0 0 1 4 1.5z"/></svg>` +
-      `<span class="${styles.processorIcon}">${icon}</span></span>`,
-    className: styles.marker,
+    glyph: { kind: 'processor', method: m, iconSvg: icon || null },
     size: PROCESSOR_PX,
     anchor: 'bottom',
     label: `처리업체 ${p.properties.name}${where ? `, ${where}` : ''}, ${METHOD_LABEL[m]}`,
