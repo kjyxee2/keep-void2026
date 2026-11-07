@@ -78,7 +78,7 @@ POST /api/requests/:id/cancel         요청 취소
 
 ### POST /api/diagnoses/:id/complete (x-anon-token)
 
-본문 없음. 한 번만 가능(두 번째는 409, 그 뒤로는 GET 사용). 응답 예(실제 데이터, F0001, 폐합성수지):
+본문 없음. 한 번만 가능(두 번째는 409, 그 뒤로는 GET 사용). 중간에 실패해 다시 부르면 이전 시도의 후보를 지우고 새로 넣는다. 응답 예(실제 데이터, F0001, 폐합성수지):
 
 ```json
 {
@@ -148,7 +148,7 @@ POST /api/requests/:id/cancel         요청 취소
 { "diagnosis_id": "uuid", "candidate_id": 1, "contact_name": "홍길동", "contact_phone": "010-1234-5678",
   "join_group": true, "kakao_notify": true }
 ```
-`candidate_id`는 complete 응답의 `candidates[].candidate_id`. `join_group`, `kakao_notify` 기본값 true(공동 수거 옵트아웃). 같은 후보에 진행 중 요청이 있으면 409.
+`candidate_id`는 complete 응답의 `candidates[].candidate_id`. `join_group`, `kakao_notify` 기본값 true(공동 수거 옵트아웃). 같은 후보에 진행 중 요청이 있으면 409(동시에 보내도 DB 부분 유니크 인덱스가 막아 409).
 응답: `{ id, diagnosis_id, candidate_id, processor_id, status: "requested", join_group, kakao_notify, sla_due_at, created_at, labels }` (연락처는 응답에 넣지 않음. 운영자와 해당 처리업체만 조회)
 
 ### POST /api/requests/:id/cancel (x-anon-token)

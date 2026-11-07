@@ -63,6 +63,13 @@ await db.exec(`update diagnoses set status='draft', completed_at=null where id='
 ok((await as('authenticated',A,`insert into group_memberships (group_id,diagnosis_id,user_id) values ('G0001','10000000-0000-0000-0000-000000000001','${A}') returning id`)).length===1, 'A joins group with own diagnosis');
 ok(await fails('authenticated',A,`insert into group_memberships (group_id,diagnosis_id,user_id) values ('G0001','10000000-0000-0000-0000-000000000002','${A}')`), 'A cannot join with B diagnosis');
 ok(await fails('authenticated',A,`update group_memberships set diagnosis_id='10000000-0000-0000-0000-000000000002' where user_id='${A}'`), 'A cannot repoint membership to B diagnosis');
+await db.exec(`insert into diagnosis_candidates (diagnosis_id,rank,processor_id,fit_score) values ('10000000-0000-0000-0000-000000000002',1,'P0002',50)`);
+const cand = (await db.query(`select id from diagnosis_candidates limit 1`)).rows[0].id;
+const req = st => `insert into connection_requests (diagnosis_id,candidate_id,processor_id,status) values ('10000000-0000-0000-0000-000000000002',${cand},'P0002','${st}')`;
+await db.exec(req('requested'));
+ok(await (async () => { try { await db.exec(req('contacted')); return false; } catch (e) { return e.code === '23505'; } })(), 'second active request for same candidate is 23505');
+await db.exec(req('cancelled')); await db.exec(req('rejected'));
+ok(true, 'cancelled, rejected requests do not block');
 await db.exec(`update profiles set role='operator' where id='${B}'`);
 ok((await as('authenticated',B,`select * from diagnoses`)).length===2, 'operator sees all diagnoses');
 ok(Math.abs((await db.query(`select haversine_km(37.3234,126.7875,37.3108,126.8308) d`)).rows[0].d - 4.07) < 0.1, 'haversine ~4km');

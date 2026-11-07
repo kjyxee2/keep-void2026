@@ -36,7 +36,8 @@ export async function POST(req: Request) {
       join_group: b.join_group ?? true, kakao_notify: b.kakao_notify ?? true,
       sla_due_at: addBusinessDays(new Date(), 2).toISOString(),
     }).select('id,diagnosis_id,candidate_id,processor_id,status,join_group,kakao_notify,sla_due_at,created_at').single();
-    if (error) return dbFail(error);
+    // 동시 요청: 부분 유니크 인덱스 connection_requests_active_candidate_uniq 위반
+    if (error) return error.code === '23505' ? fail(409, '이미 진행 중인 요청이 있음') : dbFail(error);
     await db().from('request_events').insert({ request_id: data.id, status: 'requested', actor: 'user' });
     return json({ ...data, labels: { sla: '영업일 2일 기준(공휴일 미반영)', processor: '실제 처리 가능 여부는 업체 확인 필요' } }, 201);
   } catch (e) {

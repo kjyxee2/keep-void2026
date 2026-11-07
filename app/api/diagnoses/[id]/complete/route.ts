@@ -20,10 +20,12 @@ export async function POST(req: Request, { params }: { params: Promise<{ id: str
     const [ranked, prices] = await Promise.all([computeCandidates(diag, flows.group, method), referencePrices(diag)]);
     const n = neighborCounts(flows.chip);   // 칩 원 표기 기준, 본인 공장 포함(홈 칩 통계와 같은 기준)
 
-    // 다시 시도해도 같은 결과가 되도록 upsert(중간 실패 대비)
+    // 다시 시도해도 같은 결과가 되도록 이전 시도의 후보를 지우고 넣는다(후보 수가 줄어도 옛 행이 남지 않음).
+    // draft 진단이라 연결 요청(후보 FK)은 아직 없다
+    const del = await db().from('diagnosis_candidates').delete().eq('diagnosis_id', id);
+    if (del.error) return dbFail(del.error);
     if (ranked.length) {
-      const c = await db().from('diagnosis_candidates').upsert(
-        ranked.map(r => ({ diagnosis_id: id, ...r })), { onConflict: 'diagnosis_id,rank' });
+      const c = await db().from('diagnosis_candidates').insert(ranked.map(r => ({ diagnosis_id: id, ...r })));
       if (c.error) return dbFail(c.error);
     }
     const r = await db().from('diagnosis_results').upsert({
