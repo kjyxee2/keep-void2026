@@ -1,0 +1,394 @@
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) · theme: RE:FIT v3 (by request) · genre: modern-minimal · posture: restrained · surface: result 76:168, 76:11 · motion: RouteBar ScaleXBar only */
+/* Hallmark · pre-emit critique: two columns as Figma, route and candidates left, prices, group and guide right · weakest: price table is dense in the side column */
+
+.page {
+  flex: 1;
+  background: var(--color-bg-subtle);
+  padding-block: var(--space-56) var(--section-md);
+}
+
+/* Figma 76:168: 1440에서 본문 1200(양쪽 120) */
+.wrap {
+  max-width: var(--container-narrow);
+}
+
+/* ---------- 머리 ---------- */
+.intro {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+  margin-bottom: var(--space-56);
+}
+.introTop {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-7) var(--space-21);
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-10);
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+.headline {
+  display: flex;
+  flex-direction: column;
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+  overflow-wrap: break-word;
+  min-width: 0;
+}
+.line {
+  display: block;
+}
+.share {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.shareStatus {
+  font-size: var(--font-size-p4);
+  color: var(--color-text-secondary);
+}
+.shareStatus:empty {
+  display: none;
+}
+
+/* ---------- 두 단 ---------- */
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, calc(var(--space-84) * 4 + var(--space-42)));
+  gap: var(--space-56);
+  align-items: start;
+}
+.colMain,
+.colSide {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-56);
+  min-width: 0;
+}
+.colSide {
+  gap: var(--space-28);
+}
+.areaRoute {
+  min-width: 0;
+}
+.areaStats {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+  min-width: 0;
+}
+.areaCands {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-28);
+  min-width: 0;
+}
+.areaSide {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-28);
+  min-width: 0;
+}
+
+/* ---------- 이웃 수 ---------- */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-35);
+}
+.statItem {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  padding-top: var(--space-14);
+  border-top: var(--border-width-3) solid var(--color-text-primary);
+}
+.statValue {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.3;
+}
+.burnText {
+  color: var(--color-text-warning);
+}
+.recycleText {
+  color: var(--color-text-accent);
+}
+.statLabel {
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+
+/* ---------- 후보 ---------- */
+.sectionTitle {
+  font-size: var(--font-size-h4);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.4;
+}
+.cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+}
+.reasonLabel {
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-tertiary);
+}
+.reasonList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  padding-left: var(--space-21);
+  list-style: disc;
+}
+.noteText {
+  display: inline-flex;
+  min-width: 0;
+}
+.sharedNote {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-14);
+  padding: var(--space-21);
+  border: var(--border-width-1) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-page);
+}
+
+/* ---------- 오른쪽 상자 ---------- */
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+  padding: var(--space-21);
+  border: var(--border-width-1) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-page);
+  min-width: 0;
+}
+.panelTitle {
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+}
+.panelBody {
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+.small {
+  font-size: var(--font-size-p4);
+  color: var(--color-text-secondary);
+}
+.block {
+  display: block;
+}
+.linkRow {
+  display: flex;
+}
+
+/* 단가 표 */
+.tableWrap {
+  overflow-x: auto;
+}
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-p3);
+}
+.table th,
+.table td {
+  padding: var(--space-10) var(--space-7);
+  border-bottom: var(--border-width-1) solid var(--color-border-subtle);
+  text-align: left;
+  vertical-align: top;
+}
+.table thead th {
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-tertiary);
+  border-bottom-color: var(--color-border-default);
+}
+.table th:first-child,
+.table td:first-child {
+  padding-left: 0;
+}
+.table td:nth-child(2) {
+  text-align: right;
+  white-space: nowrap;
+  font-weight: var(--font-weight-semibold);
+}
+.table td:last-child {
+  padding-right: 0;
+  white-space: nowrap;
+  color: var(--color-text-secondary);
+}
+.table tbody th {
+  font-weight: var(--font-weight-medium);
+}
+.cellMain {
+  display: block;
+}
+.cellSub {
+  display: block;
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-regular);
+  color: var(--color-text-tertiary);
+}
+.mineRow th,
+.mineRow td {
+  background: var(--color-bg-brand-soft);
+}
+.mineRow th:first-child {
+  padding-left: var(--space-7);
+}
+.mineRow td:last-child {
+  padding-right: var(--space-7);
+}
+.noteList {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  list-style: none;
+  font-size: var(--font-size-p4);
+  color: var(--color-text-secondary);
+}
+.priceInput {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 같이 맡기기 */
+.groupFigure {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+.groupSvg {
+  width: 100%;
+  height: auto;
+  background: var(--color-bg-subtle);
+  border-radius: var(--radius-sm);
+}
+.groupRing {
+  fill: none;
+  stroke: var(--color-border-control);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+.groupDot {
+  fill: var(--color-chart-factory);
+}
+.groupSelf {
+  fill: var(--color-chart-recycle);
+}
+
+/* 절차 */
+.steps {
+  display: flex;
+  flex-direction: column;
+  list-style: none;
+  border-top: var(--border-width-1) solid var(--color-border-subtle);
+}
+.step {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-14);
+  padding-block: var(--space-14);
+  border-bottom: var(--border-width-1) solid var(--color-border-subtle);
+}
+.stepNo {
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-accent);
+  line-height: 1.7;
+}
+.stepTitle {
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-bold);
+}
+.stepBody {
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+.designated {
+  padding-block: var(--space-14);
+}
+.expandBody {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+}
+.expandBody[hidden] {
+  display: none;
+}
+
+/* 모바일 아래 고정 버튼 */
+.stickyBar {
+  display: none;
+}
+
+/* 한 단: Figma 76:11 순서(길, 이웃 수, 후보, 단가, 묶음, 절차) */
+@media (max-width: 1023px) {
+  .grid {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--space-42);
+  }
+  .colMain,
+  .colSide {
+    display: contents;
+  }
+  .areaRoute {
+    order: 1;
+  }
+  .areaStats {
+    order: 2;
+  }
+  .areaCands {
+    order: 3;
+  }
+  .areaSide {
+    order: 4;
+  }
+}
+
+@media (max-width: 767px) {
+  .wrap {
+    max-width: none;
+  }
+  .page {
+    padding-block: var(--space-28) calc(var(--section-md) + var(--control-button-h));
+  }
+  .intro {
+    margin-bottom: var(--space-35);
+  }
+  .headline {
+    font-size: var(--font-size-h4);
+  }
+  .sectionTitle {
+    font-size: var(--font-size-h5);
+  }
+  .stats {
+    gap: var(--space-14);
+  }
+  .stickyBar {
+    display: block;
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 40;
+    padding: var(--space-14) var(--layout-gutter);
+    background: var(--color-bg-page);
+    box-shadow: var(--shadow-sticky-bar);
+  }
+}

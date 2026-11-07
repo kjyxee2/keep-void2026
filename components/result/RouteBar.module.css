@@ -1,0 +1,140 @@
+.route {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-21);
+  min-width: 0;
+}
+.title {
+  font-size: var(--font-size-h7);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+}
+.chart {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+}
+.markerRow,
+.bar {
+  display: flex;
+  gap: var(--border-width-2);
+}
+.markerCell,
+.cell {
+  flex-shrink: 1;
+  flex-basis: 0;
+  min-width: 0;
+}
+.markerCell {
+  display: flex;
+  justify-content: center;
+}
+.marker {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  white-space: nowrap;
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.43;
+}
+.marker::after {
+  content: "";
+  width: var(--border-width-2);
+  height: var(--space-10);
+  background: var(--color-text-primary);
+}
+.cell {
+  position: relative;
+  height: var(--space-28);
+  background: var(--color-progress-track);
+  overflow: hidden;
+}
+.cell:first-child {
+  border-radius: var(--radius-xs) 0 0 var(--radius-xs);
+}
+.cell:last-child {
+  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+}
+.fill {
+  position: absolute;
+  inset: 0;
+}
+.burn {
+  background: var(--color-chart-burn);
+}
+.recycle {
+  background: var(--color-chart-recycle);
+}
+.landfill,
+.process {
+  background: var(--color-chart-landfill);
+}
+.unknown {
+  background: var(--color-chart-unknown);
+}
+.inline {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-bold);
+  line-height: 1;
+}
+.on_burn,
+.on_recycle,
+.on_landfill,
+.on_process {
+  color: var(--color-text-inverse);
+}
+.on_unknown {
+  color: var(--color-text-primary);
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-10) var(--space-21);
+  list-style: none;
+}
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-7);
+  font-size: var(--font-size-p3);
+}
+/* 모양: 원 재활용, 사각 소각, 삼각 매립, 마름모 중간가공, 빈 원 미확인 (Legend 규칙과 같음) */
+.mark {
+  width: var(--space-14);
+  height: var(--space-14);
+  flex: none;
+}
+.mark_recycle {
+  border-radius: var(--radius-full);
+  background: var(--color-chart-recycle);
+}
+.mark_burn {
+  border-radius: var(--radius-xs);
+  background: var(--color-chart-burn);
+}
+.mark_landfill {
+  background: var(--color-chart-landfill);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.mark_process {
+  background: var(--color-chart-landfill);
+  clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+.mark_unknown {
+  border-radius: var(--radius-full);
+  border: var(--border-width-2) solid var(--color-chart-landfill);
+  background: var(--color-chart-unknown);
+}
+
+@media (max-width: 767px) {
+  .narrow {
+    display: none;
+  }
+}
