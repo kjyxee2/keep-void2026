@@ -255,11 +255,78 @@ status: `requested`, `contacted`, `sample`, `contracted`, `first_pickup`, `cance
 ```
 `summary`는 `data/demo/summary.json` 그대로(키 설명은 README 2절). `routes_switched_to_recycling`은 연결 요청이 `contracted` 또는 `first_pickup`이 된 수.
 
+## 서류 사진 자동 입력: POST /api/ocr/document
+
+계량표(계근표, 계량증명서)나 올바로 전자인계서, 폐기물 인계서 사진에서 **인쇄된 값만** 읽어 돌려준다. 진단을 저장하지 않는다. 화면은 값과 근거 글자를 보여 주고 사용자가 확인한 뒤 `PATCH /api/diagnoses/:id`로 저장한다(컴포넌트 `components/diagnose/DocumentScan.tsx`, `onApply({ weight_kg, chip_id, processor_id })`).
+
+요청: `multipart/form-data`
+
+| 필드 | 값 |
+|---|---|
+| `image` | 사진 파일. JPG, PNG, WEBP. 파일 앞부분 바이트로 판별(확장자 무시). HEIC는 415 |
+| `diagnosis_id` | 선택. 보내면 본인 진단인지 확인(`x-anon-token` 또는 로그인). 값은 저장하지 않음 |
+
+응답 200:
+```json
+{
+  "document_type": "인계서",
+  "weight_kg": 2480, "weight_unit_raw": "톤",
+  "waste_type_raw": "폐유", "processor_name_raw": "견본리사이클(주)", "transporter_name_raw": "견본운수(주)",
+  "date_raw": "2026년 10월 15일",
+  "confidence": { "weight_kg": 0.97, "waste_type_raw": 0.97, "processor_name_raw": 0.96 },
+  "evidence": { "weight_kg": "인계량 2.48 톤", "waste_type_raw": "폐유", "processor_name_raw": "견본리사이클(주)",
+                "transporter_name_raw": "견본운수(주)", "date_raw": "2026년 10월 15일" },
+  "mapped": { "chip_id": "C04", "chip_label": "폐유", "processor_id": null, "processor_name": null },
+  "diagnosis_id": null,
+  "provider": { "name": "anthropic", "model": "claude-haiku-5-5" },
+  "labels": { "values": "…", "weight": "…", "mapping": "…", "privacy": "사진은 저장하지 않음" }
+}
+```
+(시험용 견본 `tests/fixtures/sample-handover.png`의 실제 결과)
+
+규칙:
+- 서류에 없는 값, 흐린 값은 `null`. 추정, 계산 없음(총중량에서 공차중량을 빼지 않음). 금액은 읽지 않음
+- `weight_kg`: 서류에 `kg`이면 그대로, `톤`/`t`/`ton`이면 1000을 곱함(단위 환산만). 단위가 없거나 다른 단위(㎥, 마대 등)면 `null`이고 `weight_unit_raw`에 원문을 남김. `evidence.weight_kg`에 그 숫자가 보이지 않으면 `null`
+- **서류 한 장의 무게**다. 진단의 `weight_kg_per_month`(한 달 무게)와 다를 수 있어 화면에서 확인받는다
+- `mapped.chip_id`: `waste_type_raw`가 칩 `label`, 칩 `waste_group`, 신고 자료(`flows.waste_type`) 원 표기 중 하나와 정규화 후 정확히 같을 때만. 정규화는 NFKC, 소문자, 공백과 문장부호 제거
+- `mapped.processor_id`: `processors.name` 또는 `name_variants`와 정규화 후 정확히 같을 때만(법인 표기 (주), 주식회사 등은 무시). 부분 일치, 유사도 매칭 없음. 같은 키가 두 곳 이상이면 `null`. 못 찾아도 `*_raw`는 그대로
+- `confidence`는 모델이 매긴 0~1 값(참고용). 화면 안내: 0.85 이상 "또렷하게 읽음", 0.6 이상 "한 번 더 확인", 그 아래 "흐릿함, 꼭 확인"
+
+오류(`{ "error": "한국어 안내" }`):
+
+| 상태 | 언제 |
+|---|---|
+| 400 | `image` 없음, 빈 파일, `diagnosis_id` 형식 오류 |
+| 403, 404 | `diagnosis_id`가 남의 진단이거나 없음 |
+| 413 | 7.5MB 초과 |
+| 415 | HEIC, 그 밖의 형식 |
+| 422 | 모델이 거절, 결과가 잘림, JSON 아님 |
+| 429 | IP당 1분 6장 초과(`Retry-After` 헤더) |
+| 502, 504 | 모델 API 오류, 20초 초과 |
+| 503 | `ANTHROPIC_API_KEY` 없음, 모델 API 인증 실패나 혼잡 → 화면은 직접 입력으로 안내 |
+
+제한:
+- 크기 7.5MB: Claude API 이미지 한도가 base64 기준 10MB라서(원본 7.5MiB = base64 10MiB). Vercel 함수 요청 본문은 4.5MB까지이므로 컴포넌트가 보내기 전에 브라우저에서 긴 변 2576px JPEG로 줄인다(서버에는 이미지 처리 라이브러리를 쓰지 않음)
+- 시간 20초(`maxRetries: 0`), 요청 제한은 서버 인스턴스 메모리 기준 **최선 노력**이다. 서버리스 인스턴스마다 따로 세고 재시작하면 초기화된다. 남용이 보이면 공유 저장소 기반 제한으로 바꿀 것
+
+개인정보:
+- 사진은 메모리에서만 처리하고 저장하지 않는다(DB, 파일, 로그 모두). 로그에는 오류 종류와 상태 코드만 남기고 사진 바이트, 읽은 값, 모델 응답 본문은 남기지 않는다
+- 사진은 Anthropic API로 전송된다(외부 처리). 모델에게 사람 이름, 전화번호, 차량번호, 주소를 옮겨 적지 말라고 지시하며 응답 스키마에도 그런 칸이 없다
+- 키(`ANTHROPIC_API_KEY`)는 서버 Route Handler에서만 읽는다. 클라이언트 번들에 들어가지 않는다(`NEXT_PUBLIC_` 아님)
+
+모델과 비용:
+- 기본 `claude-haiku-5-5`(가장 싸고 빠른 이미지 지원 모델), `ANTHROPIC_OCR_MODEL`로 바꿀 수 있음. 구조화 출력(`output_config.format` JSON 스키마), `effort: low`
+- 공급자는 `OCR_PROVIDER`(기본 `anthropic`, 지금은 이것만 구현). 스키마 검사, 톤 환산, 이름 연결은 공급자 밖 공통 코드(`lib/ocr/normalize.ts`, `mapping.ts`)
+- 요금(claude-api 요금표, 2026-10-06 기준): Haiku 5.5 입력 $0.10, 출력 $0.50 / 100만 토큰(프롬프트 10만 토큰 이하). 이미지 토큰은 `⌈가로/28⌉ × ⌈세로/28⌉`, Claude 4.7 이후 모델은 긴 변 2576px, 최대 4,784토큰
+- 실측(견본 1080×900, 2장): 입력 3,730토큰(이미지 약 1,290 + 지시문과 스키마), 출력 약 220토큰, 장당 약 $0.00048. 휴대폰 사진(최대 4,784 이미지 토큰)은 입력 약 7,200토큰, 장당 약 $0.0009
+- 실시간 시험: `node scripts/ocr-live-test.mjs`(키가 없으면 건너뜀, 시험용 견본 2장만 보냄)
+
 ## 개발
 
 ```
 npm run dev          # http://localhost:3000/api/chips
-npm run test:api     # 순위 규칙, 경로 집계, 단가 규칙, 검색 필터, 묶음, 지도 방식, 실제 데모 데이터 값(1,209/445/125 등, unzip 필요)
+npm run test:api     # 순위 규칙, 경로 집계, 단가 규칙, 검색 필터, 묶음, 지도 방식, 서류 자동 입력(검사, 환산, 이름 연결), 실제 데모 데이터 값(1,209/445/125 등, unzip 필요)
 npm run test:db      # 마이그레이션 + RLS, 시드 SQL 적용 확인 (PGlite, Docker 불필요, python3과 unzip 필요)
 ```
-`.env.local`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`(서버 전용, 커밋 금지).
+`.env.local`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`(서버 전용, 커밋 금지), `ANTHROPIC_API_KEY`(서버 전용, 커밋 금지. 없으면 서류 자동 입력만 503).
+선택: `ANTHROPIC_OCR_MODEL`(기본 `claude-haiku-5-5`), `OCR_PROVIDER`(기본 `anthropic`). Vercel 프로젝트 환경변수에도 같은 이름으로 넣는다.
