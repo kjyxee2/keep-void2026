@@ -1,4 +1,4 @@
-import { db, dbFail, json } from '@/lib/server';
+import { cached, db, dbFail } from '@/lib/server';
 
 // 진단 1단계: 품목 칩(안내 문구는 display_text 그대로)과 입력 선택지
 export async function GET() {
@@ -7,7 +7,7 @@ export async function GET() {
     db().from('volume_options').select('*').order('id'),
   ]);
   if (chips.error || volumes.error) return dbFail(chips.error ?? volumes.error);
-  return json({
+  return cached({
     chips: chips.data,
     volume_options: volumes.data,
     weight_sources: ['계량표', '올바로 인계서', '기타'],

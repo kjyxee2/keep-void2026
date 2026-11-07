@@ -1,4 +1,4 @@
-import { db, dbFail, fail, fetchAll, json } from '@/lib/server';
+import { cached, db, dbFail, fail, fetchAll } from '@/lib/server';
 
 type P = { id: string; name: string; lat: number | null; lng: number | null; coord_verified: boolean | null; [k: string]: unknown };
 const point = ({ lat, lng, ...props }: P) =>
@@ -32,7 +32,7 @@ export async function GET(req: Request) {
   try {
     if (layer === 'factories') {
       const rows = await factories(group);
-      return json({ ...fc(rows.map(point)), labels: LABELS });
+      return cached({ ...fc(rows.map(point)), labels: LABELS });
     }
 
     if (layer === 'processors') {
@@ -49,7 +49,7 @@ export async function GET(req: Request) {
         g.processors.push(p);
         bySigungu.set(key, g);
       }
-      return json({
+      return cached({
         ...fc(rows.filter(p => p.coord_verified).map(point)),
         unlocated: [...bySigungu.values()].map(g => ({ ...g, count: g.processors.length }))
           .sort((a, b) => b.count - a.count),
@@ -74,7 +74,7 @@ export async function GET(req: Request) {
         lines.set(k, l);
       }
       const r1 = (n: number) => Math.round(n * 10) / 10;
-      return json({
+      return cached({
         ...fc([...lines.values()].map(l => ({
           type: 'Feature',
           geometry: { type: 'LineString', coordinates: [[l.f.lng, l.f.lat], [l.p.lng, l.p.lat]] },
