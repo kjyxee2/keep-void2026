@@ -1,4 +1,5 @@
-// 로고: Figma Logo/Symbol(64:19), Logo/Lockup(64:25). SVG 원본은 brand/logo에서 복사
+// 로고: Figma Logo/Symbol(64:19), Logo/Lockup(64:25). SVG 원본은 brand/logo에서 복사.
+// 심볼의 결 그림은 벡터 클립 안에 든 비트맵이라 PNG 대신 WebP(품질 85)로 넣어 두었다(모양과 크기는 같음)
 import styles from './Logo.module.css';
 
 type LogoProps = { className?: string; size?: 'sm' | 'md' | 'lg' };
