@@ -50,13 +50,32 @@ export const ANSAN_CANDIDATE = {
   title: '안산 안 후보',
 };
 
-/** 후보 카드 근거 문구. 후보는 폐기물군 기준으로 세므로 "같은 폐기물군" */
-export const candidateEvidence = (neighbors: number) =>
-  `같은 폐기물군을 이 업체에 재활용으로 보내는 안산 공장 ${num(neighbors)}곳`;
+/** 후보 카드 근거 한 줄(Figma v2 76:168 Candidate Card Evidence). 숫자는 API neighbors 그대로 */
+export const candidateEvidence = (neighbors: number) => `이 업체에 원료 재활용으로 보내는 안산 공장 ${num(neighbors)}곳`;
 
-/** 요약 이웃 수 문구. 칩(신고 원 표기) 기준 */
-export const neighborsBurnLabel = (chip: string) => `${chip}${objectParticle(chip)} 소각 쪽으로 보내는 안산 공장`;
-export const neighborsRecycleLabel = (chip: string) => `${chip}${objectParticle(chip)} 원료 재활용 업체로 보내는 안산 공장`;
+/** 요약 이웃 수 문구(Figma v2 76:283). 폐기물 이름은 머리 줄에 이미 있어 되풀이하지 않는다 */
+export const NEIGHBORS_BURN_LABEL = '소각 쪽으로 보내는 안산 공장';
+export const NEIGHBORS_RECYCLE_LABEL = '재활용 업체로 보내는 안산 공장';
+
+/** Main 끝의 페이지 각주 한 줄(Figma v2 277:3887). 구간별 각주를 대신한다 */
+export const PAGE_FOOTNOTE = '안산시 폐기물 배출자 신고현황 2026-07, 환경부 고시 처리단가 2022 (실제 계약가 아님, 절감액은 계산하지 않음)';
+
+/** 접힌 원문을 여는 글자 버튼(Figma v2 Toggle) */
+export const DETAIL_TOGGLE = { open: '자세히 보기', close: '접기' };
+
+/**
+ * 같이 맡기기 한 줄(Figma v2 76:302 "폐합성수지를 내는 성곡동 공장 10곳, 처리업체 20곳").
+ * 값은 GET /api/groups 원값. 동을 모르면 "가까운 공장"(Figma 130:1478 표현)
+ */
+export const groupSummary = (chip: string, dong: string | null | undefined, nFactories: number, nProcessors: number) =>
+  `${chip}${objectParticle(chip)} 내는 ${dong ? `${dong} ` : '가까운 '}공장 ${num(nFactories)}곳, 처리업체 ${num(nProcessors)}곳`;
+
+/** 같이 맡기기 원문(접힘 안). 값은 API 원값 */
+export const groupDetail = (chip: string, nFactories: number, radiusKm: number, nProcessors: number) =>
+  `${chip}${objectParticle(chip)} 내는 공장 ${num(nFactories)}곳이 묶음 중심에서 ${radiusKm}km 안에 있어요. 이 공장들은 지금 처리업체 ${num(nProcessors)}곳에 따로 맡기고 있어요. 물량을 묶으면 운반과 견적을 한 번에 받을 수 있어요.`;
+
+/** 점 그림 설명(Figma v2 130:956). dots는 좌표가 확인된 공장 수 */
+export const groupCaption = (dots: number) => `묶음 공장 ${num(dots)}곳, 실제 위치 (이름 비공개)`;
 
 /** Figma 130:1414 빈 상태 */
 export const EMPTY_CANDIDATES = {

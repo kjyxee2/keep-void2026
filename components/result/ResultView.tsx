@@ -1,9 +1,9 @@
-// 결과 화면(Figma 76:168 PC, 76:11 모바일). 서버가 공유 보기 값을 먼저 그리고,
+// 결과 화면(Figma v2 76:168 PC, 76:11 모바일, 130:1414 재활용 경로 없음). 서버가 공유 보기 값을 먼저 그리고,
 // 이 브라우저에 진단 토큰이 있으면 전체 응답과 같이 맡기기 묶음을 다시 받아 바꾼다.
+// 구간별 각주 대신 Main 끝에 페이지 각주 한 줄. 긴 문단은 접힘(Disclosure) 안.
 'use client';
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { CandidateCard } from '@/components/ui/CandidateCard';
 import { Tag } from '@/components/ui/Tag';
 import { Footnote } from '@/components/ui/Footnote';
 import { EmptyState } from '@/components/ui/States';
@@ -12,43 +12,21 @@ import { getDiagnosis, getGroup, tokenStore } from '@/lib/api-client';
 import {
   ANSAN_CANDIDATE,
   EMPTY_CANDIDATES,
-  candidateEvidence,
+  NEIGHBORS_BURN_LABEL,
+  NEIGHBORS_RECYCLE_LABEL,
+  PAGE_FOOTNOTE,
   SOURCE_REPORTS,
-  neighborsBurnLabel,
-  neighborsRecycleLabel,
   num,
   summaryLines,
 } from '@/lib/result-copy';
-import type { Candidate, DiagnosisResult, GroupItem } from '@/lib/types';
+import type { DiagnosisResult, GroupItem } from '@/lib/types';
 import { GroupFit } from './GroupFit';
 import { ReferencePrices } from './ReferencePrices';
+import { ResultCandidateCard as ResultCandidate } from './ResultCandidateCard';
 import { RouteBar } from './RouteBar';
 import { ShareButton } from './ShareButton';
 import { SwitchGuide } from './SwitchGuide';
 import styles from './result.module.css';
-
-/** 추천 이유 목록. 이웃 수 이유는 근거 한 줄과 같은 문장이라 목록에서 뺀다 */
-const reasonTexts = (c: Candidate) =>
-  (c.reasons ?? []).filter((r) => r && r.type !== 'neighbors_same_group' && typeof r.text === 'string' && r.text).map((r) => r.text);
-
-function ResultCandidate({ candidate: c, tags, action }: { candidate: Candidate; tags?: ReactNode; action?: ReactNode }) {
-  return (
-    <CandidateCard
-      rank={c.rank}
-      headingId={`cand-${c.candidate_id}`}
-      name={c.name}
-      region={c.sigungu ?? '지역 정보 없음'}
-      meta={[c.distance_km == null ? '거리 정보 없음' : `직선 ${c.distance_km}km`]}
-      neighbors={c.neighbors}
-      evidence={candidateEvidence(c.neighbors)}
-      reasons={reasonTexts(c)}
-      tags={tags}
-      note={c.note}
-      source={SOURCE_REPORTS}
-      action={action}
-    />
-  );
-}
 
 export function ResultView({ initial }: { initial: DiagnosisResult }) {
   const [data, setData] = useState(initial);
@@ -173,7 +151,6 @@ export function ResultView({ initial }: { initial: DiagnosisResult }) {
                       }
                     />
                   ))}
-                  <p className={styles.small}>{data.labels.candidates}</p>
                 </div>
               )}
               {cands.length > 0 && !ansanInTop && (
@@ -210,25 +187,30 @@ export function ResultView({ initial }: { initial: DiagnosisResult }) {
                 </div>
               )}
             </section>
+
+            <div className={styles.areaFoot}>
+              <Footnote basis="신고 건수">{PAGE_FOOTNOTE}</Footnote>
+            </div>
           </div>
           <div className={styles.colSide}>
             <section className={styles.areaStats} aria-label="같은 폐기물을 내는 안산 공장">
               <div className={styles.stats}>
                 <div className={styles.statItem}>
                   <p className={`${styles.statValue} ${styles.burnText} count`}>{num(data.neighbors.burning)}곳</p>
-                  <p className={styles.statLabel}>{neighborsBurnLabel(chip)}</p>
+                  <p className={styles.statLabel}>{NEIGHBORS_BURN_LABEL}</p>
                 </div>
                 <div className={styles.statItem}>
                   <p className={`${styles.statValue} ${styles.recycleText} count`}>{num(data.neighbors.recycling)}곳</p>
-                  <p className={styles.statLabel}>{neighborsRecycleLabel(chip)}</p>
+                  <p className={styles.statLabel}>{NEIGHBORS_RECYCLE_LABEL}</p>
                 </div>
               </div>
-              <Footnote basis="신고 건수">{SOURCE_REPORTS}, 우리 공장 포함</Footnote>
             </section>
 
             <div className={styles.areaSide}>
               <ReferencePrices rows={data.reference_prices} userPrice={u.current_price_won_per_ton} />
-              {group && <GroupFit group={group} chipLabel={chip} onJoin={canRequest ? () => openSheet(true) : undefined} />}
+              {group && (
+                <GroupFit group={group} chipLabel={chip} dong={u.factory?.dong ?? null} onJoin={canRequest ? () => openSheet(true) : undefined} />
+              )}
               <SwitchGuide />
             </div>
           </div>

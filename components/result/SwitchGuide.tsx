@@ -1,33 +1,18 @@
-// 업체 바꾸는 절차(Figma 130:1299 접힘, 76:168 펼침). 높이는 즉시 바뀌고, 펼친 내용만 opacity와 translateY 250ms
-// (styles/motion.css .expand-content, 줄임 모드면 0ms). 사용자가 누를 때만 움직이므로 자동 연출이 아니다.
-'use client';
-import { useEffect, useId, useState } from 'react';
-import { Button } from '@/components/ui/Button';
+// 업체 바꾸는 절차(Figma v2 130:1299 접힘이 기본). 5단계, 지정폐기물, 출처, 안내 모두 접힘 안에 있고
+// "5단계 보기" 글자 버튼으로 연다(Disclosure: 높이 즉시, 내용만 250ms, 줄임 모드 0ms).
 import { Footnote } from '@/components/ui/Footnote';
 import { SWITCH_GUIDE as G } from '@/lib/result-copy';
+import { Disclosure } from './Disclosure';
 import styles from './result.module.css';
 
 export function SwitchGuide() {
-  const [open, setOpen] = useState(false);
-  const [entered, setEntered] = useState(false);
-  const contentId = useId();
-
-  useEffect(() => {
-    if (!open) {
-      setEntered(false);
-      return;
-    }
-    const raf = requestAnimationFrame(() => setEntered(true));
-    return () => cancelAnimationFrame(raf);
-  }, [open]);
-
   return (
     <section className={styles.panel} aria-labelledby="guide-title">
       <h2 id="guide-title" className={styles.panelTitle}>
         {G.title}
       </h2>
       <p className={styles.panelBody}>{G.lead}</p>
-      <div id={contentId} hidden={!open} className={`${styles.expandBody} expand-content`} data-state={entered ? 'after' : 'before'}>
+      <Disclosure label={`${G.steps.length}단계 보기`}>
         <ol role="list" className={styles.steps}>
           {G.steps.map((s, i) => (
             <li key={s.title} className={styles.step}>
@@ -45,17 +30,7 @@ export function SwitchGuide() {
         </div>
         <Footnote basis="법령, 지침 원문">{G.source}</Footnote>
         <p className={styles.small}>{G.disclaimer}</p>
-      </div>
-      <div className={styles.linkRow}>
-        <Button
-          variant="text"
-          aria-expanded={open}
-          aria-controls={contentId}
-          onClick={() => setOpen((v) => !v)}
-        >
-          {open ? '접기' : `${G.steps.length}단계 보기`}
-        </Button>
-      </div>
+      </Disclosure>
     </section>
   );
 }
