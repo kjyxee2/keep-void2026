@@ -11,7 +11,7 @@ const REDUCE_QUERY = '(prefers-reduced-motion: reduce)';
 export const INTRO_LINE = '안산에서 나온 자원, 다시 안산으로.';
 
 /** 전체 길이(ms). motion.css --motion-intro-exit-delay + --motion-intro-exit와 같은 값. animationend가 안 올 때의 보험 */
-const TOTAL_MS = (MOTION.data * 2.5 + MOTION.base * 2) * 1000;
+const TOTAL_MS = (MOTION.data * 5.25 + MOTION.base * 3.2) * 1000; // 5초
 const FALLBACK_MS = TOTAL_MS + MOTION.emphasis * 1000;
 
 type Phase = 'play' | 'skip';

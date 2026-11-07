@@ -27,13 +27,13 @@
   --motion-shift-hero: 36px;
   /* 홈 첫 진입 인트로(components/intro). 전체 2.5초, 모두 tokens 계산값.
      심볼 가림막 걷힘 0~1.0초, 워드마크 0.8~1.4초, 한 줄 1.3~1.9초, 오버레이 사라짐 2.0~2.5초 */
-  --motion-intro-draw: calc(var(--duration-data) * 1.25);
-  --motion-intro-word-delay: var(--duration-data);
-  --motion-intro-word: calc(var(--duration-emphasis) * 1.5);
-  --motion-intro-line-delay: calc(var(--duration-data) + var(--duration-base) * 2);
-  --motion-intro-line: calc(var(--duration-emphasis) * 1.5);
-  --motion-intro-exit-delay: calc(var(--duration-data) * 2.5);
-  --motion-intro-exit: calc(var(--duration-base) * 2);
+  --motion-intro-draw: calc(var(--duration-data) * 2.5);
+  --motion-intro-word-delay: calc(var(--duration-data) * 2.25);
+  --motion-intro-word: calc(var(--duration-emphasis) * 3);
+  --motion-intro-line-delay: calc(var(--duration-data) * 3.5);
+  --motion-intro-line: calc(var(--duration-emphasis) * 3);
+  --motion-intro-exit-delay: calc(var(--duration-data) * 5.25);
+  --motion-intro-exit: calc(var(--duration-base) * 3.2);
   /* 건너뛰기 때 사라지는 시간 */
   --motion-intro-skip: var(--duration-base);
 }
