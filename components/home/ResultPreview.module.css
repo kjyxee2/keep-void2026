@@ -1,60 +1,20 @@
-/* Hallmark · component: result preview · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma Result Preview 121:706 PC, 121:737 mobile · states: static card · motion: Reveal in order (head, card, links) */
-/* 결과 미리보기. 한 화면 높이를 채우고 내용은 가운데(스크롤 스냅 구역) */
+/* Hallmark · component: result preview · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma 홈 v2 Section / 결과 미리보기 279:4039 PC, 279:4171 mobile (Dark Grid: label, two-line headline, 2x2 live captures, inverse button) · states: static · motion: none (band is taller than a phone screen, so no reveal gate) */
 .section {
-  display: flex;
+  margin-top: var(--editorial-section-gap);
+  background: var(--color-bg-brand);
+}
+.cta {
+  min-width: calc(var(--space-84) * 3 + var(--space-21));
+}
+.ctaLabel {
+  display: inline-flex;
   align-items: center;
-  min-height: calc(100svh - var(--layout-header-h));
-  background: var(--color-bg-page);
-  padding-block: var(--space-84);
-}
-.section > :global(.container) {
-  width: 100%;
-}
-.inner {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--space-28);
-}
-.head {
-  display: flex;
-  flex-direction: column;
   gap: var(--space-10);
-}
-.title {
-  font-size: var(--font-size-h3);
-  font-weight: var(--font-weight-bold);
-  line-height: 1.5;
-}
-.note {
-  font-size: var(--font-size-p2);
-  color: var(--color-text-secondary);
-}
-.card {
-  width: 100%;
-  max-width: calc(var(--space-84) * 9 - var(--space-14));
-  min-width: 0;
-}
-.action {
-  min-width: calc(var(--space-84) * 2 + var(--space-14));
-}
-.links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-7) var(--space-28);
-}
-.more {
-  margin-left: calc(var(--space-7) * -1);
 }
 
 @media (max-width: 767px) {
-  .section {
-    padding-block: var(--space-42);
-  }
-  .title {
-    font-size: var(--font-size-h5);
-  }
-  .inner {
-    gap: var(--space-21);
+  .cta {
+    display: flex;
+    width: 100%;
   }
 }

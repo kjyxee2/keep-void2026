@@ -1,53 +1,49 @@
-/* Hallmark · component: price check · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma Price Check 106:673 PC, 106:732 mobile · states: input empty, filled · motion: Reveal in order, bars scaleX once in view, input response 400ms */
-/* 처리비 점검. 막대는 transform scaleX만(공용 ScaleXBar). 한 화면 높이를 채우고 내용은 가운데(스크롤 스냅 구역) */
+/* Hallmark · component: price check · genre: modern-minimal · theme: RE:FIT v3 (by request) · surface: Figma 홈 v2 Section / 처리비 점검 279:3973 PC, 279:4106 mobile (photo opener, one sentence, input 466 beside the price table, one footnote line, accordion) · states: input empty, filled, accordion closed, open · motion: Reveal in order, bars scaleX once in view, input response 400ms */
 .section {
   display: flex;
-  align-items: center;
-  min-height: calc(100svh - var(--layout-header-h));
+  flex-direction: column;
+  gap: var(--block-title-content);
+  padding-top: var(--editorial-section-gap);
   background: var(--color-bg-page);
-  padding-block: var(--space-84);
 }
-.section > :global(.container) {
-  width: 100%;
+.content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--block-title-content);
+}
+.sentence {
+  max-width: calc(var(--editorial-container) * 0.567);
+  font-size: var(--font-size-p2);
+  line-height: 1.7;
+  color: var(--color-text-secondary);
 }
 
-.layout {
+/* 입력 칸 466 | 표(나머지), 간격 84 */
+.compare {
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  grid-template-columns: var(--editorial-input-w) minmax(0, 1fr);
   gap: var(--space-84);
   align-items: start;
 }
-
-.intro {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-21);
+.inputCol {
   min-width: 0;
-}
-.title {
-  font-size: var(--font-size-h3);
-  font-weight: var(--font-weight-bold);
-  line-height: 1.5;
-}
-.lead {
-  font-size: var(--font-size-p2);
-  color: var(--color-text-secondary);
 }
 
 .table {
   min-width: 0;
-  border-top: var(--border-width-2) solid var(--color-border-brand);
+  border-top: var(--border-width-1) solid var(--color-border-strong);
 }
 .rows {
   list-style: none;
 }
+/* 이름 열 260 | 막대와 금액 */
 .row {
   display: grid;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+  grid-template-columns: var(--editorial-price-label) minmax(0, 1fr);
   gap: var(--space-28);
-  align-items: stretch;
+  align-items: center;
   padding-block: var(--space-21);
-  border-bottom: var(--border-width-1) solid var(--color-border-subtle);
+  border-bottom: var(--border-width-1) solid var(--color-border-default);
 }
 .label {
   display: flex;
@@ -66,25 +62,19 @@
   color: var(--color-text-tertiary);
 }
 
-.next {
-  font-size: var(--font-size-p4);
-  font-weight: var(--font-weight-medium);
-  color: var(--color-text-secondary);
-}
-
 .value {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: var(--space-14);
+  display: flex;
   align-items: center;
+  gap: var(--space-14);
   min-width: 0;
 }
-
 .track {
   position: relative;
   display: flex;
   align-items: center;
-  min-width: 0;
+  width: var(--editorial-track-w);
+  max-width: 100%;
+  flex: none;
 }
 .bar {
   width: 100%;
@@ -104,7 +94,7 @@
   background: var(--color-chart-factory);
 }
 
-/* 우리 공장: 점선 빈 막대 안을 입력값만큼 채운다(다른 막대와 다른 브랜드 강조색) */
+/* 우리 공장: 점선 빈 막대 안을 입력값만큼 채운다 */
 .trackMine {
   height: var(--space-10);
   border: var(--border-width-1) dashed var(--color-border-control);
@@ -123,52 +113,56 @@
 .amount {
   font-size: var(--font-size-h7);
   font-weight: var(--font-weight-bold);
+  line-height: 1.5;
   font-variant-numeric: tabular-nums;
-  text-align: right;
   white-space: nowrap;
-  min-width: calc(var(--space-84) + var(--space-21));
 }
 .direct {
   font-size: var(--font-size-p2);
   font-weight: var(--font-weight-medium);
   color: var(--color-text-accent);
-  min-width: calc(var(--space-84) + var(--space-21));
+  white-space: nowrap;
 }
 
+/* 각주 한 줄: P4 Medium, text/tertiary */
 .foot {
-  margin-top: var(--space-14);
+  padding-top: var(--space-14);
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.7;
+  color: var(--color-text-tertiary);
+}
+
+.nextList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--radius-xs);
+}
+.next {
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
 }
 
 @media (max-width: 1023px) {
-  .layout {
+  .compare {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-42);
   }
 }
 
 @media (max-width: 767px) {
-  .section {
-    padding-block: var(--space-42);
+  .section,
+  .content {
+    gap: var(--block-content);
   }
-  .title {
-    font-size: var(--font-size-h5);
+  .sentence {
+    max-width: none;
   }
   .row {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--space-7);
     padding-block: var(--space-21);
-  }
-  .track {
-    min-height: var(--space-28);
-  }
-  .trackMine {
-    min-height: 0;
-  }
-  .amount,
-  .direct {
-    text-align: left;
-  }
-  .value {
-    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
   }
 }
