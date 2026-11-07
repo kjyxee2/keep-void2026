@@ -1,0 +1,25 @@
+/* Hallmark · design.md: Figma RE:FIT v3 · print only: 보고서 내려받기(window.print)에서 머리말, 꼬리말, 탭, 버튼을 숨긴다 */
+/* 보고서 화면이 있을 때만 적용(다른 화면 인쇄에는 영향 없음) */
+@media print {
+  body:has([data-report-root]) > header,
+  body:has([data-report-root]) > footer,
+  body:has([data-report-root]) > .skip-link,
+  [data-report-root] [data-report-noprint] {
+    display: none !important;
+  }
+  body:has([data-report-root]) {
+    background: var(--color-bg-page);
+  }
+  [data-report-root] {
+    padding-block: 0 !important;
+    background: var(--color-bg-page) !important;
+    print-color-adjust: exact;
+    -webkit-print-color-adjust: exact;
+  }
+  [data-report-root] section,
+  [data-report-root] figure,
+  [data-report-root] tr {
+    break-inside: avoid;
+  }
+}
+
