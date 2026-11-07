@@ -122,6 +122,7 @@ ${styleLines.join('\n')}
   /* 보조 토큰 (Figma 선 두께, 아이콘 크기, 터치 영역에서 옮김. Figma 변수 아님) */
   --border-width-1: 1px;
   --border-width-2: 2px;
+  --border-width-3: 3px;
   --focus-ring-width: 2px;
   --focus-ring-offset: 2px;
   --icon-sm: 20px;

@@ -1,0 +1,92 @@
+.card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: var(--color-bg-page);
+  border: var(--border-width-1) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.recommended {
+  border: var(--border-width-2) solid var(--color-text-primary);
+}
+.top {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-21);
+  padding: var(--space-21);
+}
+.rank {
+  flex: none;
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+  color: var(--color-text-primary);
+}
+.body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--radius-md);
+  flex: 1;
+  min-width: 0;
+}
+.name {
+  font-size: var(--font-size-h7);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+}
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--space-14);
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+.metric {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: none;
+}
+.neighbors {
+  font-size: var(--font-size-h2);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+  color: var(--color-text-accent);
+}
+.neighborsLabel {
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+.evidence {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  padding: var(--space-14) var(--space-21);
+  background: var(--color-bg-subtle);
+  border-top: var(--border-width-1) solid var(--color-border-default);
+}
+.evidenceText {
+  font-size: var(--font-size-p3);
+}
+.action {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-14);
+  padding: var(--space-21);
+}
+.note {
+  padding: var(--space-14) var(--space-21);
+}
+@media (max-width: 767px) {
+  .top {
+    gap: var(--space-14);
+  }
+  .action > :last-child {
+    width: 100%;
+  }
+}

@@ -1,0 +1,23 @@
+.lockup,
+.symbol {
+  width: auto;
+  max-width: none;
+}
+.lockup.sm {
+  height: var(--space-28);
+}
+.lockup.md {
+  height: var(--space-35);
+}
+.lockup.lg {
+  height: var(--space-56);
+}
+.symbol.sm {
+  height: var(--space-28);
+}
+.symbol.md {
+  height: var(--space-56);
+}
+.symbol.lg {
+  height: var(--space-84);
+}

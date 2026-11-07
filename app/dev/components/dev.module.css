@@ -1,0 +1,107 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-56);
+  padding-block: var(--space-56) var(--section-md);
+}
+.title {
+  font-size: var(--font-size-h3);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+}
+.lead {
+  margin-top: calc(var(--space-56) * -1 + var(--space-10));
+  font-size: var(--font-size-p1);
+  color: var(--color-text-secondary);
+}
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-21);
+  padding-top: var(--space-28);
+  border-top: var(--border-width-1) solid var(--color-border-subtle);
+}
+.h2 {
+  font-size: var(--font-size-h6);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.5;
+}
+.note {
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-14) var(--space-21);
+}
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-21);
+}
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-21);
+}
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-14);
+}
+.mobileFrame {
+  width: 100%;
+  max-width: calc(var(--space-84) * 4 + var(--space-14));
+}
+.caption {
+  font-size: var(--font-size-p4);
+  color: var(--color-text-tertiary);
+}
+.swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 9rem), 1fr));
+  gap: var(--space-10);
+}
+.swatch {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  font-size: var(--font-size-p4);
+  color: var(--color-text-secondary);
+  overflow-wrap: anywhere;
+}
+.chip {
+  height: var(--space-42);
+  border-radius: var(--radius-sm);
+  border: var(--border-width-1) solid var(--color-border-subtle);
+}
+.barTrack {
+  height: var(--space-21);
+  background: var(--color-progress-track);
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+}
+.barFill {
+  height: 100%;
+  background: var(--color-chart-recycle);
+}
+.barRow {
+  display: grid;
+  grid-template-columns: minmax(0, 8rem) minmax(0, 1fr) minmax(0, 4rem);
+  align-items: center;
+  gap: var(--space-14);
+  font-size: var(--font-size-p3);
+}
+.slide {
+  padding: var(--space-21);
+  border: var(--border-width-1) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+}
+@media (max-width: 767px) {
+  .grid2,
+  .grid3 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

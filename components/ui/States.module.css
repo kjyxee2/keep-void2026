@@ -1,0 +1,56 @@
+.skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+}
+.line {
+  display: block;
+  height: var(--space-21);
+  border-radius: var(--radius-sm);
+  background: var(--color-bg-subtle);
+  animation: pulse calc(var(--duration-data) * 2) var(--motion-ease) infinite alternate;
+}
+.line:nth-child(3n + 1) {
+  width: 92%;
+}
+.line:nth-child(3n + 2) {
+  width: 76%;
+}
+.line:nth-child(3n) {
+  width: 58%;
+}
+@keyframes pulse {
+  to {
+    opacity: 0.5;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .line {
+    animation: none;
+  }
+}
+
+.box {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  padding: var(--space-28) var(--space-21);
+  border: var(--border-width-1) solid var(--color-border-default);
+  border-radius: var(--radius-md);
+  background: var(--color-bg-page);
+}
+.title {
+  font-size: var(--font-size-p2);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+.body {
+  font-size: var(--font-size-p3);
+  color: var(--color-text-secondary);
+}
+.action {
+  margin-top: var(--space-7);
+}
+.error {
+  border-color: var(--color-border-error);
+}

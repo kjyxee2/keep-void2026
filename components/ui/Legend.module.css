@@ -1,0 +1,38 @@
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-10) var(--space-28);
+}
+.item {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-10);
+  font-size: var(--font-size-p3);
+  color: var(--color-text-primary);
+}
+.mark {
+  width: var(--space-14);
+  height: var(--space-14);
+  flex: none;
+}
+.recycle {
+  border-radius: var(--radius-full);
+  background: var(--color-chart-recycle);
+}
+.burn {
+  border-radius: var(--radius-xs);
+  background: var(--color-chart-burn);
+}
+.landfill {
+  background: var(--color-chart-landfill);
+  clip-path: polygon(50% 0, 100% 100%, 0 100%);
+}
+.factory {
+  border-radius: var(--radius-full);
+  background: var(--color-chart-factory);
+}
+.unknown {
+  border-radius: var(--radius-full);
+  border: var(--border-width-2) solid var(--color-chart-landfill);
+  background: var(--color-chart-unknown);
+}

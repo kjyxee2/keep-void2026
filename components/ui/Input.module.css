@@ -1,0 +1,80 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-7);
+  min-width: 0;
+}
+.label {
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-primary);
+}
+.field {
+  display: flex;
+  align-items: stretch;
+  min-height: var(--control-button-h);
+  background: var(--color-bg-page);
+  border: var(--border-width-2) solid var(--color-border-control);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+}
+.field:hover {
+  border-color: var(--color-border-strong);
+}
+.field:focus-within {
+  border-color: var(--color-border-focus);
+}
+.input {
+  flex: 1;
+  min-width: 0;
+  padding: 0 var(--space-14);
+  border: 0;
+  background: transparent;
+  font-size: var(--font-size-h6);
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-primary);
+}
+.input::placeholder {
+  color: var(--color-text-placeholder);
+  font-weight: var(--font-weight-regular);
+}
+/* 테두리가 초점을 보여 주므로 입력 자체 외곽선은 칸 테두리로 대신한다 */
+.input:focus-visible {
+  outline: none;
+}
+.field:has(.input:focus-visible) {
+  outline: var(--focus-ring-width) solid var(--color-border-focus);
+  outline-offset: var(--focus-ring-offset);
+}
+.unit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--space-70);
+  padding: 0 var(--space-14);
+  background: var(--color-bg-tint-4);
+  font-size: var(--font-size-p3);
+  font-weight: var(--font-weight-semibold);
+  color: var(--color-text-secondary);
+}
+.helper,
+.error {
+  font-size: var(--font-size-p3);
+}
+.helper {
+  color: var(--color-text-secondary);
+}
+.error {
+  color: var(--color-text-error);
+}
+.invalid .field {
+  border-color: var(--color-border-error);
+}
+.field:has(.input:disabled) {
+  background: var(--color-bg-tint-4);
+  border-color: var(--color-border-subtle);
+}
+.input:disabled {
+  color: var(--color-text-secondary);
+  cursor: not-allowed;
+}

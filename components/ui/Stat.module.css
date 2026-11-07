@@ -1,0 +1,29 @@
+.stat {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-10);
+  padding: var(--space-14) 0;
+  border-top: var(--border-width-3) solid var(--color-text-primary);
+  min-width: 0;
+}
+.light {
+  background: var(--color-bg-subtle);
+}
+.dark {
+  background: var(--color-bg-brand);
+  border-top-color: var(--color-accent-lime);
+  color: var(--color-text-inverse);
+  padding: var(--space-21);
+}
+.value {
+  font-size: var(--font-size-numeral);
+  font-weight: var(--font-weight-medium);
+  line-height: 1;
+  overflow-wrap: anywhere;
+}
+.label {
+  font-size: var(--font-size-p2);
+}
+.foot {
+  margin-top: var(--space-7);
+}

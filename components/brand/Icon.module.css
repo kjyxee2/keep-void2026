@@ -1,0 +1,11 @@
+.icon {
+  flex: none;
+}
+.sm {
+  width: var(--icon-sm);
+  height: var(--icon-sm);
+}
+.md {
+  width: var(--icon-md);
+  height: var(--icon-md);
+}

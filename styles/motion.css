@@ -102,3 +102,13 @@
 .tab-fade[data-state="before"] {
   opacity: 0;
 }
+
+/* 탭 패널이 hidden에서 보일 때 한 번 나타남(키프레임은 opacity만) */
+.tab-fade-in:not([hidden]) {
+  animation: tab-fade var(--motion-short) var(--motion-ease);
+}
+@keyframes tab-fade {
+  from {
+    opacity: 0;
+  }
+}

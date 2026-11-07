@@ -1,0 +1,39 @@
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-7);
+  font-size: var(--font-size-p4);
+  font-weight: var(--font-weight-bold);
+  line-height: 1.43;
+}
+.recommend {
+  padding: var(--space-7);
+  background: var(--color-bg-brand);
+  color: var(--color-text-inverse);
+  border-radius: var(--radius-xs);
+}
+.bar {
+  width: var(--radius-sm);
+  height: var(--icon-sm);
+  flex: none;
+  border-radius: var(--radius-xs);
+  background: currentColor;
+}
+.basis {
+  color: var(--color-text-secondary);
+}
+.basis .bar {
+  background: var(--color-border-control);
+}
+.warning {
+  color: var(--color-text-warning);
+}
+.warning .bar {
+  background: var(--color-chart-burn);
+}
+.confirmed {
+  color: var(--color-text-accent);
+}
+.confirmed .bar {
+  background: var(--color-chart-recycle);
+}

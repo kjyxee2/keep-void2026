@@ -1,0 +1,20 @@
+.footnote {
+  display: flex;
+  flex-direction: column;
+  gap: var(--radius-xs);
+  font-size: var(--font-size-p4);
+  line-height: 1.7;
+}
+.basis {
+  font-weight: var(--font-weight-bold);
+  color: var(--color-text-tertiary);
+}
+.source {
+  font-weight: var(--font-weight-medium);
+  color: var(--color-text-secondary);
+}
+/* 어두운 면: Figma는 tertiary, secondary 그대로지만 대비가 낮아 inverse-muted로 올림 */
+.dark .basis,
+.dark .source {
+  color: var(--color-text-inverse-muted);
+}
