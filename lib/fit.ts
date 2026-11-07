@@ -8,6 +8,7 @@ export type Flow = {
   region: string | null;
   waste_type?: string | null;
   waste_group?: string | null;
+  transporter?: string | null;
   weight: number;
 };
 
@@ -137,6 +138,64 @@ export function rankComputed(opts: {
       || (a.distance_km ?? Infinity) - (b.distance_km ?? Infinity))
     .slice(0, 3)
     .map((r, i) => ({ ...r, rank: i + 1, source: 'computed' as const }));
+}
+
+// 추천 이유(화면 설명 전용). 순위와 fit_score는 바꾸지 않는다(research/ai/recommender v2 권고: 운반 연결, 같은 동 이웃은 이유로만)
+export type ReasonType = 'neighbors_same_group' | 'same_dong' | 'transporter_link' | 'in_ansan';
+export type Reason = { type: ReasonType; count?: number; text: string; basis: string };
+export const REASON_BASIS = '신고 건수 집계 2026-07';
+
+// 신고 운반자 칸: 여러 곳이면 '_'로 이어 적힘. 자가 운반은 업체가 아니라 뺀다
+export function splitTransporters(s: string | null | undefined) {
+  return (s ?? '').split('_').map(t => t.trim()).filter(t => t && t !== '자가');
+}
+
+// 마지막 한글 음절에 받침이 있으면 '이', 아니면 '가'(한글이 아니면 '가')
+function subjectJosa(word: string) {
+  const c = word.charCodeAt(word.length - 1);
+  return c >= 0xac00 && c <= 0xd7a3 && (c - 0xac00) % 28 ? '이' : '가';
+}
+
+export function candidateReasons(
+  cands: Array<{ processor_id: string; neighbors: number; sigungu: string | null }>,
+  ctx: {
+    flows: Flow[];                                             // 그 폐기물군 신고 경로
+    self: { factory_id: string; dong: string | null } | null;  // 진단 공장(없으면 이웃 수, 안산 여부만)
+    factoryDong: Map<string, string | null>;                   // 같은 동 공장의 동(다른 공장은 없어도 됨)
+    transportRows: Array<{ processor_id: string; transporter: string | null }>;   // 후보 업체로 가는 신고의 운반자
+  },
+): Reason[][] {
+  const { flows, self, factoryDong, transportRows } = ctx;
+  const basis = REASON_BASIS;
+  const mine = new Set(self ? flows.filter(f => f.factory_id === self.factory_id).flatMap(f => splitTransporters(f.transporter)) : []);
+  const linked = new Map<string, Set<string>>();
+  for (const r of transportRows) for (const t of splitTransporters(r.transporter)) {
+    if (!mine.has(t)) continue;
+    const s = linked.get(r.processor_id) ?? new Set<string>();
+    linked.set(r.processor_id, s.add(t));
+  }
+  const dong = self?.dong ?? null;
+  const sameDong = new Map<string, Set<string>>();
+  if (dong) for (const f of flows) {
+    if (f.method !== RECYCLE || f.method_by_other_group_permit || !f.processor_id || !f.factory_id) continue;
+    if (f.factory_id === self!.factory_id || factoryDong.get(f.factory_id) !== dong) continue;
+    const s = sameDong.get(f.processor_id) ?? new Set<string>();
+    sameDong.set(f.processor_id, s.add(f.factory_id));
+  }
+
+  return cands.map(c => {
+    const out: Reason[] = [{ type: 'neighbors_same_group', count: c.neighbors,
+      text: `같은 폐기물군을 이 업체에 재활용으로 보내는 안산 공장 ${c.neighbors}곳`, basis }];
+    const n = sameDong.get(c.processor_id)?.size ?? 0;
+    if (n) out.push({ type: 'same_dong', count: n, text: `같은 동(${dong}) 공장 ${n}곳이 이 업체에 보내요`, basis });
+    const ts = [...(linked.get(c.processor_id) ?? [])].sort();
+    if (ts.length) {
+      const names = ts.join(', ');
+      out.push({ type: 'transporter_link', text: `지금 운반업체 ${names}${subjectJosa(names)} 이 업체로도 운반해요`, basis });
+    }
+    if (c.sigungu?.includes('안산')) out.push({ type: 'in_ansan', text: '안산 안의 업체예요', basis });
+    return out;
+  });
 }
 
 // 결과 화면 공개 단가(unit_prices 원문 행). 무게와 곱하지 않는다.

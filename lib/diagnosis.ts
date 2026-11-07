@@ -1,8 +1,8 @@
 // 진단 결과 조립(complete, GET 공용). 금액 계산 없음.
 import { db, fetchAll, LABELS } from './server';
 import {
-  BURN_METHODS, EXCLUDED_GROUPS, chipFlows, pickStored, rankComputed, priceYearLabel, referencePriceIds, resolveCurrentMethod, routeShare,
-  type Flow, type Proc, type Ranked,
+  BURN_METHODS, EXCLUDED_GROUPS, candidateReasons, chipFlows, splitTransporters, pickStored, rankComputed, priceYearLabel, referencePriceIds, resolveCurrentMethod, routeShare,
+  type Flow, type Proc, type Ranked, type Reason,
 } from './fit';
 
 export type Diagnosis = {
@@ -22,7 +22,7 @@ export async function loadDiagnosis(id: string) {
 
 export function groupFlows(group: string) {
   return fetchAll<Flow>((from, to) => db().from('flows')
-    .select('factory_id,processor_id,method,method_by_other_group_permit,region,waste_type,weight')
+    .select('factory_id,processor_id,method,method_by_other_group_permit,region,waste_type,transporter,weight')
     .eq('waste_group', group).order('link_id').range(from, to));
 }
 
@@ -96,6 +96,37 @@ async function candidateCards(diagnosisId: string) {
   });
 }
 
+// 후보별 추천 이유(lib/fit.ts candidateReasons). 순위는 그대로. 쿼리는 후보 업체 id로 묶어 최대 3번(N+1 없음).
+// 공유 보기(full=false)와 공장 없는 진단은 공장 정보(동, 운반업체)를 쓰지 않아 이웃 수와 안산 여부만
+async function reasonsFor(
+  diag: Diagnosis, full: boolean, groupFlows: Flow[],
+  cards: Array<{ processor_id: string; neighbors: number; sigungu: string | null }>,
+): Promise<Reason[][]> {
+  const empty = { flows: groupFlows, self: null, factoryDong: new Map<string, string | null>(), transportRows: [] };
+  if (!cards.length || !full || !diag.factory_id) return candidateReasons(cards, empty);
+  const factoryId = diag.factory_id;
+  const mine = new Set(groupFlows.filter(f => f.factory_id === factoryId).flatMap(f => splitTransporters(f.transporter)));
+  const ids = cards.map(c => c.processor_id);
+  const [{ data: me, error }, transportRows] = await Promise.all([
+    db().from('factories').select('dong').eq('id', factoryId).maybeSingle(),
+    mine.size
+      ? fetchAll<{ processor_id: string; transporter: string | null }>((from, to) => db().from('flows')
+        .select('processor_id,transporter').in('processor_id', ids).not('transporter', 'is', null)
+        .order('link_id').range(from, to))
+      : Promise.resolve([]),
+  ]);
+  if (error) throw error;
+  const dong = (me?.dong as string | null) ?? null;
+  const neighbors = dong
+    ? await fetchAll<{ id: string; dong: string | null }>((from, to) => db().from('factories')
+      .select('id,dong').eq('dong', dong).order('id').range(from, to))
+    : [];
+  return candidateReasons(cards, {
+    flows: groupFlows, self: { factory_id: factoryId, dong }, transportRows,
+    factoryDong: new Map(neighbors.map(f => [f.id, f.dong])),
+  });
+}
+
 // full=false: 공유 링크용. 공장, 위치, 처리비, 톤당 단가, 연락처는 넣지 않는다
 export async function buildResult(diag: Diagnosis, full: boolean, flows?: DiagFlows) {
   const group = diag.waste_group!;
@@ -108,6 +139,7 @@ export async function buildResult(diag: Diagnosis, full: boolean, flows?: DiagFl
     db().from('volume_options').select('id,label').eq('id', diag.volume_option_id ?? '').maybeSingle(),
   ]);
   const method = resolveCurrentMethod(diag.current_method ?? '모름', flows.chip);
+  const reasons = await reasonsFor(diag, full, flows.group, cards);
 
   return {
     diagnosis_id: diag.id,
@@ -130,7 +162,7 @@ export async function buildResult(diag: Diagnosis, full: boolean, flows?: DiagFl
       recycling: result?.neighbors_recycling ?? null, burning: result?.neighbors_burning ?? null,
       burning_methods: BURN_METHODS, basis: LABELS.neighbors,
     },
-    candidates: cards,
+    candidates: cards.map((c, i) => ({ ...c, reasons: reasons[i] })),
     ranking: { current_method_used: method.method, inferred_from_reports: method.inferred, rule: 'data/demo/README.md fit_score' },
     reference_prices: prices,
     labels: LABELS,
