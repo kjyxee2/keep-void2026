@@ -47,11 +47,12 @@ POST /api/requests/:id/cancel         요청 취소
 
 ### GET /api/factories/search?q=디와이
 
-`q` 2자 이상. 사업장명 또는 주소 부분 일치, 최대 10개.
+`q` 2자 이상(50자까지). 사업장명 또는 주소 부분 일치, 이름순 최대 10개. `(주)`, `㈜`, 괄호, 점, 쉼표가 든 입력도 글자 그대로 찾는다(`(주)`와 `㈜`는 서로 바꿔서도 찾음). `%`, `_`는 와일드카드가 아니라 글자로 찾고 `*`는 지운다.
 ```json
 { "factories": [{ "id": "F0001", "name": "주식회사 디와이코스메틱", "address": "…", "dong": "성곡동",
-                  "waste_groups": ["폐합성수지류"], "coord_verified": true }] }
+                  "waste_groups": ["폐합성수지류"], "n_waste_types": 1, "coord_verified": null }] }
 ```
+`n_waste_types`는 그 공장이 신고한 폐기물 종류(원 표기) 수. 화면은 "신고 종류 N개"로 그대로 쓴다.
 
 ### POST /api/diagnoses → 201
 
