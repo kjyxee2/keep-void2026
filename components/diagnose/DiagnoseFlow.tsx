@@ -10,7 +10,7 @@ import { Footnote } from '@/components/ui/Footnote';
 import { Input } from '@/components/ui/Input';
 import { Option } from '@/components/ui/Option';
 import { Tag } from '@/components/ui/Tag';
-import { MethodIcon, WasteIcon, type MethodType, type WasteType } from '@/components/brand/Icon';
+import { MethodIcon, UnknownIcon, WasteIcon, type MethodType, type WasteType } from '@/components/brand/Icon';
 import { SlideStep } from '@/components/motion';
 import { ApiError, completeDiagnosis, createDiagnosis, getChips, getFactory, patchDiagnosis, tokenStore } from '@/lib/api-client';
 import { rememberLastCompleted } from '@/lib/report-latest';
@@ -36,7 +36,7 @@ import { StepList, type StepListItem } from './StepList';
 import styles from './Diagnose.module.css';
 
 const MAIN_CHIPS: Record<string, WasteType> = { C01: '폐합성수지', C02: '폐수처리오니', C03: '폐활성탄', C04: '폐유' };
-const METHOD_ICON: Partial<Record<Method, MethodType>> = { 소각: '소각', 매립: '매립' };
+const METHOD_ICON: Record<Exclude<Method, '모름'>, MethodType> = { 소각: '소각', 매립: '매립', 에너지회수: '에너지회수' };
 const METHODS: Method[] = ['소각', '매립', '에너지회수', '모름'];
 const WEIGHT_SOURCES: WeightSource[] = ['계량표', '올바로 인계서', '기타'];
 const SOURCE_NOTE = '안산시 폐기물 배출자 신고현황 2026-07';
@@ -501,16 +501,13 @@ export function DiagnoseFlow({ chips: initialChips, initialFactoryId, initialSte
                 <fieldset className={styles.group} aria-describedby={errors.method ? 'err-method' : undefined}>
                   <legend className="sr-only">지금 처리 방식</legend>
                   <div className={styles.optionGrid}>
-                    {METHODS.map((m) => {
-                      const icon = METHOD_ICON[m];
-                      return (
-                        <Option key={m} name="method" value={m} checked={method === m} fullWidth
-                          icon={icon ? <MethodIcon type={icon} size="sm" /> : undefined}
-                          onChange={() => { setMethod(m); setErrors((x) => ({ ...x, method: undefined })); }}>
-                          {METHOD_LABEL[m]}
-                        </Option>
-                      );
-                    })}
+                    {METHODS.map((m) => (
+                      <Option key={m} name="method" value={m} checked={method === m} fullWidth
+                        icon={m === '모름' ? <UnknownIcon size="sm" /> : <MethodIcon type={METHOD_ICON[m]} size="sm" />}
+                        onChange={() => { setMethod(m); setErrors((x) => ({ ...x, method: undefined })); }}>
+                        {METHOD_LABEL[m]}
+                      </Option>
+                    ))}
                   </div>
                   {errors.method && <p id="err-method" className={styles.fieldError} role="alert">{errors.method}</p>}
                 </fieldset>

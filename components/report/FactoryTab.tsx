@@ -18,7 +18,7 @@ type PriceRow = ReferencePrice & { year_label?: string; source?: string };
 
 const METHOD_ICON: Partial<Record<string, MethodType>> = {
   소각: '소각',
-  에너지회수: '소각',
+  에너지회수: '에너지회수',
   매립: '매립',
 };
 

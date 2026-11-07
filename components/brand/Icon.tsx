@@ -3,7 +3,7 @@ import type { SVGProps } from 'react';
 import styles from './Icon.module.css';
 
 export type WasteType = '폐합성수지' | '폐수처리오니' | '폐활성탄' | '폐유';
-export type MethodType = '소각' | '매립' | '재활용';
+export type MethodType = '소각' | '매립' | '재활용' | '에너지회수';
 
 const WASTE: Record<WasteType, React.ReactNode> = {
   폐합성수지: (
@@ -67,6 +67,14 @@ const METHOD: Record<MethodType, React.ReactNode> = {
       <path d="M4.5 20.5V16H9" />
     </>
   ),
+  // 번개 하나와 그 아래 열 파동 두 줄: 소각 불꽃과 구분되게 열을 에너지로
+  에너지회수: (
+    <>
+      <path d="M15 2 7 10.5h5l-1 4.5 8-8.5h-5z" />
+      <path d="M6 18.8c2-1.4 4-1.4 6 0s4 1.4 6 0" />
+      <path d="M6 22c2-1.4 4-1.4 6 0s4 1.4 6 0" />
+    </>
+  ),
 };
 
 type BaseProps = Omit<SVGProps<SVGSVGElement>, 'children'> & {
@@ -102,6 +110,16 @@ export function WasteIcon({ type, ...rest }: BaseProps & { type: WasteType }) {
 
 export function MethodIcon({ type, ...rest }: BaseProps & { type: MethodType }) {
   return <Svg {...rest}>{METHOD[type]}</Svg>;
+}
+
+/** "잘 모르겠어요" 칩의 물음표(brand/icons/unknown.svg) */
+export function UnknownIcon(props: BaseProps) {
+  return (
+    <Svg {...props}>
+      <path d="M7.5 8.5a4.5 4.5 0 1 1 7.4 3.5c-1.8 1.2-2.9 2.1-2.9 4" />
+      <circle cx="12" cy="20.5" r=".5" />
+    </Svg>
+  );
 }
 
 /** 버튼 오른쪽 화살표(Figma Button Arrow 벡터). 장식 전용 */
