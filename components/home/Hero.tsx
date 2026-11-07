@@ -16,7 +16,7 @@ export const PHOTO_START_HREF = '/diagnose?start=photo';
 export const HERO_ACTIONS_ID = 'home-hero-actions';
 
 /** 헤드라인 세 줄. 문구는 Figma 그대로, 어절마다 순번을 매긴다 */
-const HEADLINE_LINES = [['지금', '내는'], ['폐기물', '처리비,'], ['적정한지', '확인해', '보세요.']];
+const HEADLINE_LINES = [['지금', '내는', '폐기물', '처리비,'], ['적정한지', '확인해', '보세요.']];
 const WORD_COUNT = HEADLINE_LINES.flat().length;
 
 const order = (i: number) => ({ '--i': i }) as CSSProperties;
@@ -44,9 +44,6 @@ export function Hero() {
         </h1>
         <hr className={styles.rule} style={order(WORD_COUNT)} />
         <div className={styles.bottom}>
-          <p className={styles.sub} style={order(WORD_COUNT + 1)}>
-            서류 사진 한 장이면 맡기는 곳과 비교할 단가가 나와요.
-          </p>
           <div id={HERO_ACTIONS_ID} className={styles.actions}>
             <div className={styles.rise} style={order(WORD_COUNT + 2)}>
               <Button href={PHOTO_START_HREF} className={styles.cta}>
