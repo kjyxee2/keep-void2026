@@ -1,37 +1,45 @@
-/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) 08 기능 설명 · theme: RE:FIT v3 (by request) · genre: modern-minimal · posture: restrained · hero: headline and one sentence, no action (explainer page, actions sit on each step) · motion: none */
-/* Hallmark · pre-emit critique: intro is Figma Intro 186:3713 as drawn · weakest: no primary action in the first screen; every step carries its own link to the live screen instead */
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) 08 기능 설명 v2 186:3696, 187:4464 · theme: RE:FIT v3 (by request) · genre: modern-minimal · posture: restrained · hero: label column, two-line headline, one sentence and the map band; no action (explainer page) · shape: 1200 container, label column 200 + gutter 24, section gap 140/96, dark capture grid, one source footnote · motion: none here (steps reveal once) */
+/* Hallmark · pre-emit critique: intro is Figma Intro 265:5309 as drawn, the dark grid closes the page without copy · weakest: no primary action anywhere on the page; the steps are explanation, the actions live on the product screens */
+/* Hallmark · waive 26b · no controls in this file · the page's only controls are the shared accordion rows, styled in components/editorial/AccordionRow.module.css, and a summary has no disabled state */
 
+/* 머리 위 여백: Figma space/120 (24 x 5), 모바일 64 (16 x 4) */
 .main {
-  padding-block: var(--space-84) var(--section-md);
+  padding-top: calc(var(--editorial-gap-24) * 5);
 }
 
+/* 머리: 섹션 머리와 지도 띠, 사이 56, 아래 섹션 간격 */
 .intro {
   display: flex;
   flex-direction: column;
-  gap: var(--space-21);
-  max-width: var(--container-narrow);
-  padding-bottom: var(--space-56);
+  gap: var(--block-title-content);
+  padding-bottom: var(--editorial-section-gap);
 }
 
-.title {
-  font-size: var(--font-size-h2);
-  font-weight: var(--font-weight-bold);
-  line-height: 1.5;
-  color: var(--color-text-primary);
+/* 캡처 격자 띠: 위아래 120 (24 x 5), 칸은 588x368 */
+.main .captures {
+  padding-block: calc(var(--editorial-gap-24) * 5);
+}
+.main .captures li {
+  aspect-ratio: var(--editorial-ratio-tall);
 }
 
-.lead {
-  max-width: var(--container-text);
-  font-size: var(--font-size-p1);
-  line-height: 1.7;
-  color: var(--color-text-secondary);
+/* 출처 각주 한 줄: 위 24, 아래 40 */
+.foot {
+  padding-block: var(--editorial-gap-24) var(--space-42);
 }
 
 @media (max-width: 767px) {
   .main {
-    padding-top: var(--space-56);
+    padding-top: calc(var(--editorial-gap-16) * 4);
   }
   .br {
     display: none;
+  }
+  .intro {
+    gap: var(--editorial-gap-16);
+  }
+  /* 모바일 띠 위아래 40 (16 x 2.5) */
+  .main .captures {
+    padding-block: calc(var(--editorial-gap-16) * 2.5);
   }
 }
