@@ -4,15 +4,20 @@
   overflow-x: auto;
   scrollbar-width: none;
 }
+/* 글자는 탭 상자(아래 선 포함) 한가운데: 아래 선 두께만큼 위 안쪽 여백을 두어 맞춘다 */
 .tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   flex: none;
   min-height: var(--control-button-h-sm);
   min-width: calc(var(--space-70) * 2);
-  padding: 0 var(--space-21);
+  padding: var(--border-width-2) var(--space-21) 0;
   margin-bottom: calc(var(--border-width-1) * -1);
   border-bottom: var(--border-width-2) solid transparent;
   font-size: var(--font-size-p1);
   font-weight: var(--font-weight-bold);
+  line-height: 1;
   color: var(--color-text-tab-idle);
 }
 .tab:hover {
