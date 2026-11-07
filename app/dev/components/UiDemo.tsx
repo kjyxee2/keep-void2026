@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { LogoLockup, LogoSymbol } from '@/components/brand/Logo';
-import { MethodIcon, WasteIcon, type MethodType, type WasteType } from '@/components/brand/Icon';
+import { MethodIcon, UnknownIcon, WasteIcon, type MethodType, type WasteType } from '@/components/brand/Icon';
 import { AutocompleteList, type AutocompleteItem } from '@/components/ui/AutocompleteList';
 import { Button } from '@/components/ui/Button';
 import { CandidateCard } from '@/components/ui/CandidateCard';
@@ -16,7 +16,7 @@ import { Tag } from '@/components/ui/Tag';
 import styles from './dev.module.css';
 
 const WASTES: WasteType[] = ['폐합성수지', '폐수처리오니', '폐활성탄', '폐유'];
-const METHODS: MethodType[] = ['소각', '매립', '재활용'];
+const METHODS: MethodType[] = ['소각', '매립', '재활용', '에너지회수'];
 const BASES: FootnoteBasis[] = ['신고 건수', '공식 원값', '직접 입력', '고시 단가'];
 const SEARCH: AutocompleteItem[] = [
   { id: 'F0001', name: '주식회사 디와이코스메틱', dong: '성곡동', wasteTypeCount: 1 },
@@ -147,7 +147,7 @@ export function UiDemo() {
               {w}
             </Option>
           ))}
-          <Option name="waste-demo" value="disabled" disabled>
+          <Option name="waste-demo" value="disabled" disabled icon={<UnknownIcon />}>
             잘 모르겠어요
           </Option>
         </fieldset>

@@ -4,7 +4,7 @@
 'use client';
 import { useState } from 'react';
 import { CountUp, Reveal } from '@/components/motion';
-import { WasteIcon } from '@/components/brand/Icon';
+import { UnknownIcon, WasteIcon } from '@/components/brand/Icon';
 import { Button } from '@/components/ui/Button';
 import { Option } from '@/components/ui/Option';
 import { Stat } from '@/components/ui/Stat';
@@ -59,6 +59,7 @@ export function WasteStats({ chips, photoHref }: { chips: HomeChipView[]; photoH
               value={UNKNOWN}
               checked={selected === UNKNOWN}
               onChange={() => choose(UNKNOWN)}
+              icon={<UnknownIcon size="sm" />}
               className={styles.option}
             >
               잘 모르겠어요
