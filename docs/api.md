@@ -21,7 +21,9 @@ Next.js Route Handler(`app/api/`). 모든 응답은 JSON. 데이터 기준: 데�
 ```
 GET  /api/chips                       품목 칩, 선택지
 POST /api/diagnoses                   { chip_id } → { id, anon_token }
+GET  /api/home-stats                  홈 칩 4개 통계
 GET  /api/factories/search?q=         (선택) 우리 공장 찾기
+GET  /api/groups?factory_id=|diagnosis_id=   같이 맡기기 묶음
 PATCH /api/diagnoses/:id              단계마다 입력 저장
 POST /api/diagnoses/:id/complete      결과 계산, 저장, 반환
 GET  /api/diagnoses/:id               결과 다시 보기 / 공유 링크
@@ -234,7 +236,7 @@ status: `requested`, `contacted`, `sample`, `contracted`, `first_pickup`, `cance
 
 ```
 npm run dev          # http://localhost:3000/api/chips
-npm run test:api     # 순위 규칙, 경로 집계, 영업일 계산
-npm run test:db      # 마이그레이션 + RLS (PGlite, Docker 불필요)
+npm run test:api     # 순위 규칙, 경로 집계, 단가 규칙, 검색 필터, 묶음, 지도 방식, 실제 데모 데이터 값(1,209/445/125 등, unzip 필요)
+npm run test:db      # 마이그레이션 + RLS, 시드 SQL 적용 확인 (PGlite, Docker 불필요, python3과 unzip 필요)
 ```
 `.env.local`: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SECRET_KEY`(서버 전용, 커밋 금지).
