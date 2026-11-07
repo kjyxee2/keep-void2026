@@ -1,0 +1,473 @@
+/*
+ * RE:FIT 디자인 토큰. 손으로 고치지 말 것.
+ * 생성: node scripts/figma-tokens.mjs (입력 design/tokens.figma.json, Figma uWAdbYtb8Wg3nQmIW4Fgb7)
+ * Figma 변수 157개 = CSS 변수 157개, 스타일: 글자 23, 그림자 6, 블러 2, 그라디언트 8
+ */
+
+:root {
+  /* RE:FIT v3 Primitives */
+  --primitive-ink-950: #001b15;
+  --primitive-ink-900: #012f21;
+  --primitive-ink-700: #0f4a35;
+  --primitive-ink-300: #afc4bc;
+  --primitive-ink-100: #eaf1ee;
+  --primitive-green-800: #05602f;
+  --primitive-green-700: #048732;
+  --primitive-green-600: #079b4c;
+  --primitive-green-400: #3ac73a;
+  --primitive-green-300: #80e03e;
+  --primitive-green-100: #dff6cf;
+  --primitive-green-50: #f1fbea;
+  --primitive-gray-950: #101010;
+  --primitive-gray-900: #1c1c1c;
+  --primitive-gray-700: #4f4f4f;
+  --primitive-gray-600: #696969;
+  --primitive-gray-500: #828282;
+  --primitive-gray-400: #9c9c9c;
+  --primitive-gray-300: #cfcfcf;
+  --primitive-gray-200: #e8e8e8;
+  --primitive-gray-100: #f4f6f8;
+  --primitive-white: #ffffff;
+  --primitive-black: #000000;
+  --primitive-tint-leaf: #eaf4e4;
+  --primitive-tint-moss: #ecf0ea;
+  --primitive-tint-sage: #d5dfde;
+  --primitive-tint-mist: #eaecf1;
+  --primitive-tint-sand: #ede6db;
+  --primitive-tint-stone: #e3e8e5;
+  --primitive-orange-600: #b54708;
+  --primitive-red-600: #b42318;
+  --primitive-ext-naver: #5bce36;
+  --primitive-ext-kakao: #fee500;
+  --primitive-alpha-black-15: #00000026;
+  --primitive-alpha-black-25: #00000040;
+  --primitive-alpha-black-50: #00000080;
+  --primitive-alpha-black-70: #000000b2;
+  --primitive-alpha-white-10: #ffffff1a;
+  --primitive-alpha-white-20: #ffffff33;
+  --primitive-alpha-white-30: #ffffff4d;
+  --primitive-alpha-white-50: #ffffff80;
+  --primitive-alpha-white-60: #ffffff99;
+  --primitive-alpha-ink-40: #012f2166;
+  --primitive-orange-500: #f79009;
+  --primitive-ink-500: #4f7568;
+  --primitive-ink-200: #d5e2dd;
+  --color-text-primary: var(--primitive-gray-900); /* #1c1c1c */
+  --color-text-secondary: var(--primitive-gray-700); /* #4f4f4f */
+  --color-text-tertiary: var(--primitive-gray-600); /* #696969 */
+  --color-text-placeholder: var(--primitive-gray-400); /* #9c9c9c */
+  --color-text-tab-idle: var(--primitive-gray-500); /* #828282 */
+  --color-text-brand: var(--primitive-ink-900); /* #012f21 */
+  --color-text-link: var(--primitive-green-700); /* #048732 */
+  --color-text-accent: var(--primitive-green-700); /* #048732 */
+  --color-text-inverse: var(--primitive-white); /* #ffffff */
+  --color-text-inverse-muted: var(--primitive-alpha-white-60); /* #ffffff99 */
+  --color-text-inverse-accent: var(--primitive-green-300); /* #80e03e */
+  --color-text-error: var(--primitive-red-600); /* #b42318 */
+  --color-text-warning: var(--primitive-orange-600); /* #b54708 */
+  --color-bg-page: var(--primitive-white); /* #ffffff */
+  --color-bg-subtle: var(--primitive-gray-100); /* #f4f6f8 */
+  --color-bg-brand: var(--primitive-ink-900); /* #012f21 */
+  --color-bg-brand-secondary: var(--primitive-green-800); /* #05602f */
+  --color-bg-brand-soft: var(--primitive-green-50); /* #f1fbea */
+  --color-bg-accent: var(--primitive-green-700); /* #048732 */
+  --color-bg-accent-soft: var(--primitive-green-100); /* #dff6cf */
+  --color-bg-inverse: var(--primitive-gray-900); /* #1c1c1c */
+  --color-bg-dim: var(--primitive-alpha-black-15); /* #00000026 */
+  --color-bg-glass: var(--primitive-alpha-black-50); /* #00000080 */
+  --color-bg-glass-soft: var(--primitive-alpha-black-25); /* #00000040 */
+  --color-bg-scrim: var(--primitive-alpha-black-70); /* #000000b2 */
+  --color-bg-pointer: var(--primitive-alpha-ink-40); /* #012f2166 */
+  --color-bg-tile-on-dark: var(--primitive-alpha-white-10); /* #ffffff1a */
+  --color-bg-arrow-on-dark: var(--primitive-alpha-white-20); /* #ffffff33 */
+  --color-bg-tint-1: var(--primitive-tint-leaf); /* #eaf4e4 */
+  --color-bg-tint-2: var(--primitive-tint-stone); /* #e3e8e5 */
+  --color-bg-tint-3: var(--primitive-tint-sage); /* #d5dfde */
+  --color-bg-tint-4: var(--primitive-tint-moss); /* #ecf0ea */
+  --color-bg-tint-5: var(--primitive-tint-mist); /* #eaecf1 */
+  --color-bg-tint-6: var(--primitive-tint-sand); /* #ede6db */
+  --color-bg-naver: var(--primitive-ext-naver); /* #5bce36 */
+  --color-bg-kakao: var(--primitive-ext-kakao); /* #fee500 */
+  --color-border-default: var(--primitive-gray-300); /* #cfcfcf */
+  --color-border-subtle: var(--primitive-gray-200); /* #e8e8e8 */
+  --color-border-strong: var(--primitive-gray-900); /* #1c1c1c */
+  --color-border-control: var(--primitive-gray-500); /* #828282 */
+  --color-border-focus: var(--primitive-green-700); /* #048732 */
+  --color-border-error: var(--primitive-red-600); /* #b42318 */
+  --color-border-brand: var(--primitive-ink-900); /* #012f21 */
+  --color-border-on-dark: var(--primitive-alpha-white-50); /* #ffffff80 */
+  --color-border-on-dark-subtle: var(--primitive-alpha-white-30); /* #ffffff4d */
+  --color-progress-track: var(--primitive-gray-200); /* #e8e8e8 */
+  --color-progress-fill: var(--primitive-ink-900); /* #012f21 */
+  --color-progress-track-on-dark: var(--primitive-alpha-white-30); /* #ffffff4d */
+  --color-progress-fill-on-dark: var(--primitive-green-300); /* #80e03e */
+  --color-accent-colon: var(--primitive-green-400); /* #3ac73a */
+  --color-chart-recycle: var(--primitive-green-600); /* #079b4c */
+  --color-chart-burn: var(--primitive-orange-600); /* #b54708 */
+  --color-chart-landfill: var(--primitive-ink-500); /* #4f7568 */
+  --color-chart-factory: var(--primitive-ink-700); /* #0f4a35 */
+  --color-chart-unknown: var(--primitive-ink-300); /* #afc4bc */
+  --color-chart-recycle-on-dark: var(--primitive-green-400); /* #3ac73a */
+  --color-chart-burn-on-dark: var(--primitive-orange-500); /* #f79009 */
+  --color-chart-factory-on-dark: var(--primitive-ink-200); /* #d5e2dd */
+  --color-accent-lime: var(--primitive-green-300); /* #80e03e */
+
+  /* RE:FIT v3 Color (Light) */
+  --color-text-primary: var(--primitive-gray-900); /* #1c1c1c */
+  --color-text-secondary: var(--primitive-gray-700); /* #4f4f4f */
+  --color-text-tertiary: var(--primitive-gray-600); /* #696969 */
+  --color-text-placeholder: var(--primitive-gray-400); /* #9c9c9c */
+  --color-text-tab-idle: var(--primitive-gray-500); /* #828282 */
+  --color-text-brand: var(--primitive-ink-900); /* #012f21 */
+  --color-text-link: var(--primitive-green-700); /* #048732 */
+  --color-text-accent: var(--primitive-green-700); /* #048732 */
+  --color-text-inverse: var(--primitive-white); /* #ffffff */
+  --color-text-inverse-muted: var(--primitive-alpha-white-60); /* #ffffff99 */
+  --color-text-inverse-accent: var(--primitive-green-300); /* #80e03e */
+  --color-text-error: var(--primitive-red-600); /* #b42318 */
+  --color-text-warning: var(--primitive-orange-600); /* #b54708 */
+  --color-bg-page: var(--primitive-white); /* #ffffff */
+  --color-bg-subtle: var(--primitive-gray-100); /* #f4f6f8 */
+  --color-bg-brand: var(--primitive-ink-900); /* #012f21 */
+  --color-bg-brand-secondary: var(--primitive-green-800); /* #05602f */
+  --color-bg-brand-soft: var(--primitive-green-50); /* #f1fbea */
+  --color-bg-accent: var(--primitive-green-700); /* #048732 */
+  --color-bg-accent-soft: var(--primitive-green-100); /* #dff6cf */
+  --color-bg-inverse: var(--primitive-gray-900); /* #1c1c1c */
+  --color-bg-dim: var(--primitive-alpha-black-15); /* #00000026 */
+  --color-bg-glass: var(--primitive-alpha-black-50); /* #00000080 */
+  --color-bg-glass-soft: var(--primitive-alpha-black-25); /* #00000040 */
+  --color-bg-scrim: var(--primitive-alpha-black-70); /* #000000b2 */
+  --color-bg-pointer: var(--primitive-alpha-ink-40); /* #012f2166 */
+  --color-bg-tile-on-dark: var(--primitive-alpha-white-10); /* #ffffff1a */
+  --color-bg-arrow-on-dark: var(--primitive-alpha-white-20); /* #ffffff33 */
+  --color-bg-tint-1: var(--primitive-tint-leaf); /* #eaf4e4 */
+  --color-bg-tint-2: var(--primitive-tint-stone); /* #e3e8e5 */
+  --color-bg-tint-3: var(--primitive-tint-sage); /* #d5dfde */
+  --color-bg-tint-4: var(--primitive-tint-moss); /* #ecf0ea */
+  --color-bg-tint-5: var(--primitive-tint-mist); /* #eaecf1 */
+  --color-bg-tint-6: var(--primitive-tint-sand); /* #ede6db */
+  --color-bg-naver: var(--primitive-ext-naver); /* #5bce36 */
+  --color-bg-kakao: var(--primitive-ext-kakao); /* #fee500 */
+  --color-border-default: var(--primitive-gray-300); /* #cfcfcf */
+  --color-border-subtle: var(--primitive-gray-200); /* #e8e8e8 */
+  --color-border-strong: var(--primitive-gray-900); /* #1c1c1c */
+  --color-border-control: var(--primitive-gray-500); /* #828282 */
+  --color-border-focus: var(--primitive-green-700); /* #048732 */
+  --color-border-error: var(--primitive-red-600); /* #b42318 */
+  --color-border-brand: var(--primitive-ink-900); /* #012f21 */
+  --color-border-on-dark: var(--primitive-alpha-white-50); /* #ffffff80 */
+  --color-border-on-dark-subtle: var(--primitive-alpha-white-30); /* #ffffff4d */
+  --color-progress-track: var(--primitive-gray-200); /* #e8e8e8 */
+  --color-progress-fill: var(--primitive-ink-900); /* #012f21 */
+  --color-progress-track-on-dark: var(--primitive-alpha-white-30); /* #ffffff4d */
+  --color-progress-fill-on-dark: var(--primitive-green-300); /* #80e03e */
+  --color-accent-colon: var(--primitive-green-400); /* #3ac73a */
+  --color-chart-recycle: var(--primitive-green-600); /* #079b4c */
+  --color-chart-burn: var(--primitive-orange-600); /* #b54708 */
+  --color-chart-landfill: var(--primitive-ink-500); /* #4f7568 */
+  --color-chart-factory: var(--primitive-ink-700); /* #0f4a35 */
+  --color-chart-unknown: var(--primitive-ink-300); /* #afc4bc */
+  --color-chart-recycle-on-dark: var(--primitive-green-400); /* #3ac73a */
+  --color-chart-burn-on-dark: var(--primitive-orange-500); /* #f79009 */
+  --color-chart-factory-on-dark: var(--primitive-ink-200); /* #d5e2dd */
+  --color-accent-lime: var(--primitive-green-300); /* #80e03e */
+
+  /* RE:FIT v3 Layout (Desktop 1440) */
+  --font-size-display: 42px;
+  --font-size-h1: 54px;
+  --font-size-sub-title: 52px;
+  --font-size-h2: 40px;
+  --font-size-h3: 36px;
+  --font-size-h4: 32px;
+  --font-size-h5: 26px;
+  --font-size-h6: 23px;
+  --font-size-h7: 21px;
+  --font-size-p1: 19px;
+  --font-size-p2: 17px;
+  --font-size-p3: 16px;
+  --font-size-p4: 14px;
+  --font-size-numeral: 70px;
+  --font-size-tel: 42px;
+  --space-7: 7px;
+  --space-10: 10px;
+  --space-14: 14px;
+  --space-21: 21px;
+  --space-28: 28px;
+  --space-35: 35px;
+  --space-42: 42px;
+  --space-56: 56px;
+  --space-70: 70px;
+  --space-84: 84px;
+  --section-xl: 210px;
+  --section-lg: 140px;
+  --section-md: 105px;
+  --block-title-content: 56px;
+  --block-content: 42px;
+  --layout-gutter: 20px;
+  --layout-header-x: 20px;
+  --layout-header-h: 80px;
+  --container-full: 1400px;
+  --container-narrow: 1240px;
+  --container-text: 1040px;
+  --control-input-h: 56px;
+  --control-input-h-sm: 49px;
+  --control-button-h: 54px;
+  --control-button-h-sm: 52px;
+  --radius-xs: 2px;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+  --radius-2xl: 20px;
+  --radius-full: 999px;
+
+  /* RE:FIT v3 Motion */
+  --duration-short: 150ms;
+  --duration-base: 250ms;
+  --duration-emphasis: 400ms;
+  --duration-data: 800ms;
+  --stagger-base: 80ms;
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+
+  /* 스타일: 그림자, 블러, 그라디언트 */
+  --shadow-card: 0px 1px 2px 0px #012f210f, 0px 4px 12px 0px #012f210a;
+  --shadow-card-hover: 0px 2px 4px 0px #012f2114, 0px 8px 24px 0px #012f2114;
+  --shadow-sticky-bar: 0px -2px 8px 0px #012f211a;
+  --shadow-header: 0px 0px 5px 0px #0000001a;
+  --shadow-dropdown: 0px 6px 10px 0px #00000008, 6px 0px 10px 0px #00000008, -6px 0px 10px 0px #00000008;
+  --shadow-popover: 0px 0px 10px 0px #0000001a;
+  --blur-glass: 8px;
+  --blur-pointer: 10px;
+  --gradient-people: linear-gradient(to bottom, #012f21 2%, #80e03e 100%);
+  --gradient-hero-dim: linear-gradient(to bottom, #0000000d 0%, #00000073 100%);
+  --gradient-principle-shade: linear-gradient(to bottom, #000000 5%, #00000000 100%);
+  --gradient-banner-veil: linear-gradient(to bottom, #fffffff2 0%, #ffffffd9 45%, #ffffff00 80%);
+  --gradient-banner-scrim-mobile: linear-gradient(to bottom, #012f211a 0%, #012f218c 45%, #012f21eb 100%);
+  --gradient-consult-scrim: linear-gradient(to bottom, #012f21e5 0%, #012f21b8 40%, #012f216b 100%);
+  --gradient-consult-scrim-mobile: linear-gradient(to bottom, #012f21b8 0%, #012f21e5 55%, #012f21f0 100%);
+  --gradient-sub-visual-dim: linear-gradient(to bottom, #012f2140 0%, #012f218c 50%, #012f21e0 100%);
+
+  /* 서체 (Pretendard 하나, next/font/local 변수 --font-pretendard) */
+  --font-family-base: var(--font-pretendard), -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* 보조 토큰 (Figma 선 두께, 아이콘 크기, 터치 영역에서 옮김. Figma 변수 아님) */
+  --border-width-1: 1px;
+  --border-width-2: 2px;
+  --focus-ring-width: 2px;
+  --focus-ring-offset: 2px;
+  --icon-sm: 20px;
+  --icon-md: 24px;
+  --touch-min: 48px;
+}
+
+/* RE:FIT v3 Layout (Mobile 375) */
+@media (max-width: 767px) {
+  :root {
+    --font-size-display: 19.6px;
+    --font-size-h1: 34px;
+    --font-size-sub-title: 34px;
+    --font-size-h2: 28px;
+    --font-size-h3: 26px;
+    --font-size-h4: 24px;
+    --font-size-h5: 18px;
+    --font-size-h6: 16px;
+    --font-size-h7: 18px;
+    --font-size-p1: 16px;
+    --font-size-p2: 16px;
+    --font-size-numeral: 44px;
+    --font-size-tel: 28px;
+    --space-7: 6px;
+    --space-14: 12px;
+    --space-21: 15px;
+    --space-28: 20px;
+    --space-35: 24px;
+    --space-42: 30px;
+    --space-56: 36px;
+    --space-70: 48px;
+    --space-84: 60px;
+    --section-xl: 100px;
+    --section-lg: 100px;
+    --section-md: 80px;
+    --block-title-content: 30px;
+    --block-content: 30px;
+    --layout-gutter: 15px;
+    --layout-header-x: 15px;
+    --layout-header-h: 60px;
+    --container-full: 345px;
+    --container-narrow: 345px;
+    --container-text: 345px;
+    --control-button-h: 56px;
+    --control-button-h-sm: 48px;
+    --radius-lg: 8px;
+    --radius-xl: 10px;
+    --radius-2xl: 14px;
+  }
+}
+
+/* 글자 스타일 (RE:FIT v3/*) */
+.text-title-display {
+  font-size: var(--font-size-display);
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+.text-title-h1 {
+  font-size: var(--font-size-h1);
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+.text-title-sub-visual {
+  font-size: var(--font-size-sub-title);
+  font-weight: 700;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+
+.text-title-h2 {
+  font-size: var(--font-size-h2);
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+.text-title-h3 {
+  font-size: var(--font-size-h3);
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+.text-title-h4 {
+  font-size: var(--font-size-h4);
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+.text-title-h5 {
+  font-size: var(--font-size-h5);
+  font-weight: 700;
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+.text-title-h6 {
+  font-size: var(--font-size-h6);
+  font-weight: 700;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+
+.text-title-h7 {
+  font-size: var(--font-size-h7);
+  font-weight: 700;
+  line-height: 1.5;
+  letter-spacing: 0;
+}
+
+.text-body-p1-bold {
+  font-size: var(--font-size-p1);
+  font-weight: 700;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+
+.text-body-p1-regular {
+  font-size: var(--font-size-p1);
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+
+.text-body-p1-bold-link {
+  font-size: var(--font-size-p1);
+  font-weight: 700;
+  line-height: 1.7;
+  letter-spacing: 0;
+  text-decoration: underline;
+}
+
+.text-body-p2-semibold {
+  font-size: var(--font-size-p2);
+  font-weight: 600;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+
+.text-body-p2-medium {
+  font-size: var(--font-size-p2);
+  font-weight: 500;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+
+.text-body-p2-regular {
+  font-size: var(--font-size-p2);
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+
+.text-body-p3-regular {
+  font-size: var(--font-size-p3);
+  font-weight: 400;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+
+.text-body-p3-medium {
+  font-size: var(--font-size-p3);
+  font-weight: 500;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+
+.text-body-p3-semibold {
+  font-size: var(--font-size-p3);
+  font-weight: 600;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+
+.text-body-p3-bold {
+  font-size: var(--font-size-p3);
+  font-weight: 700;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+
+.text-body-p4-bold {
+  font-size: var(--font-size-p4);
+  font-weight: 700;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+
+.text-body-p4-medium {
+  font-size: var(--font-size-p4);
+  font-weight: 500;
+  line-height: 1.7;
+  letter-spacing: 0;
+}
+
+.text-number-numeral {
+  font-size: var(--font-size-numeral);
+  font-weight: 500;
+  line-height: 1;
+  letter-spacing: 0;
+}
+
+.text-number-tel {
+  font-size: var(--font-size-tel);
+  font-weight: 700;
+  line-height: 1.7;
+  letter-spacing: 0;
+}

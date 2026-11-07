@@ -8,10 +8,14 @@
     "start": "next start",
     "lint": "eslint",
     "test:db": "node supabase/tests/rls.test.mjs",
-    "test:api": "node --test lib/*.test.ts"
+    "test:api": "node --test lib/*.test.ts",
+    "tokens": "node scripts/figma-tokens.mjs",
+    "check:literals": "node scripts/check-literals.mjs",
+    "test:web": "node --test tests/*.test.ts"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",
+    "framer-motion": "^11.18.2",
     "next": "15.5.29",
     "react": "19.1.0",
     "react-dom": "19.1.0"

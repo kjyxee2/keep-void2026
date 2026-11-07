@@ -1,0 +1,104 @@
+/*
+ * RE:FIT 모션 토큰과 상태 클래스. 원본 docs/REFIT_motion_tokens.css
+ * 값은 tokens.css의 Figma Motion 변수(--duration-*, --stagger-base, --ease-standard)에 연결한다.
+ * 규칙: transform, opacity만. transition: all 금지. 줄임 모드에서는 모든 시간이 0ms.
+ */
+
+:root {
+  --motion-short: var(--duration-short);
+  --motion-base: var(--duration-base);
+  --motion-emphasis: var(--duration-emphasis);
+  --motion-data: var(--duration-data);
+  --motion-stagger: var(--stagger-base);
+  --motion-ease: var(--ease-standard);
+  --color-focus: var(--color-border-focus);
+  /* 이동 거리 (docs/REFIT_motion_tokens.css 값) */
+  --motion-shift-step: 24px;
+  --motion-shift-reveal: 8px;
+  --motion-shift-expand: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-short: 0ms;
+    --motion-base: 0ms;
+    --motion-emphasis: 0ms;
+    --motion-data: 0ms;
+    --motion-stagger: 0ms;
+  }
+}
+
+.bar {
+  transform-origin: left center;
+  transform: scaleX(var(--ratio, 1));
+  transition: transform var(--motion-data) var(--motion-ease);
+}
+
+/* 숫자 세기 중 글자 폭이 흔들리지 않도록 고정폭 숫자 */
+.count {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 진단 단계 진입: 오른쪽에서 가로 이동 + 나타남 */
+.slide-enter {
+  transform: translateX(0);
+  opacity: 1;
+  transition:
+    transform var(--motion-base) var(--motion-ease),
+    opacity var(--motion-base) var(--motion-ease);
+}
+.slide-enter[data-state="before"] {
+  transform: translateX(var(--motion-shift-step));
+  opacity: 0;
+}
+.slide-enter[data-state="exit"] {
+  transform: translateX(calc(var(--motion-shift-step) * -1));
+  opacity: 0;
+  transition:
+    transform var(--motion-short) var(--motion-ease),
+    opacity var(--motion-short) var(--motion-ease);
+}
+
+/* 칩 전환 등 내용 교체: opacity 교차 */
+.fade-swap {
+  opacity: 1;
+  transition: opacity var(--motion-emphasis) var(--motion-ease);
+}
+.fade-swap[data-state="out"] {
+  opacity: 0;
+}
+
+/* 접기와 펼치기: 높이는 바로 바뀌고, 펼쳐진 내용만 나타남 */
+.expand-content {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--motion-base) var(--motion-ease),
+    transform var(--motion-base) var(--motion-ease);
+}
+.expand-content[data-state="before"] {
+  opacity: 0;
+  transform: translateY(var(--motion-shift-expand));
+}
+
+/* 연결 요청 완료 로고 심볼: 1회, opacity와 scale만 */
+.logo-reveal {
+  opacity: 1;
+  transform: scale(1);
+  transition:
+    opacity var(--motion-emphasis) var(--motion-ease),
+    transform var(--motion-emphasis) var(--motion-ease);
+}
+.logo-reveal[data-state="before"] {
+  opacity: 0;
+  transform: scale(0.96);
+}
+
+/* 보고서 탭 패널 내용: 탭 표시는 즉시, 내용만 150ms 나타남 */
+.tab-fade {
+  opacity: 1;
+  transition: opacity var(--motion-short) var(--motion-ease);
+}
+.tab-fade[data-state="before"] {
+  opacity: 0;
+}
