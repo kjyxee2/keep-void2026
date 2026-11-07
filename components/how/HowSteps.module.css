@@ -1,0 +1,13 @@
+/* Hallmark · design.md: Figma RE:FIT v3 (uWAdbYtb8Wg3nQmIW4Fgb7) 08 기능 설명 v2 278:3661, 275:4480 · theme: RE:FIT v3 (by request) · genre: modern-minimal · posture: restrained · shape: eight editorial steps stacked at section gap 140/96, photo openers on 01 02 03 08, label-column numbers on 04 to 07 · signature: each step's real screen beside its one verified number · motion: one Reveal per step (opacity, translateY), accordion body only */
+/* Hallmark · pre-emit critique: the band is the shared Step component eight times, so this file only owns the rhythm between steps · weakest: all eight steps share one weight; the opener photos are the only change of pace */
+/* Hallmark · waive 26b · the only controls here are the shared accordion summaries · their hover, focus-visible and open states live in components/editorial/AccordionRow.module.css, and a summary has no disabled state */
+
+/* 단계 사이 140(모바일 96), 띠 아래도 같은 간격 */
+.band {
+  display: flex;
+  flex-direction: column;
+  gap: var(--editorial-section-gap);
+  width: 100%;
+  min-width: 0;
+  padding-bottom: var(--editorial-section-gap);
+}
