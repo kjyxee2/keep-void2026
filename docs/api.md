@@ -84,7 +84,7 @@ POST /api/requests/:id/cancel         요청 취소
 
 ```json
 {
-  "diagnosis_id": "uuid", "status": "completed", "completed_at": "…", "data_version": "demo-4d8c270",
+  "diagnosis_id": "uuid", "status": "completed", "completed_at": "…", "data_version": "demo-ce08a33",
   "waste_group": "폐합성수지류",
   "user_input": {
     "chip": { "id": "C01", "label": "폐합성수지", "display_text": "…" },
