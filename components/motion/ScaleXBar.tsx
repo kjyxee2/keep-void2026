@@ -1,13 +1,13 @@
-// 막대: 화면에 들어오면 한 번 scaleX 0에서 비율로(800ms, 순서대로 80ms 간격).
+// 막대: 화면에 들어오면 한 번 scaleX 0에서 비율로(800ms, 순서대로 80ms 간격). 전환은 styles/motion.css [data-motion-bar]가 한다.
 // 화면 진입은 변형되지 않은 부모(막대 칸, 트랙)로 잰다. scaleX(0)인 자기 자신은 면적이 0이라 amount 0.5를 넘지 못한다.
-// duration(초)을 주면 첫 연출이 끝난 뒤 비율이 바뀔 때(사용자 입력 반응) 그 시간으로 새 비율까지 간다. 없으면 800ms.
+// duration(초)을 주면 첫 연출이 끝난 뒤 비율이 바뀔 때(사용자 입력 반응) 그 시간으로 새 비율까지 간다(data-state live, --bar-live). 없으면 800ms.
 // 장식이므로 aria-hidden. 비율 숫자는 반드시 글자로 옆에 같이 적는다.
 // 줄임 모드면 바로 최종 비율(시간 0). 서버와 첫 렌더가 같은 구조라 hydration 뒤에도 값이 맞다.
-// 스크립트가 꺼져 있으면 layout의 noscript 스타일이 최종 비율(--ratio)로 보이게 한다.
+// 숨김 상태(scaleX 0)는 html.js 아래에서만이라 스크립트가 꺼져 있으면 최종 비율(--ratio)로 보인다(layout의 noscript 스타일도 같은 뜻).
 'use client';
 import { useEffect, useRef, useState, type CSSProperties } from 'react';
-import { inView, motion, useReducedMotion } from 'framer-motion';
 import { MOTION } from './tokens';
+import { useReducedMotion } from './useReducedMotion';
 
 export function ScaleXBar({
   ratio,
@@ -32,11 +32,20 @@ export function ScaleXBar({
 
   useEffect(() => {
     const target = ref.current?.parentElement;
-    if (!target) {
+    if (!target || typeof IntersectionObserver === 'undefined') {
       setSeen(true);
       return;
     }
-    return inView(target, () => setSeen(true), { amount: 0.5 });
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        setSeen(true);
+      },
+      { threshold: 0.5 },
+    );
+    io.observe(target);
+    return () => io.disconnect();
   }, []);
 
   useEffect(() => {
@@ -45,23 +54,9 @@ export function ScaleXBar({
     return () => clearTimeout(t);
   }, [seen, revealed, index, duration]);
 
-  const transition = reduce
-    ? { duration: 0 }
-    : revealed && duration !== undefined
-      ? { duration, ease: MOTION.ease }
-      : { duration: MOTION.data, delay: index * MOTION.stagger, ease: MOTION.ease };
-
-  const Tag = as === 'span' ? motion.span : motion.div;
-  return (
-    <Tag
-      ref={ref as never}
-      aria-hidden="true"
-      data-motion-bar=""
-      className={className}
-      style={{ transformOrigin: 'left', '--ratio': r } as CSSProperties}
-      initial={{ scaleX: 0 }}
-      animate={{ scaleX: reduce || seen ? r : 0 }}
-      transition={transition}
-    />
-  );
+  const shown = reduce || seen;
+  const state = !shown ? 'before' : revealed && duration !== undefined ? 'live' : 'shown';
+  const style = { '--ratio': r, '--i': index, ...(duration !== undefined ? { '--bar-live': `${duration}s` } : {}) } as CSSProperties;
+  const Tag = as;
+  return <Tag ref={ref as never} aria-hidden="true" data-motion-bar="" data-state={state} className={className} style={style} />;
 }

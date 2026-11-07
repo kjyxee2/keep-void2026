@@ -3,8 +3,7 @@
 // 모션 줄이기면 세지 않는다. 스크린리더는 세는 동안의 값 대신 최종 값만 읽는다.
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { animate, useReducedMotion } from 'framer-motion';
-import { MOTION } from '@/components/motion';
+import { animateValue, MOTION, useReducedMotion } from '@/components/motion';
 import { Stat } from '@/components/ui/Stat';
 import styles from './impact.module.css';
 
@@ -39,13 +38,7 @@ export function ScaleStats({ items }: { items: ScaleItem[] }) {
 
   useEffect(() => {
     if (phase !== 'run') return;
-    const controls = animate(0, 1, {
-      duration: MOTION.data,
-      ease: MOTION.ease,
-      onUpdate: setProgress,
-      onComplete: () => setPhase('final'),
-    });
-    return () => controls.stop();
+    return animateValue({ from: 0, to: 1, duration: MOTION.data, onUpdate: setProgress, onComplete: () => setPhase('final') });
   }, [phase]);
 
   const shown = (v: number) => (phase === 'final' ? v : Math.round(v * progress));

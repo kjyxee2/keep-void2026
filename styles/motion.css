@@ -4,6 +4,7 @@
  * 값은 tokens.css의 Figma Motion 변수(--duration-*, --stagger-base, --ease-standard)에 연결한다.
  * 규칙: transform, opacity만. transition: all 금지. 줄임 모드에서는 모든 시간이 0ms.
  * 숨김 상태(data-state)는 .js 아래에서만 적용한다. 스크립트가 꺼지면 항상 보인다(layout이 js 클래스를 붙임).
+ * components/motion의 Reveal, ScaleXBar, SlideStep은 data-motion-* 속성과 data-state만 바꾸고 전환은 여기 규칙이 한다.
  */
 
 :root {
@@ -35,6 +36,65 @@
     --motion-stagger: 0ms;
     --motion-slow: 0ms;
     --motion-dwell: 0ms;
+  }
+  [data-motion-bar][data-state="live"] {
+    transition-duration: 0ms;
+  }
+}
+
+/* 나타남(Reveal): 한 번, opacity와 translateY 8px. --i 순번마다 --motion-stagger씩 늦게 */
+[data-motion-reveal] {
+  --reveal-delay: calc(var(--i, 0) * var(--motion-stagger));
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity var(--motion-base) var(--motion-ease) var(--reveal-delay),
+    transform var(--motion-base) var(--motion-ease) var(--reveal-delay);
+}
+.js [data-motion-reveal][data-state="before"] {
+  opacity: 0;
+  transform: translateY(var(--motion-shift-reveal));
+}
+
+/* 막대(ScaleXBar, 진단 진행 막대): scaleX 0에서 --ratio로 800ms, --i 순번마다 --motion-stagger씩 늦게.
+   data-speed="base"는 단계 전환처럼 250ms, data-state="live"는 첫 연출 뒤 사용자 입력에 --bar-live(초)로 반응 */
+[data-motion-bar] {
+  transform-origin: left center;
+  transform: scaleX(var(--ratio, 1));
+  transition: transform var(--motion-data) var(--motion-ease) calc(var(--i, 0) * var(--motion-stagger));
+}
+[data-motion-bar][data-speed="base"] {
+  transition: transform var(--motion-base) var(--motion-ease);
+}
+[data-motion-bar][data-state="live"] {
+  transition: transform var(--bar-live, var(--motion-emphasis)) var(--motion-ease);
+}
+.js [data-motion-bar][data-state="before"] {
+  transform: scaleX(0);
+}
+
+/* 단계 전환(SlideStep): 나가는 내용은 --dir 반대쪽으로 150ms, 새 내용은 --dir 쪽에서 250ms 들어온다 */
+[data-motion-step] {
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    transform var(--motion-base) var(--motion-ease),
+    opacity var(--motion-base) var(--motion-ease);
+}
+.js [data-motion-step][data-state="exit"] {
+  opacity: 0;
+  transform: translateX(calc(var(--motion-shift-step) * var(--dir, 1) * -1));
+  transition:
+    transform var(--motion-short) var(--motion-ease),
+    opacity var(--motion-short) var(--motion-ease);
+}
+.js [data-motion-step][data-state="enter"] {
+  animation: step-enter var(--motion-base) var(--motion-ease) both;
+}
+@keyframes step-enter {
+  from {
+    opacity: 0;
+    transform: translateX(calc(var(--motion-shift-step) * var(--dir, 1)));
   }
 }
 

@@ -1,25 +1,43 @@
-// 나타남: opacity 0에서 1, translateY 8px에서 0. 한 번만. 줄임 모드면 바로 보인다(시간 0).
-// 스크립트가 꺼져 있으면 layout의 noscript 스타일이 바로 보이게 한다.
+// 나타남: opacity 0에서 1, translateY 8px에서 0. 한 번만(styles/motion.css [data-motion-reveal], 순서 --i마다 --motion-stagger씩 늦게).
+// 화면에 30% 들어오면 data-state를 shown으로 바꾸고 전환은 CSS가 한다. 줄임 모드면 바로 보인다(시간 0).
+// 숨김 상태는 html.js 아래에서만이라 스크립트가 꺼져 있으면 바로 보인다(layout의 noscript 스타일도 같은 뜻).
 'use client';
-import { useRef, type ReactNode } from 'react';
-import { motion, useInView, useReducedMotion } from 'framer-motion';
-import { MOTION } from './tokens';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
+import { useReducedMotion } from './useReducedMotion';
 
 export function Reveal({ children, index = 0, className }: { children: ReactNode; index?: number; className?: string }) {
   const ref = useRef<HTMLDivElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.3 });
+  const [inView, setInView] = useState(false);
   const reduce = useReducedMotion();
   const shown = reduce || inView;
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setInView(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        io.disconnect();
+        setInView(true);
+      },
+      { threshold: 0.3 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
   return (
-    <motion.div
+    <div
       ref={ref}
       data-motion-reveal=""
+      data-state={shown ? 'shown' : 'before'}
       className={className}
-      initial={{ opacity: 0, y: 8 }}
-      animate={shown ? { opacity: 1, y: 0 } : { opacity: 0, y: 8 }}
-      transition={reduce ? { duration: 0 } : { duration: MOTION.base, delay: index * MOTION.stagger, ease: MOTION.ease }}
+      style={{ '--i': index } as CSSProperties}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }

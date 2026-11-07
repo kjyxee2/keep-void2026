@@ -5,8 +5,7 @@
 'use client';
 import { useEffect, useId, useRef, useState } from 'react';
 import Image, { type StaticImageData } from 'next/image';
-import { useReducedMotion } from 'framer-motion';
-import { MOTION } from '@/components/motion';
+import { MOTION, useReducedMotion } from '@/components/motion';
 import { PauseIcon, PlayIcon } from './icons';
 import styles from './Hero.module.css';
 
